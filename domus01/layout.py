@@ -488,7 +488,9 @@ FURNITURE: list[dict] = [
 # ═══════════ 精致家具（由 furniture.py 参数化生成：有腿、有横撑、有底盘、有器型）═══════════
 # 手写基本体拼出来的家具一眼假（椅子没腿、落地灯就一根杆、花瓶是个圆柱）；
 # 这些用构件库生成，一件家具由五到十个零件组成。
-import furniture as F   # noqa: E402
+import os as _os, sys as _sys                                    # noqa: E402
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))  # 被动态加载时也找得到同目录模块
+import furniture as F                                              # noqa: E402
 
 FURNITURE += (
     # 餐桌 + 六把带腿的椅子（长边各三把，面朝餐桌）
