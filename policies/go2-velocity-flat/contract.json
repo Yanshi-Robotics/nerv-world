@@ -1,0 +1,121 @@
+{
+  "task": "Unitree-Go2-Velocity",
+  "joint_names": [
+    "FL_hip_joint",
+    "FR_hip_joint",
+    "RL_hip_joint",
+    "RR_hip_joint",
+    "FL_thigh_joint",
+    "FR_thigh_joint",
+    "RL_thigh_joint",
+    "RR_thigh_joint",
+    "FL_calf_joint",
+    "FR_calf_joint",
+    "RL_calf_joint",
+    "RR_calf_joint"
+  ],
+  "default_joint_pos": [
+    0.10000000149011612,
+    -0.10000000149011612,
+    0.10000000149011612,
+    -0.10000000149011612,
+    0.800000011920929,
+    0.800000011920929,
+    1.0,
+    1.0,
+    -1.5,
+    -1.5,
+    -1.5,
+    -1.5
+  ],
+  "gains": {
+    "FL_hip_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "FR_hip_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "RL_hip_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "RR_hip_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "FL_thigh_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "FR_thigh_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "RL_thigh_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "RR_thigh_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 23.700000762939453
+    },
+    "FL_calf_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 45.43000030517578
+    },
+    "FR_calf_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 45.43000030517578
+    },
+    "RL_calf_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 45.43000030517578
+    },
+    "RR_calf_joint": {
+      "kp": 25.0,
+      "kd": 0.5,
+      "effort_limit": 45.43000030517578
+    }
+  },
+  "term_order": [
+    "base_ang_vel",
+    "projected_gravity",
+    "velocity_commands",
+    "joint_pos_rel",
+    "joint_vel_rel",
+    "last_action"
+  ],
+  "term_scales": {
+    "base_ang_vel": 0.2,
+    "projected_gravity": 1.0,
+    "velocity_commands": 1.0,
+    "joint_pos_rel": 1.0,
+    "joint_vel_rel": 0.05,
+    "last_action": 1.0
+  },
+  "history_length": 1,
+  "action": {
+    "scale": 0.25,
+    "use_default_offset": true,
+    "dim": 12
+  },
+  "timing": {
+    "policy_dt_s": 0.02,
+    "physics_dt_s": 0.005,
+    "decimation": 4
+  },
+  "obs_dim": 45
+}
