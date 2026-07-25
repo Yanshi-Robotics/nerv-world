@@ -274,39 +274,78 @@ FURNITURE: list[dict] = [
     {"name": "console_entry", "room": "entry", "type": "box",
      "pos": (4.35, 0.60, 0.42), "size": (0.40, 1.60, 0.84), "rgba": (0.48, 0.35, 0.24, 1)},
 
-    # ═══════ ⑤鞋帽间：整墙柜 + 中央矮柜 ═══════
-    {"name": "sr_cab_w", "room": "chinese_kitchen", "type": "box",
-     "pos": (-0.25, -1.5, 1.15), "size": (0.42, 2.40, 2.30), "rgba": (0.74, 0.66, 0.55, 1)},
-    {"name": "sr_cab_s", "room": "chinese_kitchen", "type": "box",
-     "pos": (1.8, -2.75, 1.15), "size": (2.60, 0.42, 2.30), "rgba": (0.74, 0.66, 0.55, 1)},
-    {"name": "sr_island", "room": "chinese_kitchen", "type": "box",
-     "pos": (2.2, -1.3, 0.42), "size": (1.40, 0.70, 0.84), "rgba": (0.52, 0.40, 0.28, 1)},
-    {"name": "sr_mirror", "room": "chinese_kitchen", "type": "box",
-     "pos": (3.78, -1.5, 1.35), "size": (0.05, 1.10, 1.90), "rgba": (0.74, 0.82, 0.87, 1), "mat": "mat_mirror"},
+    # ═══════ ⑤⑥ 中厨（并入鞋帽间储物）—— 沿墙布置，中间留通行区 ═══════
+    # ⛔ 2026-07-25 重排：原先是 12 空间合并时留下的烂摊子——鞋帽间那组 2.3m 高的整墙柜
+    #    横在房间正中（还正好堵住西墙那扇门），厨房操作台也悬在房间中央，结果 4.5×10m 的
+    #    大房间被切成三块、只靠 54cm 和 90cm 两条缝连通。真实住宅不会这样：橱柜沿墙走、
+    #    中间是通行区。这次按真实厨房重排（修的是"摆位不真实"，不是为了迁就哪种机器人）。
+    #
+    #    布局：主操作台一字型贴【西墙】(x=-0.5)，从 y=-2.6 到 -7.0，避开西墙那扇门(y -2.2..-0.8)；
+    #         储物高柜与冰箱贴【北墙】(y=0)；中间 x 0.3~3.5 全是通行区（宽 3.2m）。
 
-    # ═══════ ⑥中厨：封闭式，灶台 + 抽油烟机 + 橱柜 ═══════
+    # ── 贴北墙：冰箱（落地大件，从东门进来正对着它）+ 储物高柜（原鞋帽间那组）──
+    {"name": "ck_fridge", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.05, -0.36, 0.93), "size": (0.90, 0.72, 1.85), "rgba": (0.88, 0.89, 0.91, 1), "mat": "mat_steel"},
+    {"name": "ck_fridge_seam", "room": "chinese_kitchen", "type": "box",     # 上下门缝
+     "pos": (0.05, -0.72, 1.20), "size": (0.88, 0.02, 0.02), "rgba": (0.55, 0.56, 0.58, 1)},
+    {"name": "ck_fridge_handle_u", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.42, -0.73, 1.45), "size": (0.04, 0.04, 0.42), "rgba": (0.62, 0.64, 0.67, 1), "mat": "mat_chrome"},
+    {"name": "ck_fridge_handle_l", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.42, -0.73, 0.90), "size": (0.04, 0.04, 0.38), "rgba": (0.62, 0.64, 0.67, 1), "mat": "mat_chrome"},
+    {"name": "sr_cab_n", "room": "chinese_kitchen", "type": "box",
+     "pos": (2.00, -0.21, 1.15), "size": (2.40, 0.42, 2.30), "rgba": (0.74, 0.66, 0.55, 1)},
+
+    # ── 贴西墙：一字型主操作台（北→南：洗碗机 · 水槽 · 灶台 · 烤箱）──
     {"name": "ck_counter", "room": "chinese_kitchen", "type": "box",
-     "pos": (1.7, -3.45, 0.45), "size": (3.60, 0.65, 0.90), "rgba": (0.84, 0.84, 0.80, 1)},
+     "pos": (-0.175, -4.80, 0.45), "size": (0.65, 4.40, 0.90), "rgba": (0.84, 0.84, 0.80, 1)},
     {"name": "ck_counter_top", "room": "chinese_kitchen", "type": "box",
-     "pos": (1.7, -3.45, 0.93), "size": (3.70, 0.72, 0.07), "rgba": (0.22, 0.22, 0.25, 1), "mat": "mat_marble_dark"},
-    {"name": "ck_stove", "room": "chinese_kitchen", "type": "box",
-     "pos": (0.80, -3.45, 0.98), "size": (0.80, 0.58, 0.04), "rgba": (0.10, 0.10, 0.12, 1)},
-    {"name": "ck_burner_a", "room": "chinese_kitchen", "type": "cylinder",
-     "pos": (0.58, -3.32, 1.01), "size": (0.26, 0.26, 0.03), "rgba": (0.45, 0.12, 0.10, 1)},
-    {"name": "ck_burner_b", "room": "chinese_kitchen", "type": "cylinder",
-     "pos": (1.02, -3.32, 1.01), "size": (0.26, 0.26, 0.03), "rgba": (0.45, 0.12, 0.10, 1)},
-    {"name": "ck_hood", "room": "chinese_kitchen", "type": "box",
-     "pos": (0.80, -3.30, 1.80), "size": (1.00, 0.55, 0.36), "rgba": (0.70, 0.72, 0.74, 1), "mat": "mat_steel"},
-    {"name": "ck_cab_door", "room": "chinese_kitchen", "type": "box",
-     "pos": (2.60, -3.11, 0.46), "size": (1.20, 0.04, 0.78), "rgba": (0.78, 0.75, 0.70, 1)},
-    {"name": "ck_cab_handle", "room": "chinese_kitchen", "type": "box",
-     "pos": (2.60, -3.07, 0.72), "size": (0.90, 0.05, 0.04), "rgba": (0.55, 0.56, 0.58, 1)},
+     "pos": (-0.16, -4.80, 0.93), "size": (0.72, 4.50, 0.07), "rgba": (0.22, 0.22, 0.25, 1), "mat": "mat_marble_dark"},
+    # 洗碗机：嵌在台面下（真实厨房就是这么装的），正面朝东——站在房间里一眼能看到
+    {"name": "ck_dishwasher", "room": "chinese_kitchen", "type": "box",
+     "pos": (-0.17, -3.00, 0.44), "size": (0.62, 0.60, 0.80), "rgba": (0.88, 0.89, 0.91, 1), "mat": "mat_steel"},
+    {"name": "ck_dw_door", "room": "chinese_kitchen", "type": "box",        # 整扇不锈钢门（一眼认得出是台家电）
+     "pos": (0.145, -3.00, 0.40), "size": (0.02, 0.58, 0.62), "rgba": (0.86, 0.88, 0.90, 1),
+     "mat": "mat_steel"},
+    {"name": "ck_dw_panel", "room": "chinese_kitchen", "type": "box",        # 门顶上的控制面板（有屏有灯）
+     "pos": (0.15, -3.00, 0.76), "size": (0.02, 0.58, 0.11), "mat": "mat_appliance_panel",
+     "rgba": (0.85, 0.86, 0.88, 1)},
+    {"name": "ck_dw_handle", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.17, -3.00, 0.68), "size": (0.05, 0.52, 0.05), "rgba": (0.62, 0.64, 0.67, 1), "mat": "mat_chrome"},
     {"name": "ck_sink", "room": "chinese_kitchen", "type": "box",
-     "pos": (2.90, -3.45, 0.96), "size": (0.76, 0.50, 0.10), "rgba": (0.78, 0.80, 0.82, 1), "mat": "mat_porcelain"},
-    {"name": "ck_upper", "room": "chinese_kitchen", "type": "box",
-     "pos": (2.40, -3.25, 1.95), "size": (2.00, 0.36, 0.70), "rgba": (0.78, 0.74, 0.68, 1)},
+     "pos": (-0.19, -4.00, 0.96), "size": (0.50, 0.76, 0.10), "rgba": (0.78, 0.80, 0.82, 1), "mat": "mat_porcelain"},
+    {"name": "ck_faucet", "room": "chinese_kitchen", "type": "cylinder",
+     "pos": (-0.40, -4.00, 1.15), "size": (0.05, 0.05, 0.36), "rgba": (0.86, 0.88, 0.90, 1), "mat": "mat_chrome"},
+    {"name": "ck_stove", "room": "chinese_kitchen", "type": "box",
+     "pos": (-0.19, -5.30, 0.98), "size": (0.58, 0.80, 0.04), "rgba": (0.10, 0.10, 0.12, 1)},
+    {"name": "ck_burner_a", "room": "chinese_kitchen", "type": "cylinder",
+     "pos": (-0.19, -5.08, 1.01), "size": (0.26, 0.26, 0.03), "rgba": (0.45, 0.12, 0.10, 1)},
+    {"name": "ck_burner_b", "room": "chinese_kitchen", "type": "cylinder",
+     "pos": (-0.19, -5.52, 1.01), "size": (0.26, 0.26, 0.03), "rgba": (0.45, 0.12, 0.10, 1)},
+    {"name": "ck_hood", "room": "chinese_kitchen", "type": "box",            # 抽油烟机在灶台正上方（真实高度）
+     "pos": (-0.24, -5.30, 1.80), "size": (0.55, 1.00, 0.36), "rgba": (0.70, 0.72, 0.74, 1), "mat": "mat_steel"},
+    # 烤箱：嵌在台面下，黑玻璃门 + 控制面板 + 横把手——厨房里最好认的一件
+    {"name": "ck_oven", "room": "chinese_kitchen", "type": "box",
+     "pos": (-0.17, -6.40, 0.42), "size": (0.62, 0.62, 0.76), "rgba": (0.30, 0.31, 0.33, 1), "mat": "mat_steel"},
+    {"name": "ck_oven_glass", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.145, -6.40, 0.40), "size": (0.02, 0.52, 0.50), "mat": "mat_oven_glass",
+     "rgba": (0.14, 0.15, 0.17, 1)},
+    {"name": "ck_oven_panel", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.145, -6.40, 0.73), "size": (0.02, 0.58, 0.11), "mat": "mat_appliance_panel",
+     "rgba": (0.85, 0.86, 0.88, 1)},
+    {"name": "ck_oven_handle", "room": "chinese_kitchen", "type": "box",
+     "pos": (0.17, -6.40, 0.66), "size": (0.05, 0.56, 0.05), "rgba": (0.62, 0.64, 0.67, 1), "mat": "mat_chrome"},
+    {"name": "ck_upper", "room": "chinese_kitchen", "type": "box",           # 吊柜（真实高度，贴西墙）
+     "pos": (-0.32, -4.30, 1.95), "size": (0.36, 2.60, 0.70), "rgba": (0.78, 0.74, 0.68, 1)},
+
+    # ── 贴东墙：储物矮柜（原鞋帽间中央矮柜，挪到两扇门之间）+ 穿衣镜 ──
+    {"name": "sr_island", "room": "chinese_kitchen", "type": "box",
+     "pos": (3.74, -3.40, 0.42), "size": (0.52, 1.60, 0.84), "rgba": (0.52, 0.40, 0.28, 1)},
+    {"name": "sr_mirror", "room": "chinese_kitchen", "type": "box",
+     "pos": (3.95, -6.60, 1.35), "size": (0.05, 1.10, 1.90), "rgba": (0.74, 0.82, 0.87, 1), "mat": "mat_mirror"},
+
+    # ── 中央备餐台（真实中厨常见的中岛，只有 0.88m 高，不挡视线）──
     {"name": "ck_prep_table", "room": "chinese_kitchen", "type": "box",
-     "pos": (1.7, -5.6, 0.44), "size": (1.80, 0.80, 0.88), "rgba": (0.82, 0.82, 0.80, 1)},
+     "pos": (1.90, -4.60, 0.44), "size": (1.60, 0.90, 0.88), "rgba": (0.82, 0.82, 0.80, 1)},
 
     # ═══════ ⑦晾晒区：晾衣杆 + 挂着的衣物 ═══════
     {"name": "dry_rail_a", "room": "chinese_kitchen", "type": "box",

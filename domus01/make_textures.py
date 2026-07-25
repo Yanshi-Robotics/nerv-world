@@ -177,6 +177,46 @@ def artwork(h=512, w=512, style=0) -> np.ndarray:
     return img
 
 
+def oven_glass(h=256, w=256) -> np.ndarray:
+    """烤箱/洗碗机的玻璃门：近黑的深色玻璃，斜向一道高光，隐约透出里面的烤架横线。
+
+    真实烤箱门就是这个样子——正因为它又黑又亮、上面横着几道烤架，才成为厨房里
+    最好认的一件东西（比清一色的柜门辨识度高得多）。
+    """
+    yy, xx = np.mgrid[0:h, 0:w]
+    img = np.zeros((h, w, 3), np.float32)
+    img[..., 0], img[..., 1], img[..., 2] = 26, 27, 30      # 深炭灰底
+    # 斜向高光带（玻璃反光）
+    diag = ((xx * 0.7 + yy * 0.3) / (w * 0.7 + h * 0.3))
+    glare = np.exp(-((diag - 0.32) ** 2) / 0.008) * 46
+    img += glare[..., None]
+    # 里面隐约的烤架：三道横线
+    for frac in (0.34, 0.55, 0.76):
+        band = np.exp(-((yy / h - frac) ** 2) / 2.0e-5) * 22
+        img += band[..., None]
+    # 玻璃边框内缘
+    edge = 10
+    img[:edge], img[-edge:], img[:, :edge], img[:, -edge:] = 62, 62, 62, 62
+    return np.clip(img + _noise(h, w, 3.0)[..., None] * 3, 0, 255).astype(np.uint8)
+
+
+def appliance_panel(h=128, w=512) -> np.ndarray:
+    """家电控制面板：拉丝不锈钢底 + 一排指示灯 + 一小块显示屏。"""
+    yy, xx = np.mgrid[0:h, 0:w]
+    img = np.zeros((h, w, 3), np.float32)
+    img[..., 0], img[..., 1], img[..., 2] = 186, 190, 196
+    img += (np.sin(xx * 1.7) * 4)[..., None]                 # 竖向拉丝
+    img += _noise(h, w, 6.0)[..., None] * 5
+    # 显示屏（左侧一小块深色）
+    img[int(h * 0.3):int(h * 0.7), int(w * 0.08):int(w * 0.26)] = (24, 30, 34)
+    # 指示灯：几个小圆点
+    for i, col in enumerate([(90, 200, 120), (230, 170, 60), (210, 90, 80)]):
+        cx, cy, r = int(w * (0.42 + i * 0.09)), h // 2, 7
+        m = (xx - cx) ** 2 + (yy - cy) ** 2 < r * r
+        img[m] = col
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
 def main() -> None:
     print("生成材质贴图 →", OUT_DIR)
     _save("wood_floor.png", wood_floor())
@@ -190,6 +230,8 @@ def main() -> None:
     _save("fabric_blue.png", fabric(base=(104, 118, 140)))
     _save("wall_paint.png", wall_paint())
     _save("city_skyline.png", city_skyline())
+    _save("oven_glass.png", oven_glass())
+    _save("appliance_panel.png", appliance_panel())
     for i in range(4):
         _save(f"art{i}.png", artwork(style=i))
     print("完成。make_house.py 会把这些贴图写进 MJCF 的 <asset>。")

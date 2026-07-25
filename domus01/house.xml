@@ -28,6 +28,8 @@
     <texture type="2d" name="tex_art1" file="textures/art1.png"/>
     <texture type="2d" name="tex_art2" file="textures/art2.png"/>
     <texture type="2d" name="tex_art3" file="textures/art3.png"/>
+    <texture type="2d" name="tex_oven_glass" file="textures/oven_glass.png"/>
+    <texture type="2d" name="tex_appliance_panel" file="textures/appliance_panel.png"/>
     <material name="mat_wood" texture="tex_wood_floor" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_wood_light" texture="tex_wood_floor_light" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_tile" texture="tex_tile_white" texrepeat="4 4" specular="0.35" shininess="0.55" reflectance="0.12"/>
@@ -38,6 +40,8 @@
     <material name="mat_fabric" texture="tex_fabric" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
     <material name="mat_fabric_blue" texture="tex_fabric_blue" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
     <material name="mat_wall" texture="tex_wall_paint" texrepeat="2 2" specular="0.05" shininess="0.1" reflectance="0.0"/>
+    <material name="mat_oven_glass" texture="tex_oven_glass" texrepeat="1 1" specular="0.85" shininess="0.9" reflectance="0.3"/>
+    <material name="mat_appliance_panel" texture="tex_appliance_panel" texrepeat="1 1" specular="0.7" shininess="0.8" reflectance="0.25"/>
     <material name="mat_steel" rgba="0.82 0.84 0.87 1" specular="0.9" shininess="0.85" reflectance="0.35"/>
     <material name="mat_chrome" rgba="0.90 0.92 0.94 1" specular="1.0" shininess="0.95" reflectance="0.5"/>
     <material name="mat_glass" rgba="0.72 0.85 0.90 0.32" specular="0.8" shininess="0.9" reflectance="0.25"/>
@@ -545,21 +549,31 @@
     <geom name="chinese_kitchen_wfe0_r" type="box" size="0.085 0.04 0.7" pos="3.93 -4.4 1.65" rgba="0.93 0.93 0.91 1"/>
     <geom name="chinese_kitchen_wfe0_top" type="box" size="0.085 0.64 0.04" pos="3.93 -5 2.35" rgba="0.93 0.93 0.91 1"/>
     <geom name="chinese_kitchen_wfe0_bot" type="box" size="0.085 0.64 0.04" pos="3.93 -5 0.95" rgba="0.93 0.93 0.91 1"/>
-    <geom name="furn_sr_cab_w" type="box" size="0.21 1.2 1.15" pos="-0.25 -1.5 1.15" rgba="0.74 0.66 0.55 1"/>
-    <geom name="furn_sr_cab_s" type="box" size="1.3 0.21 1.15" pos="1.8 -2.75 1.15" rgba="0.74 0.66 0.55 1"/>
-    <geom name="furn_sr_island" type="box" size="0.7 0.35 0.42" pos="2.2 -1.3 0.42" rgba="0.52 0.4 0.28 1"/>
-    <geom name="furn_sr_mirror" type="box" size="0.025 0.55 0.95" pos="3.78 -1.5 1.35" material="mat_mirror"/>
-    <geom name="furn_ck_counter" type="box" size="1.8 0.325 0.45" pos="1.7 -3.45 0.45" rgba="0.84 0.84 0.8 1"/>
-    <geom name="furn_ck_counter_top" type="box" size="1.85 0.36 0.035" pos="1.7 -3.45 0.93" material="mat_marble_dark"/>
-    <geom name="furn_ck_stove" type="box" size="0.4 0.29 0.02" pos="0.8 -3.45 0.98" rgba="0.1 0.1 0.12 1"/>
-    <geom name="furn_ck_burner_a" type="cylinder" size="0.13 0.015" pos="0.58 -3.32 1.01" rgba="0.45 0.12 0.1 1"/>
-    <geom name="furn_ck_burner_b" type="cylinder" size="0.13 0.015" pos="1.02 -3.32 1.01" rgba="0.45 0.12 0.1 1"/>
-    <geom name="furn_ck_hood" type="box" size="0.5 0.275 0.18" pos="0.8 -3.3 1.8" material="mat_steel"/>
-    <geom name="furn_ck_cab_door" type="box" size="0.6 0.02 0.39" pos="2.6 -3.11 0.46" rgba="0.78 0.75 0.7 1"/>
-    <geom name="furn_ck_cab_handle" type="box" size="0.45 0.025 0.02" pos="2.6 -3.07 0.72" rgba="0.55 0.56 0.58 1"/>
-    <geom name="furn_ck_sink" type="box" size="0.38 0.25 0.05" pos="2.9 -3.45 0.96" material="mat_porcelain"/>
-    <geom name="furn_ck_upper" type="box" size="1 0.18 0.35" pos="2.4 -3.25 1.95" rgba="0.78 0.74 0.68 1"/>
-    <geom name="furn_ck_prep_table" type="box" size="0.9 0.4 0.44" pos="1.7 -5.6 0.44" rgba="0.82 0.82 0.8 1"/>
+    <geom name="furn_ck_fridge" type="box" size="0.45 0.36 0.925" pos="0.05 -0.36 0.93" material="mat_steel"/>
+    <geom name="furn_ck_fridge_seam" type="box" size="0.44 0.01 0.01" pos="0.05 -0.72 1.2" rgba="0.55 0.56 0.58 1"/>
+    <geom name="furn_ck_fridge_handle_u" type="box" size="0.02 0.02 0.21" pos="0.42 -0.73 1.45" material="mat_chrome"/>
+    <geom name="furn_ck_fridge_handle_l" type="box" size="0.02 0.02 0.19" pos="0.42 -0.73 0.9" material="mat_chrome"/>
+    <geom name="furn_sr_cab_n" type="box" size="1.2 0.21 1.15" pos="2 -0.21 1.15" rgba="0.74 0.66 0.55 1"/>
+    <geom name="furn_ck_counter" type="box" size="0.325 2.2 0.45" pos="-0.175 -4.8 0.45" rgba="0.84 0.84 0.8 1"/>
+    <geom name="furn_ck_counter_top" type="box" size="0.36 2.25 0.035" pos="-0.16 -4.8 0.93" material="mat_marble_dark"/>
+    <geom name="furn_ck_dishwasher" type="box" size="0.31 0.3 0.4" pos="-0.17 -3 0.44" material="mat_steel"/>
+    <geom name="furn_ck_dw_door" type="box" size="0.01 0.29 0.31" pos="0.145 -3 0.4" material="mat_steel"/>
+    <geom name="furn_ck_dw_panel" type="box" size="0.01 0.29 0.055" pos="0.15 -3 0.76" material="mat_appliance_panel"/>
+    <geom name="furn_ck_dw_handle" type="box" size="0.025 0.26 0.025" pos="0.17 -3 0.68" material="mat_chrome"/>
+    <geom name="furn_ck_sink" type="box" size="0.25 0.38 0.05" pos="-0.19 -4 0.96" material="mat_porcelain"/>
+    <geom name="furn_ck_faucet" type="cylinder" size="0.025 0.18" pos="-0.4 -4 1.15" material="mat_chrome"/>
+    <geom name="furn_ck_stove" type="box" size="0.29 0.4 0.02" pos="-0.19 -5.3 0.98" rgba="0.1 0.1 0.12 1"/>
+    <geom name="furn_ck_burner_a" type="cylinder" size="0.13 0.015" pos="-0.19 -5.08 1.01" rgba="0.45 0.12 0.1 1"/>
+    <geom name="furn_ck_burner_b" type="cylinder" size="0.13 0.015" pos="-0.19 -5.52 1.01" rgba="0.45 0.12 0.1 1"/>
+    <geom name="furn_ck_hood" type="box" size="0.275 0.5 0.18" pos="-0.24 -5.3 1.8" material="mat_steel"/>
+    <geom name="furn_ck_oven" type="box" size="0.31 0.31 0.38" pos="-0.17 -6.4 0.42" material="mat_steel"/>
+    <geom name="furn_ck_oven_glass" type="box" size="0.01 0.26 0.25" pos="0.145 -6.4 0.4" material="mat_oven_glass"/>
+    <geom name="furn_ck_oven_panel" type="box" size="0.01 0.29 0.055" pos="0.145 -6.4 0.73" material="mat_appliance_panel"/>
+    <geom name="furn_ck_oven_handle" type="box" size="0.025 0.28 0.025" pos="0.17 -6.4 0.66" material="mat_chrome"/>
+    <geom name="furn_ck_upper" type="box" size="0.18 1.3 0.35" pos="-0.32 -4.3 1.95" rgba="0.78 0.74 0.68 1"/>
+    <geom name="furn_sr_island" type="box" size="0.26 0.8 0.42" pos="3.74 -3.4 0.42" rgba="0.52 0.4 0.28 1"/>
+    <geom name="furn_sr_mirror" type="box" size="0.025 0.55 0.95" pos="3.95 -6.6 1.35" material="mat_mirror"/>
+    <geom name="furn_ck_prep_table" type="box" size="0.8 0.45 0.44" pos="1.9 -4.6 0.44" rgba="0.82 0.82 0.8 1"/>
     <geom name="furn_dry_rail_a" type="box" size="1.7 0.03 0.03" pos="1.7 -8.2 2.1" rgba="0.75 0.76 0.78 1"/>
     <geom name="furn_dry_rail_b" type="box" size="1.7 0.03 0.03" pos="1.7 -8.9 2.1" rgba="0.75 0.76 0.78 1"/>
     <geom name="furn_dry_cloth_a" type="box" size="0.25 0.025 0.525" pos="0.6 -8.2 1.55" rgba="0.86 0.88 0.92 1"/>

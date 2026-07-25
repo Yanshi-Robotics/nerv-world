@@ -221,7 +221,8 @@ def _assets() -> list[str]:
     # 贴图（file 路径相对本 XML 所在目录）
     for name in ("wood_floor", "wood_floor_light", "tile_white", "tile_grey",
                  "marble", "marble_dark", "carpet", "fabric", "fabric_blue", "wall_paint",
-                 "city_skyline", "art0", "art1", "art2", "art3"):
+                 "city_skyline", "art0", "art1", "art2", "art3",
+                 "oven_glass", "appliance_panel"):
         out.append(f'    <texture type="2d" name="tex_{name}" file="textures/{name}.png"/>')
     # 材质：texrepeat 控制平铺密度（数字越大格子越小）
     mats = [
@@ -235,6 +236,9 @@ def _assets() -> list[str]:
         ("mat_fabric", "tex_fabric", 6, 6, 0.05, 0.10, 0.0),
         ("mat_fabric_blue", "tex_fabric_blue", 6, 6, 0.05, 0.10, 0.0),
         ("mat_wall", "tex_wall_paint", 2, 2, 0.05, 0.10, 0.0),
+        # 家电：烤箱/洗碗机的玻璃门与控制面板（厨房里最好认的两样东西）
+        ("mat_oven_glass", "tex_oven_glass", 1, 1, 0.85, 0.90, 0.30),
+        ("mat_appliance_panel", "tex_appliance_panel", 1, 1, 0.70, 0.80, 0.25),
     ]
     for name, tex, rx, ry, spec, shin, refl in mats:
         out.append(f'    <material name="{name}" texture="{tex}" texrepeat="{rx} {ry}" '
