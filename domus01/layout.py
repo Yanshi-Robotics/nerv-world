@@ -62,8 +62,8 @@ ROOMS: dict[str, dict] = {
     # ═══ 西列：主卧套间（上）+ 小孩房区（下）═══
     "master_bath": {                                           # ⑳ 主卫（独立浴缸）
         "rect": (-9.5, 4.5, -5.5, 10.0), "label": "主卫",       # 4.0 × 5.5 = 22㎡
-        "wall_rgba": (0.86, 0.88, 0.86, 1.0), "floor_rgba": (0.33, 0.32, 0.31, 1.0),
-        "floor_mat": "mat_tile_grey", "wall_mat": "mat_tile",
+        "wall_rgba": (0.86, 0.88, 0.86, 1.0), "floor_rgba": (0.77, 0.79, 0.81, 1.0),
+        "floor_mat": "mat_marble_grey", "wall_mat": "mat_tile",
     },
     "closet": {                                                # ⑱ 衣帽间
         "rect": (-9.5, 1.0, -5.5, 4.5), "label": "衣帽间",      # 4.0 × 3.5 = 14㎡
@@ -88,8 +88,8 @@ ROOMS: dict[str, dict] = {
     },
     "guest_bath": {                                            # ⑪ 客卫
         "rect": (-5.5, -10.0, -3.0, -6.0), "label": "客卫",     # 2.5 × 4.0 = 10㎡
-        "wall_rgba": (0.78, 0.86, 0.90, 1.0), "floor_rgba": (0.80, 0.82, 0.84, 1.0),
-        "floor_mat": "mat_tile", "wall_mat": "mat_tile",
+        "wall_rgba": (0.78, 0.86, 0.90, 1.0), "floor_rgba": (0.77, 0.79, 0.81, 1.0),
+        "floor_mat": "mat_marble_grey", "wall_mat": "mat_tile",
     },
     "second_bedroom": {                                        # ⑩ 次卧
         "rect": (-3.0, -10.0, -0.5, -6.0), "label": "次卧",     # 2.5 × 4.0 = 10㎡
@@ -104,8 +104,8 @@ ROOMS: dict[str, dict] = {
     },
     "chinese_kitchen": {                                       # ⑤+⑥+⑦ 中厨并入储物与晾晒
         "rect": (-0.5, -10.0, 4.0, 0.0), "label": "中厨",       # 4.5 × 10.0 = 45㎡
-        "wall_rgba": (0.76, 0.86, 0.76, 1.0), "floor_rgba": (0.88, 0.88, 0.86, 1.0),
-        "floor_mat": "mat_tile", "wall_mat": "mat_tile",
+        "wall_rgba": (0.76, 0.86, 0.76, 1.0), "floor_rgba": (0.89, 0.84, 0.77, 1.0),
+        "floor_mat": "mat_marble_warm", "wall_mat": "mat_tile",
     },
     # ═══ 东列：客厅 / 玄关 / 洗衣（东南是缺角，不建）═══
     "living_room": {                                           # ① 客厅

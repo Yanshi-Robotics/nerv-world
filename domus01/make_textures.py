@@ -225,6 +225,10 @@ def main() -> None:
     _save("tile_grey.png", tile(base=(150, 152, 156), grout=(112, 115, 120)))
     _save("marble.png", marble())
     _save("marble_dark.png", marble(base=(74, 74, 80)))
+    # 厨房与卫生间的地面石材（真实住宅这两处常铺大理石；用不同色号，同一套房里
+    # 各房间本来就不会铺一模一样的石头）
+    _save("marble_warm.png", marble(base=(226, 214, 196)))   # 暖米色 → 厨房
+    _save("marble_grey.png", marble(base=(196, 200, 205)))   # 冷灰色 → 卫生间
     _save("carpet.png", carpet())
     _save("fabric.png", fabric())
     _save("fabric_blue.png", fabric(base=(104, 118, 140)))

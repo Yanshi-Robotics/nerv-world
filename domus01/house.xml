@@ -19,6 +19,8 @@
     <texture type="2d" name="tex_tile_grey" file="textures/tile_grey.png"/>
     <texture type="2d" name="tex_marble" file="textures/marble.png"/>
     <texture type="2d" name="tex_marble_dark" file="textures/marble_dark.png"/>
+    <texture type="2d" name="tex_marble_warm" file="textures/marble_warm.png"/>
+    <texture type="2d" name="tex_marble_grey" file="textures/marble_grey.png"/>
     <texture type="2d" name="tex_carpet" file="textures/carpet.png"/>
     <texture type="2d" name="tex_fabric" file="textures/fabric.png"/>
     <texture type="2d" name="tex_fabric_blue" file="textures/fabric_blue.png"/>
@@ -36,6 +38,8 @@
     <material name="mat_tile_grey" texture="tex_tile_grey" texrepeat="4 4" specular="0.35" shininess="0.55" reflectance="0.12"/>
     <material name="mat_marble" texture="tex_marble" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
     <material name="mat_marble_dark" texture="tex_marble_dark" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
+    <material name="mat_marble_warm" texture="tex_marble_warm" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
+    <material name="mat_marble_grey" texture="tex_marble_grey" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
     <material name="mat_carpet" texture="tex_carpet" texrepeat="4 4" specular="0.02" shininess="0.05" reflectance="0.0"/>
     <material name="mat_fabric" texture="tex_fabric" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
     <material name="mat_fabric_blue" texture="tex_fabric_blue" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
@@ -112,7 +116,7 @@
     <geom name="city_west" type="box" size="0.2 65 17" pos="-46 0 12" material="mat_city" contype="0" conaffinity="0"/>
 
     <!-- ===== 主卫 ===== -->
-    <geom name="master_bath_floor" type="box" size="2 2.75 0.025" pos="-7.5 7.25 -0.025" material="mat_tile_grey"/>
+    <geom name="master_bath_floor" type="box" size="2 2.75 0.025" pos="-7.5 7.25 -0.025" material="mat_marble_grey"/>
     <geom name="master_bath_ceiling" type="box" size="2 2.75 0.05" pos="-7.5 7.25 3.05" rgba="0.95 0.95 0.93 1" group="1"/>
     <geom name="master_bath_ws0" type="box" size="0.725 0.07 1.5" pos="-8.775 4.57 1.5" material="mat_tile"/>
     <geom name="master_bath_ws1" type="box" size="0.725 0.07 1.5" pos="-6.225 4.57 1.5" material="mat_tile"/>
@@ -337,7 +341,7 @@
     <geom name="furn_cplant_leaf_c" type="sphere" size="0.2" pos="-1.28 -5.16 0.85" rgba="0.22 0.43 0.24 1"/>
 
     <!-- ===== 客卫 ===== -->
-    <geom name="guest_bath_floor" type="box" size="1.25 2 0.025" pos="-4.25 -8 -0.025" material="mat_tile"/>
+    <geom name="guest_bath_floor" type="box" size="1.25 2 0.025" pos="-4.25 -8 -0.025" material="mat_marble_grey"/>
     <geom name="guest_bath_ceiling" type="box" size="1.25 2 0.05" pos="-4.25 -8 3.05" rgba="0.95 0.95 0.93 1" group="1"/>
     <geom name="guest_bath_ws0" type="box" size="0.375 0.07 1.5" pos="-5.125 -9.93 1.5" material="mat_tile"/>
     <geom name="guest_bath_ws1" type="box" size="0.425 0.07 1.5" pos="-3.425 -9.93 1.5" material="mat_tile"/>
@@ -511,7 +515,7 @@
     <geom name="furn_bstool_b_ring" type="cylinder" size="0.1296 0.015" pos="2.5 5.45 0.22" rgba="0.42 0.43 0.46 1"/>
 
     <!-- ===== 中厨 ===== -->
-    <geom name="chinese_kitchen_floor" type="box" size="2.25 5 0.025" pos="1.75 -5 -0.025" material="mat_tile"/>
+    <geom name="chinese_kitchen_floor" type="box" size="2.25 5 0.025" pos="1.75 -5 -0.025" material="mat_marble_warm"/>
     <geom name="chinese_kitchen_ceiling" type="box" size="2.25 5 0.05" pos="1.75 -5 3.05" rgba="0.95 0.95 0.93 1" group="1"/>
     <geom name="chinese_kitchen_ws0" type="box" size="0.55 0.07 1.5" pos="0.05 -9.93 1.5" material="mat_tile"/>
     <geom name="chinese_kitchen_ws1" type="box" size="0.5 0.07 1.5" pos="3.5 -9.93 1.5" material="mat_tile"/>

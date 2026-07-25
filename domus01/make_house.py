@@ -220,7 +220,7 @@ def _assets() -> list[str]:
                'rgb2="0.88 0.92 0.96" width="512" height="1024"/>')
     # 贴图（file 路径相对本 XML 所在目录）
     for name in ("wood_floor", "wood_floor_light", "tile_white", "tile_grey",
-                 "marble", "marble_dark", "carpet", "fabric", "fabric_blue", "wall_paint",
+                 "marble", "marble_dark", "marble_warm", "marble_grey", "carpet", "fabric", "fabric_blue", "wall_paint",
                  "city_skyline", "art0", "art1", "art2", "art3",
                  "oven_glass", "appliance_panel"):
         out.append(f'    <texture type="2d" name="tex_{name}" file="textures/{name}.png"/>')
@@ -232,6 +232,8 @@ def _assets() -> list[str]:
         ("mat_tile_grey", "tex_tile_grey", 4, 4, 0.35, 0.55, 0.12),
         ("mat_marble", "tex_marble", 2, 2, 0.45, 0.70, 0.15),
         ("mat_marble_dark", "tex_marble_dark", 2, 2, 0.45, 0.70, 0.15),
+        ("mat_marble_warm", "tex_marble_warm", 2, 2, 0.45, 0.70, 0.15),
+        ("mat_marble_grey", "tex_marble_grey", 2, 2, 0.45, 0.70, 0.15),
         ("mat_carpet", "tex_carpet", 4, 4, 0.02, 0.05, 0.0),
         ("mat_fabric", "tex_fabric", 6, 6, 0.05, 0.10, 0.0),
         ("mat_fabric_blue", "tex_fabric_blue", 6, 6, 0.05, 0.10, 0.0),
