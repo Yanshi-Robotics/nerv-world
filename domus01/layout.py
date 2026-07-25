@@ -192,7 +192,9 @@ WINDOW_FRAME_T = 0.08
 
 # ---------------------------------------------------------------- 出生点
 # 站在玄关、刚进门的姿态（朝西看向屋内）。厨房/卧室从这里都看不见，必须自己一间间找。
-START_POS_XY = (8.3, -0.6)
+# ⚠️ 出生点必须避开地垫/地毯这类薄片家具：机器人生成时脚会嵌进去，接触力一冲就把它掀翻
+#    （2026-07-25 实测：原来站在玄关地垫上，一起服务就倒立，倾角 156°）。
+START_POS_XY = (7.30, -0.60)
 START_YAW = 3.14159            # 朝西（-x）
 START_HEIGHT = 0.445
 
@@ -208,7 +210,7 @@ FURNITURE: list[dict] = [
     {"name": "tv_console", "room": "living_room", "type": "box",
      "pos": (4.38, 6.6, 0.24), "size": (0.45, 3.00, 0.48), "rgba": (0.28, 0.21, 0.15, 1)},
     {"name": "rug", "room": "living_room", "type": "cylinder",
-     "pos": (6.6, 6.3, 0.012), "size": (4.00, 4.00, 0.02), "rgba": (0.78, 0.70, 0.60, 1), "mat": "mat_carpet"},
+     "pos": (6.6, 6.3, 0.005), "size": (4.00, 4.00, 0.01), "rgba": (0.78, 0.70, 0.60, 1), "mat": "mat_carpet"},
     {"name": "sofa_seat_e", "room": "living_room", "type": "box",
      "pos": (8.55, 6.3, 0.22), "size": (1.00, 3.40, 0.44), "rgba": (0.62, 0.55, 0.46, 1), "mat": "mat_fabric"},
     {"name": "sofa_back_e", "room": "living_room", "type": "box",
@@ -260,7 +262,7 @@ FURNITURE: list[dict] = [
 
     # ═══════ ④入户玄关：鞋柜 / 换鞋凳 / 挂衣 / 地垫 / 端景台 ═══════
     {"name": "entry_mat", "room": "entry", "type": "box",
-     "pos": (8.7, -0.6, 0.012), "size": (0.90, 1.60, 0.02), "rgba": (0.33, 0.31, 0.30, 1)},
+     "pos": (8.7, -0.6, 0.005), "size": (0.90, 1.60, 0.01), "rgba": (0.33, 0.31, 0.30, 1)},
     {"name": "shoe_cabinet", "room": "entry", "type": "box",
      "pos": (9.30, 1.20, 1.10), "size": (0.45, 1.80, 2.20), "rgba": (0.72, 0.63, 0.52, 1)},
     {"name": "shoe_cab_handle", "room": "entry", "type": "box",

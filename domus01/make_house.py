@@ -299,24 +299,31 @@ def _city_backdrop() -> list[str]:
             ("south", (0, -d, z), (w, 0.4, h)),
             ("east", (d, 0, z), (0.4, w, h)),
             ("west", (-d, 0, z), (0.4, w, h))]:
-        out.append(_box(f"city_{name}", pos, size, (1, 1, 1, 1), mat="mat_city"))
+        out.append(_box(f"city_{name}", pos, size, (1, 1, 1, 1), mat="mat_city", extra=_DECOR))
     return out
+
+
+# 屋外的一切都是**纯装饰**：狗永远不出门，这些不该参与碰撞。
+# ⚠️ 实测教训（2026-07-25）：草地是块 120m 的大板、顶面只比室内地板低 1cm，
+#    机器狗的脚会同时接触室内地板和屋外草地，两层地面的接触约束打架 → 站着就被掀翻。
+#    关掉碰撞后彻底根治，视觉毫无损失。
+_DECOR = ' contype="0" conaffinity="0"'
 
 
 def _outdoor() -> list[str]:
     """屋外景色：草地 + 树 + 远处楼房。从窗口望出去有东西可看，屋子才不像个盒子。"""
-    out: list[str] = ['    <!-- ===== 屋外景色（透过窗户看得见）===== -->']
+    out: list[str] = ['    <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->']
     g = L.OUTDOOR_GROUND
-    out.append(_box("outdoor_ground", g["pos"], g["size"], g["rgba"]))
+    out.append(_box("outdoor_ground", g["pos"], g["size"], g["rgba"], extra=_DECOR))
     for i, (x, y, trunk_h, crown_d) in enumerate(L.TREES):
         out.append(f'    <geom name="tree{i}_trunk" type="cylinder" '
                    f'size="{0.16:g} {_half(trunk_h):g}" pos="{x:g} {y:g} {_half(trunk_h):g}" '
-                   f'rgba="{_rgba(L.TRUNK_RGBA)}"/>')
+                   f'rgba="{_rgba(L.TRUNK_RGBA)}"{_DECOR}/>')
         out.append(f'    <geom name="tree{i}_crown" type="sphere" size="{_half(crown_d):g}" '
                    f'pos="{x:g} {y:g} {trunk_h + crown_d * 0.35:g}" '
-                   f'rgba="{_rgba(L.FOLIAGE_RGBA)}"/>')
+                   f'rgba="{_rgba(L.FOLIAGE_RGBA)}"{_DECOR}/>')
     for i, (x, y, sx, sy, h, rgba) in enumerate(L.BUILDINGS):
-        out.append(_box(f"bldg{i}", (x, y, h / 2.0), (sx, sy, h), rgba))
+        out.append(_box(f"bldg{i}", (x, y, h / 2.0), (sx, sy, h), rgba, extra=_DECOR))
     return out
 
 
