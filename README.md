@@ -1,187 +1,239 @@
-# alice-house · 给机器人住的房子
+[![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
 
-**Alice 的房子**——一套**用代码生成**的室内场景，让机器人在里面看、走、找东西、干活。
+# alice-house · A House for Robots to Live In
 
-几何一行都不手写：房间、门窗、家具、贴图全部由 `layout.py` 这一份布局定义生成。
-想改屋子就改布局、重跑生成器；场景和使用它的程序读同一份真相源，不会两处坐标打架。
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.4-lightgrey?style=flat-square)](CHANGELOG.md)
 
-配套还带**机器人**（宇树 Go2 四足、宇树 G1 人形）和训练好的**运动策略**——
-克隆下来就能让它们在屋里真的迈腿走路，不是瞬移。
+**A procedurally generated indoor simulation scene, shipped with two Unitree robots and trained locomotion policies — clone it and they actually walk around the house.**
 
-> 名字的来历：Alice 是这一系列里第一号机器人，这是她的房子。
-> 以后可能扩成一座岛——房子、山路、码头都在上面，Alice 挨个去。
+**Alice's house** — an indoor scene generated entirely from code, for robots to look around in, walk through, search, and work in.
 
-**MIT 许可**，随便用。仓里的宇树机器人模型来自 MuJoCo Menagerie，保留它们自己的
-BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
+Not one line of geometry is hand-written: rooms, doors, windows, furniture and textures all come out of a single layout definition (`layout.py`). Change the house by changing the layout and re-running the generator; the scene and whatever consumes it read the same source of truth, so coordinates can never disagree in two places.
+
+It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their trained **locomotion policies** — so they really take steps, they don't teleport.
+
+> Where the name comes from: Alice is robot number one in this series. This is her house.
+> It may grow into an island one day — house, hillside trail, dock — with Alice visiting each.
 
 ---
 
-## 里面有什么
+## Table of Contents
 
-| 户型 | 规模 | 说明 |
+- [What's Inside](#whats-inside) · [Robots](#robots) · [Floor Plan & Screenshots](#floor-plan)
+- [Design Principles](#design-principles)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [One Scene per Robot](#one-scene-per-robot)
+- [Versioning](#versioning) · [License](#license)
+
+---
+
+## What's Inside
+
+| Layout | Size | Notes |
 |---|---|---|
-| 大平层三室两厅双卫 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离 |
+| 3 bedrooms, 2 living areas, 2 baths (single floor) | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens |
 
-### 现有机器人
+### Robots
 
-| 编号 | 本体 | 眼高 | 说明 |
+| Key | Body | Eye height | Notes |
 |---|---|---|---|
-| **go2** | 宇树 Go2 四足机器狗 | ~0.38 m | 头部前视相机；平地速度策略 |
-| **g1** | 宇树 G1 人形（29 自由度） | ~1.25 m | 站立 1.38 m；头部相机装在躯干上、下俯 10° |
+| **go2** | Unitree Go2 quadruped | ~0.38 m | Head-mounted forward camera; flat-ground velocity policy |
+| **g1** | Unitree G1 humanoid (29 dof) | ~1.25 m | 1.38 m standing; head camera on the torso, pitched 10° down |
 
-同一间屋子在这两双眼睛里差别很大——这正是场景**按真实做、不为某一种机器人定制**的理由。
+The same room looks very different through these two pairs of eyes — which is exactly why the scene is **built to be realistic, not tailored to one robot**.
 
-### 空间构成
+### Spaces
 
-主卫（独立浴缸）· 衣帽间 · 小孩房（含卫浴）· 主卧 · 过道 · 客卫 · 次卧 ·
-餐厅（含西厨中岛）· 中厨（含晾晒）· 客厅 · 玄关 · 洗衣房
+Master bath (freestanding tub) · walk-in closet · kid's room (ensuite) · master bedroom ·
+corridor · guest bath · second bedroom · dining room (with a western-kitchen island) ·
+Chinese kitchen (with drying area) · living room · entry hall · laundry
 
-### 户型
+### Floor Plan
 
-关掉天花板俯视，可以看清整套动线：西侧是主卧套间与小孩房（静区），一条过道横贯东西，
-东侧是客厅、玄关与服务区（动区）。
+Ceiling hidden, viewed from above — you can read the whole circulation: the master suite and
+kid's room (quiet zone) sit west, a corridor runs east-west, and the living room, entry and
+service rooms (active zone) sit east.
 
-![户型俯视图](docs/images/A1-户型俯视图.png)
+![Floor plan](docs/images/A1-户型俯视图.png)
 
-### 公共区
+### Common Areas
 
-客厅与餐厅之间的墙整段拆除，电视立在原墙位置当软隔断——大平层的客餐一体做法。
+The wall between living and dining is removed entirely; the TV stands where that wall used to be
+and acts as a soft divider — the way open-plan apartments usually do it.
 
-| 客餐打通 | 客厅 |
+| Living-dining opened up | Living room |
 |---|---|
-| ![客餐厅打通](docs/images/B1-客餐厅打通.png) | ![客厅](docs/images/B2-客厅.png) |
+| ![Living-dining](docs/images/B1-客餐厅打通.png) | ![Living room](docs/images/B2-客厅.png) |
 
-### 居室与服务区
+### Bedrooms & Service Rooms
 
-| 主卧 | 主卫（独立浴缸） |
+| Master bedroom | Master bath (freestanding tub) |
 |---|---|
-| ![主卧](docs/images/C1-主卧.png) | ![主卫](docs/images/C3-主卫+浴缸.png) |
+| ![Master bedroom](docs/images/C1-主卧.png) | ![Master bath](docs/images/C3-主卫+浴缸.png) |
 
-| 小孩房 | 中厨 |
+| Kid's room | Chinese kitchen |
 |---|---|
-| ![小孩房](docs/images/D1-小孩房.png) | ![中厨](docs/images/E1-中厨.png) |
+| ![Kid's room](docs/images/D1-小孩房.png) | ![Kitchen](docs/images/E1-中厨.png) |
 
-中厨这张值得多看一眼：橱柜沿西墙一字排开（洗碗机·水槽·灶台·烤箱），储物高柜与冰箱贴北墙，
-中间整条是通行区。**这是 2026-07-25 重排过的**——之前鞋帽间的整墙柜横在房间正中还堵着门，
-把 45 ㎡ 切成三块，机器狗钻进 54 cm 的缝里就出不来。
+The kitchen shot is worth a second look: the counter run goes along the west wall
+(dishwasher · sink · stove · oven), tall storage and the fridge sit against the north wall,
+and the middle is left clear to walk through. **This was re-laid out on 2026-07-25** — before
+that, a full-height cabinet wall sat in the middle of the room and blocked a door, cutting
+45 m² into three pieces; the robot dog would crawl into a 54 cm gap and get stuck.
 
-### 机器人视角
+### Through the Robot's Eyes
 
-场景最终要服务的是机器人的眼睛。下面几张都是**四足机器狗头部相机**看到的画面（高度 0.5 m），
-最后一张是同一间厨房换成**人形视线高度**（1.55 m）的对照——同一个场景，不同机器人看到的
-东西差别很大，所以场景按真实做、不为某一种机器人定制。
+What this scene ultimately serves is a robot's camera. The shots below are from the
+**quadruped's head camera** (0.38 m); the last one is the same kitchen at **humanoid eye
+height** (1.25 m, the G1's actual camera height) for comparison.
 
-| 出生在玄关 | 客厅（正对电视墙） | 过道 |
+| Spawned in the entry | Living room (facing the TV wall) | Corridor |
 |---|---|---|
-| ![玄关](docs/images/G1-狗视角-出生在玄关.png) | ![客厅](docs/images/G2-狗视角-看电视.png) | ![过道](docs/images/G5-狗视角-过道.png) |
+| ![Entry](docs/images/G1-狗视角-出生在玄关.png) | ![Living room](docs/images/G2-狗视角-看电视.png) | ![Corridor](docs/images/G5-狗视角-过道.png) |
 
-| 站在门口望进中厨 | 窗外的城市 | 人形视线高度看同一间中厨 |
+| Looking into the kitchen from the door | The city outside | Same kitchen, humanoid eye height |
 |---|---|---|
-| ![厨房门口](docs/images/G3-狗视角-厨房门口.png) | ![窗外](docs/images/G4-狗视角-窗外城市.png) | ![人形视角](docs/images/H1-人形视角-中厨.png) |
+| ![Kitchen door](docs/images/G3-狗视角-厨房门口.png) | ![Outside](docs/images/G4-狗视角-窗外城市.png) | ![Humanoid view](docs/images/H1-人形视角-中厨.png) |
 
-> 「站在门口望进中厨」这张就是实测里 ANIMA 宣布「已到厨房」时看到的画面——
-> 吊柜、深色台面、不锈钢洗碗机门、右侧落地冰箱都在画面里。
+### How the Screenshots Are Made
 
-### 图是怎么出的
-
-**别手工截图。** 机位全写在 `make_docs_images.py` 里，改了场景就重跑：
+**Don't hand-capture them.** Every camera pose lives in `make_docs_images.py`; re-run it
+whenever the scene changes:
 
 ```bash
-python make_docs_images.py        # 全出
-python make_docs_images.py E1 G3  # 只出指定几张
+python make_docs_images.py        # all of them
+python make_docs_images.py E1 G3  # only the ones you name
 ```
 
-背景：第一版配图是一张张手摆机位截的，中厨一重排就全过时，还没人记得当初相机在哪。
+Background: the first set of screenshots was framed by hand one at a time. One kitchen
+re-layout later they were all stale, and nobody remembered where the cameras had been.
 
 ---
 
-## 设计原则
+## Design Principles
 
-**几何不手写，全部由布局定义生成。** 改屋子只改 `layout.py`，重跑生成器即可——
-场景与消费方（世界服务判断「机器人在哪间屋」）读同一份真相源，不会两处坐标打架。
+**No hand-written geometry — everything is generated from the layout definition.** Change the
+house by changing `layout.py` and re-running the generator. The scene and its consumers (e.g. a
+world service deciding "which room is the robot in") read the same source of truth.
 
-**⛔ 按真实做，不为某一种机器人定制。** 场景是「现实」，不是给某台机器的考题。
-四足机器狗的相机只有 ~0.5 m 高，人形是 1.5 m 以上——**为了迁就狗去压低家具，
-换成人形就全得重做**。看不见高处是**机器人侧**的局限，该用环视、抬头、换机位去解决，
-不是把抽油烟机装到膝盖上。
+**⛔ Build for realism, not for one particular robot.** The scene is *reality*, not an exam paper
+written for one machine. A quadruped's camera sits around 0.4 m; a humanoid's is above 1.2 m —
+**lower the furniture to suit the dog and you have to redo everything when the humanoid arrives.**
+Not being able to see high things is a limitation *on the robot side*, to be solved by looking
+around, looking up, or moving — not by mounting the range hood at knee height.
 
-> 这条是纠正来的。早期版本这里写的是「识别特征必须铺在 0.3–0.9 m 高度带」——那是
-> 拿一台特定机器人的视角当设计目标，方向错了（Jeff 2026-07-25 校正）。
+> This principle is a correction. An earlier version said "recognisable features must sit in the
+> 0.3–0.9 m band" — that was taking one specific robot's viewpoint as the design target.
 
-**摆位要真实：沿墙布置，中间留通行区。** 真实住宅的橱柜、衣柜是贴着墙走的，屋子中间是人
-走路的地方。**别让大件家具横在房间中央**——2026-07-25 实测踩过：12 空间合并时鞋帽间的
-整墙柜留在了中厨正中（还堵着门），把 45 ㎡ 的房间切成三块、只靠 54 cm 和 90 cm 两条缝
-连通，机器狗进去就卡死。真实厨房重排之后，问题自然消失。
+**Place things the way they really are: along the walls, keep the middle clear.** In real homes
+cabinets and wardrobes hug the walls and the middle of the room is where people walk. **Don't
+leave a large piece of furniture stranded in the middle of a room** — measured the hard way on
+2026-07-25: a full-height cabinet left in the middle of the kitchen cut a 45 m² room into three
+pieces connected only by a 54 cm and a 90 cm gap, and the robot got wedged.
 
-顺带说明：真实厨房里烤箱、洗碗机**本来就嵌在台面下**（0.1–0.9 m），冰箱本来就落地——
-它们恰好落在低视角能看到的位置，这是真实的结果，不是为谁让步。
+Worth noting: in a real kitchen the oven and dishwasher **are** built in under the counter
+(0.1–0.9 m) and the fridge **does** stand on the floor — they happen to land where a low camera
+can see them. That is a consequence of realism, not a concession to anyone.
 
-**家具是组合件，不是基本体。** 一把椅子 = 座面 + 靠背 + 两根竖档 + 四条腿 + 前后横撑；
-一盏落地灯 = 配重底盘 + 细杆 + 收口 + 灯罩 + 收头。见 `furniture.py`。
+**Furniture is assembled from parts, not primitives.** A chair = seat + back + two stiles + four
+legs + front and rear rails; a floor lamp = weighted base + slim pole + collar + shade + finial.
+See `furniture.py`.
 
-**封顶。** 有天花板，机器人抬头看到的是屋顶不是天空；天花板单独归一个 geom group，
-出俯视图时整层关掉即可。
+**Capped.** There is a ceiling — look up and you see a roof, not sky. The ceiling lives in its own
+geom group so it can be switched off in one line for top-down renders.
 
-**窗外有世界。** 近处树木草地 → 中景楼房 → 远处城市天际线背景板（matte painting 手法）。
+**There's a world outside the windows.** Near trees and grass → mid-ground buildings → a distant
+city skyline backdrop (matte-painting style).
 
 ---
 
-## 目录结构
+## Project Structure
 
 ```
-layout.py           ⭐ 布局单一真相源（房间矩形/门窗/家具/窗外景物）
-furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
-make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-make_house.py       布局 + 机器人 → house-<机器人>.xml（MJCF）
-make_docs_images.py 出 README 配图（机位写在代码里，改了场景一条命令重出）
-house-go2.xml       生成产物（四足机器狗那份）
-house-g1.xml        生成产物（人形那份）
-textures/           生成的贴图
+layout.py           ⭐ single source of truth for the layout (room rects / doors / windows / furniture / outdoor scenery)
+furniture.py        parametric furniture part library (chairs / tables / lamps / vases / plants…)
+make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
+make_house.py       layout + robot → house-<robot>.xml (MJCF)
+make_docs_images.py renders the README screenshots (poses live in code; one command re-renders)
+house-go2.xml       generated scene (quadruped)
+house-g1.xml        generated scene (humanoid)
+textures/           generated textures
 robots/
-  manifest.py       ⭐ 机器人清单单一真相源（模型/出生高度/相机/策略/力矩怎么发）
-  go2/              宇树 Go2 模型（含头部前视相机）
-  g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
-policies/           训练好的运动策略（ONNX + 契约）
-docs/images/        README 配图
+  manifest.py       ⭐ single source of truth for robots (model / spawn height / camera / policy / how torque is applied)
+  go2/              Unitree Go2 model (with head camera)
+  g1/               Unitree G1 humanoid, 29 dof (imported from Menagerie by import_from_menagerie.py)
+policies/           trained locomotion policies (ONNX + contract)
+docs/images/        README screenshots
 ```
 
-## 重新生成场景
+## Quick Start
 
 ```bash
-python make_textures.py         # 贴图（改了纹理才需要重跑）
-python make_house.py            # 每台机器人各生成一份场景
-python make_house.py --robot g1 # 只生成人形那份
+git clone https://github.com/jeffliulab/alice-house.git
+cd alice-house
+pip install mujoco numpy pillow
+
+# Take a look at the house (scenes are already generated — just open them)
+python -m mujoco.viewer --mjcf=house-go2.xml     # with the quadruped
+python -m mujoco.viewer --mjcf=house-g1.xml      # with the humanoid
 ```
 
-依赖：`mujoco` · `numpy` · `pillow`
+Re-generate after changing the house:
 
-## 一台机器人一份场景
+```bash
+python make_textures.py         # textures (only needed if you changed them)
+python make_house.py            # one scene per robot
+python make_house.py --robot g1 # humanoid only
+python make_docs_images.py      # re-render the README screenshots
+```
 
-`house-go2.xml` / `house-g1.xml` 是同一间屋子、不同的住客。为什么不合成一份：
-机器人的网格路径在 MJCF 编译期就定死了，两台塞不进同一个模型。
+To actually **make a robot walk**: `policies/` holds trained ONNX policies with a
+`contract.json` next to each (joint order, gains, observation layout — all of it). Feed a policy
+a velocity command `(vx, vy, wz)` and it returns joint targets. For a working deployer, see
+`world/sim-house-nav/sim.py` in [anima-zero](https://github.com/jeffliulab/anima-zero).
 
-**机器人清单 `robots/manifest.py` 是「这台机器人是什么」的单一真相源**——模型在哪、
-出生多高、相机叫什么、力矩怎么发。加一台新的就往里追加一条，再跑一次生成器。
+## One Scene per Robot
 
-⚠️ 清单里**不重复**策略契约（`contract.json`）已有的东西（关节顺序、增益、观测格式、
-控制周期）——那些的真相源是契约，抄两份必然对不上。清单只放契约里没有的。
+`house-go2.xml` and `house-g1.xml` are the same house with a different occupant. Why not one
+file: a robot's mesh path is baked in at MJCF compile time, so two robots can't share a model.
 
-⛔ **两台机器人的力矩发法是相反的**，写在清单的 `pd_mode` 里，搞反了当场倒：
-Go2 训练侧是显式 PD（部署器自己算 −kd·qd、模型阻尼清零），
-G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一项）。
+**`robots/manifest.py` is the single source of truth for "what this robot is"** — where the model
+lives, how high it spawns, what the camera is called, how torque is applied. Adding a robot means
+appending one entry and re-running the generator.
 
-## 改屋子 / 加新地方
+⚠️ The manifest deliberately **does not repeat** anything already in the policy contract
+(`contract.json`: joint order, gains, observation layout, control period). The contract is the
+source of truth for those; copying them would guarantee they drift apart.
 
-改 `layout.py` 里的房间矩形、门窗、家具，重跑生成器即可。构件库（家具/贴图）直接复用。
-想加**别的地方**（山路、码头……）也走同一套：新写一份布局定义，生成器不用动。
+⛔ **The two robots apply torque in opposite ways** — recorded as `pd_mode` in the manifest, and
+getting it backwards makes the robot fall over immediately. The Go2 was trained with explicit PD
+(the deployer computes `−kd·qd` itself and zeroes the model's damping); the G1 with implicit PD
+(`kd` goes into `dof_damping` for MuJoCo to apply, and the torque carries only the `kp` term).
+
+## Changing the House / Adding New Places
+
+Edit the room rectangles, doors, windows and furniture in `layout.py` and re-run the generator.
+The part libraries (furniture, textures) are reused as-is. Adding a **different place** (a hillside
+trail, a dock…) works the same way: write another layout definition; the generator doesn't change.
 
 ---
 
-## 版本
+## Versioning
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.4**。
+See [CHANGELOG.md](CHANGELOG.md). Currently **v0.4**.
 
-## 许可
+## License
 
-私有仓。Go2 机器人模型来自 [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie)，
-许可见 `robots/go2/GO2_MODEL_LICENSE`。
+The scene generator, furniture and texture libraries, robot manifest, locomotion policies and
+documentation in this repository are **MIT** licensed (see [LICENSE](LICENSE)).
+
+Third-party assets bundled here keep their own licenses: the Unitree Go2 and G1 models come from
+[MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) under BSD-3-Clause — see
+`robots/go2/GO2_MODEL_LICENSE` and `robots/g1/G1_MODEL_LICENSE`. What we changed in the G1 model
+and why is written up in `robots/g1/G1_MODEL_UPSTREAM.md`.
+
+## Acknowledgments
+
+Unitree Robotics for the Go2 and G1 models · Google DeepMind for
+[MuJoCo](https://mujoco.org) and [Menagerie](https://github.com/google-deepmind/mujoco_menagerie).

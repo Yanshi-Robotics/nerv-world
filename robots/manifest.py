@@ -31,7 +31,13 @@ ROBOTS: dict[str, dict] = {
         # 出生时躯干中心离地多高(m)。太低会把脚嵌进地板、一放开就被接触力弹飞。
         "start_height": 0.445,
         "camera": "head_front",          # 模型里那只前视相机的名字（ANIMA 唯一的眼睛）
-        "chase_body": "base",            # 第三视角跟拍挂在哪个部件上（给人看，ANIMA 看不到）
+        # 第三视角跟拍（给人看的旁观镜头，ANIMA 看不到）：挂在哪个部件上、退多远、抬多高。
+        # ⚠️ **必须按机器人分**：狗站立约 0.4 m、人形 1.38 m，同一组机位对狗偏高、对人形偏低。
+        #    退的距离大致是身长的两三倍、抬的高度大致到身高的一倍半，画面里才既看得清它、
+        #    又看得见它面前那片空间。
+        "chase_body": "base",
+        "chase_back_m": 1.6,             # 退到身后多远（狗矮，退太远就看不清它了）
+        "chase_up_m": 0.7,               # 抬多高（俯角约 24°）
         "policy_dir": "policies/go2-velocity-flat",
         # ⛔ 力矩怎么发：训练侧是**显式 PD** → 部署侧自己算 tau = kp·(q*−q) − kd·qd，
         #    并把模型里的关节阻尼/库仑摩擦清零（那是给"手搓控制器"准备的，训练时不存在）。
@@ -47,6 +53,8 @@ ROBOTS: dict[str, dict] = {
         "start_height": 0.80,
         "camera": "head_front",          # 由 robots/g1/import_from_menagerie.py 装上，眼高约 1.25 m
         "chase_body": "torso_link",
+        "chase_back_m": 2.6,             # 人形高，得退远些才装得下整个人
+        "chase_up_m": 1.7,               # 抬到比头顶略高（俯角约 33°）
         "policy_dir": "policies/g1-29dof-turn",
         # ⛔ 训练侧是 **ImplicitActuator（隐式 PD）** → 部署侧必须把 kd 写进 model.dof_damping
         #    让 MuJoCo 半隐式积分去施加，力矩只发 kp·(q*−q)。

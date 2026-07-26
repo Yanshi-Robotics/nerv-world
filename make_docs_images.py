@@ -5,7 +5,7 @@
 地板换石材）就全过时，而且没人记得当初相机在哪。机位写进代码 = 图和场景永远对得上。
 
 用法：
-    python make_docs_images.py            # 全出，写到 ../docs/images/
+    python make_docs_images.py            # 全出，写到 docs/images/
     python make_docs_images.py A1 E1      # 只出指定的几张
 
 两类镜头：
@@ -28,10 +28,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # 差别只在里面站着谁；这些图要么关掉天花板俯视、要么是机器人视角（各用各的相机）。
 SCENE_FOR = lambda robot: os.path.join(HERE, f"house-{robot}.xml")
 SCENE = SCENE_FOR("go2")
-OUT_DIR = os.path.join(os.path.dirname(HERE), "docs", "images")
+# ⚠️ 写到**本仓**的 docs/images。2026-07-26 场景目录扁平化时这里没跟着改（还是
+#    os.path.dirname(HERE)，那是场景还在 domus01/ 子目录时的写法），结果配图被写到了
+#    仓库外面的上一级目录去——脚本照常打印"完成"，README 的图却一张没更新。
+#    教训：目录一动，所有 ".." 都要重新数一遍。
+OUT_DIR = os.path.join(HERE, "docs", "images")
 
-DOG_EYE = 0.50      # 四足机器狗头部相机的高度(m)——"狗视角"那几张用它
-HUMAN_EYE = 1.55    # 人/人形机器人的视线高度(m)——对照用
+# ⚠️ 这两个高度必须和 robots/manifest.py 里那两台机器人**实际**的相机高度对得上，
+#    不然配图说"人形看到的"其实是个不存在的机位（v0.3 之前这里写 1.55 m，
+#    那是还没有真人形时随手定的；真 G1 装上相机后实测眼高 1.25 m，已改）。
+DOG_EYE = 0.38      # 四足机器狗头部相机的实际高度(m)
+HUMAN_EYE = 1.25    # 人形 G1 头部相机的实际高度(m)，装在 torso_link 上
 
 # ── 俯视镜头：(编号, 文件名, 看向哪, 视野距离m, 说明) ──
 TOPDOWN = [
@@ -52,7 +59,7 @@ EYE = [
     ("G3", "G3-狗视角-厨房门口.png", (4.5, -1.6), DOG_EYE, 206, "站在门口望进中厨"),
     ("G4", "G4-狗视角-窗外城市.png", (7.0, 8.6), DOG_EYE, 90, "客厅落地窗，窗外是城市"),
     ("G5", "G5-狗视角-过道.png", (-3.0, -1.5), DOG_EYE, 90, "过道，两侧开着各房间的门"),
-    ("H1", "H1-人形视角-中厨.png", (3.0, -5.2), HUMAN_EYE, 190, "同一间中厨，人形视线高度"),
+    ("H1", "H1-人形视角-中厨.png", (3.0, -5.2), HUMAN_EYE, 190, "同一间中厨，人形眼高"),
 ]
 
 
