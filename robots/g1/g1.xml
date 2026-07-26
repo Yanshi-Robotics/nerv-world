@@ -1,7 +1,7 @@
 <!-- 本文件由 import_from_menagerie.py 从 MuJoCo Menagerie 的 unitree_g1 生成，请勿手改。
      改了什么、为什么改，见那个脚本的文件头。上游许可见同目录 G1_MODEL_LICENSE。-->
 <mujoco model="g1_29dof_rev_1_0">
-  <compiler angle="radian" meshdir="../robots/g1/meshes"/>
+  <compiler angle="radian" meshdir="robots/g1/meshes"/>
 
   <option integrator="implicitfast"/>
 

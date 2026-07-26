@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把宇树 G1（29 自由度）从 MuJoCo Menagerie 导进 Domus —— 可重跑，别手改产物。
+"""把宇树 G1（29 自由度）从 MuJoCo Menagerie 导进 alice-house —— 可重跑，别手改产物。
 
 **为什么要有这个脚本**：上游模型不能原样用，得改三处。改动写成代码而不是手改文件，
 是为了说清楚"我们到底动了上游什么"，以及上游更新时能一键重来。
@@ -16,7 +16,7 @@
    装在 `torso_link` 上（跟着腰转，和真人一样），高度按站立时约 1.25 m 定。
 
 3. **不用改 geom 分组**（记在这儿免得下次又去查）：上游已经是 menagerie 惯例——
-   视觉 group 2、碰撞 group 3，和 Domus 房子用的 0（结构家具）/1（天花板）不冲突。
+   视觉 group 2、碰撞 group 3，和房子用的 0（结构家具）/1（天花板）不冲突。
    世界侧的激光测距靠这个分组把"射线打到墙"和"射线打到自己胳膊"分开，撞上就拒绝启动。
 
 上游来源与许可：MuJoCo Menagerie 的 `unitree_g1`（BSD-3-Clause，见同目录 G1_MODEL_LICENSE）。
@@ -84,8 +84,8 @@ def main() -> int:
             print(f"⚠️ 没找到 body «{CAM_BODY}»，相机没装上。上游结构变了，拒绝产出半成品。")
             return 1
 
-    # ③ meshdir：产物被 house-g1.xml 从 domus01/ 里 include，路径要能从那儿找到
-    s = s.replace('meshdir="assets"', 'meshdir="../robots/g1/meshes"')
+    # ③ meshdir：产物被仓根的 house-g1.xml include，路径要从**仓根**算起（不是从本目录）
+    s = s.replace('meshdir="assets"', 'meshdir="robots/g1/meshes"')
     s = ('<!-- 本文件由 import_from_menagerie.py 从 MuJoCo Menagerie 的 unitree_g1 生成，请勿手改。\n'
          '     改了什么、为什么改，见那个脚本的文件头。上游许可见同目录 G1_MODEL_LICENSE。-->\n') + s
 

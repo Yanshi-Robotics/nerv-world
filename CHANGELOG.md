@@ -1,6 +1,21 @@
-# Domus Changelog
+# alice-house Changelog
 
 场景资产库的版本记录。**要点：保持简洁，每版只说重点。**（格式参考 [Keep a Changelog](https://keepachangelog.com)）
+
+## [0.4] — 2026-07-26
+
+Main: 开源。改名 **alice-house**（Alice 是这一系列里第一号机器人，这是她的房子），
+采用 MIT 许可，场景目录扁平化。
+
+Features:
+
+1. **MIT 开源**：顶层 `LICENSE`；仓里的宇树 Go2 / G1 模型来自 MuJoCo Menagerie，
+   保留各自的 BSD-3-Clause 许可，来源与"我们改了上游什么"都已入库。
+2. **改名 Domus → alice-house**，README 重写成对外口径（不再讲 ANIMA/SOMA 内部体系）。
+3. **不再分场景目录**：`domus01/` 的内容全部上移到仓根。原来的设计是 `Domus01/Domus02…`
+   多套户型并列，现在的方向是**一个世界里有多个地方**（房子 → 以后可能是一座岛，
+   上面有房子、山路、码头），所以先扁平化，等真要加地方时再按"地方"组织。
+   顺带修掉两处路径：机器人 XML 的 `meshdir` 从仓根算起，`make_house.py` 加载清单的路径同改。
 
 ## [0.3] — 2026-07-26
 
@@ -19,7 +34,7 @@ Features:
    站立 1.38 m，同一间屋子和四足狗看到的完全不是一回事。
 3. **一台机器人一份场景**：`make_house.py --robot <key>` 产出 `house-go2.xml` / `house-g1.xml`
    （机器人的网格路径在 MJCF 编译期就定死，两台塞不进同一份模型）。
-   顺带去掉了 `domus01/` 下那两个 symlink（`assets` / `go2.xml`）——只能挂一台机器人，
+   顺带去掉了场景目录下那两个 symlink（`assets` / `go2.xml`）——只能挂一台机器人，
    第二台一来就撞名；改成各机器人 XML 自己声明 meshdir。
 4. **出生高度移出场景**：`layout.py` 只留"这套房子里从哪儿开始"（x/y 与朝向），
    出生高度是机器人的事（狗 0.445 m、人形 0.80 m），进清单。
@@ -54,7 +69,7 @@ Features:
 
 ## [0.1] — 2026-07-25
 
-Main: 建库。首个场景 **Domus01**——参照真实豪宅大平层户型图复刻的三室两厅双卫，
+Main: 建库（当时叫 Domus）。首个场景——参照真实豪宅大平层户型图复刻的三室两厅双卫，
 12 个空间 364 ㎡，供四足机器狗做室内导航与房间识别。
 
 Features:

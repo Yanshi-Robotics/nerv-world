@@ -1,4 +1,4 @@
-"""Domus 里有哪些机器人 —— 换身体要知道的全部事实，收在这一处。
+"""alice-house 里有哪些机器人 —— 换身体要知道的全部事实，收在这一处。
 
 **这里只放"这台机器人是什么"（资产事实），不放"我打算怎么开它"（控制参数）。**
 判据：换个消费方（换个世界、换个任务）还成立的，是事实，放这里；
@@ -9,17 +9,17 @@
 在这儿再抄一份就成了"改一处忘另一处"的隐患。这里只放契约里**没有**的：
 模型文件在哪、出生多高、相机叫什么、力矩怎么发。
 
-场景（房间矩形、出生点在哪）住在各场景的 `layout.py`；机器人住这里——
-因为同一台机器人可以放进 Domus01、Domus02……，而出生点是每套房子各自的事。
+场景（房间矩形、出生点在哪）住在仓根的 `layout.py`；机器人住这里——
+因为同一台机器人可以放进任何一个场景，而出生点是每个场景各自的事。
 
 加一台新机器人：往 `ROBOTS` 里**追加**一条（⛔ 追加不替换），把下面每个字段都填对，
-再跑一次 `domus01/make_house.py --robot <key>`。
+再跑一次 `make_house.py --robot <key>`。
 """
 from __future__ import annotations
 
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # Domus 仓根
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # alice-house 仓根
 
 
 ROBOTS: dict[str, dict] = {
@@ -27,7 +27,7 @@ ROBOTS: dict[str, dict] = {
     "go2": {
         "label": "四足机器狗（宇树 Go2）",
         "xml": "robots/go2/go2.xml",
-        "meshdir": "../robots/go2/meshes",
+        "meshdir": "robots/go2/meshes",
         # 出生时躯干中心离地多高(m)。太低会把脚嵌进地板、一放开就被接触力弹飞。
         "start_height": 0.445,
         "camera": "head_front",          # 模型里那只前视相机的名字（ANIMA 唯一的眼睛）
@@ -42,7 +42,7 @@ ROBOTS: dict[str, dict] = {
     "g1": {
         "label": "人形机器人（宇树 G1，29 自由度）",
         "xml": "robots/g1/g1.xml",
-        "meshdir": "../robots/g1/meshes",
+        "meshdir": "robots/g1/meshes",
         # 训练侧默认根高（contract.json 的 default_root_pos_w[2]）。站立总高实测 1.379 m。
         "start_height": 0.80,
         "camera": "head_front",          # 由 robots/g1/import_from_menagerie.py 装上，眼高约 1.25 m
@@ -68,5 +68,5 @@ def get(key: str) -> dict:
 
 
 def path(key: str, field: str) -> str:
-    """把清单里的相对路径拼成绝对路径（相对 Domus 仓根）。"""
+    """把清单里的相对路径拼成绝对路径（相对仓根）。"""
     return os.path.join(ROOT, get(key)[field])

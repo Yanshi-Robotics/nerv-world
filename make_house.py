@@ -11,7 +11,7 @@
 
 **一台机器人一份场景文件**：机器人的网格路径（meshdir）在编译期就定死了，
 两台机器人塞不进同一份 MJCF。所以按机器人各生成一份，谁也不挤谁。
-机器人清单见 `../robots/manifest.py`。
+机器人清单见 `robots/manifest.py`。
 
 用法：
     python make_house.py                 # 全部机器人各生成一份
@@ -29,9 +29,9 @@ import os
 import layout as L
 
 # 机器人清单住在仓根的 robots/manifest.py（跨场景共用），按路径加载——
-# domus01 不是包、上一级也不是，import 不到，只能这么来。
+# 仓根不是包，import 不到，只能按路径加载。
 _spec = importlib.util.spec_from_file_location(
-    "domus_robots", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "alice_robots", os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  "robots", "manifest.py"))
 ROBOTS = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(ROBOTS)
 
@@ -353,9 +353,9 @@ def build(robot_key: str) -> str:
     parts.append(f'<mujoco model="sim_house_nav_{robot_key}">')
     parts.append('  <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->')
     parts.append(f'  <!-- 机器人：{r["label"]}（清单见 ../robots/manifest.py） -->')
-    # 机器人的 XML 与网格都住在 ../robots/<key>/，从这里按相对路径 include。
+    # 机器人的 XML 与网格都住在 robots/<key>/，从这里按相对路径 include。
     # meshdir 由机器人自己的 XML 声明（导入脚本写好的），这里不重复声明、免得两处打架。
-    parts.append(f'  <include file="../robots/{robot_key}/{os.path.basename(r["xml"])}"/>')
+    parts.append(f'  <include file="robots/{robot_key}/{os.path.basename(r["xml"])}"/>')
     parts.append('')
     # ⚠️ 必须显式声明场景尺度：MuJoCo 默认按模型包围盒自动算 extent，而我们为了"窗外有风景"
     # 加了 60m 草地和几十米高的远楼，包围盒被撑到几十米 → 近裁剪面(znear ∝ extent)跟着变大，

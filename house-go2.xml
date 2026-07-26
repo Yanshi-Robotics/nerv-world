@@ -1,7 +1,7 @@
-<mujoco model="sim_house_nav_g1">
+<mujoco model="sim_house_nav_go2">
   <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->
-  <!-- 机器人：人形机器人（宇树 G1，29 自由度）（清单见 ../robots/manifest.py） -->
-  <include file="../robots/g1/g1.xml"/>
+  <!-- 机器人：四足机器狗（宇树 Go2）（清单见 ../robots/manifest.py） -->
+  <include file="robots/go2/go2.xml"/>
 
   <statistic center="0 -1 1" extent="6"/>
 

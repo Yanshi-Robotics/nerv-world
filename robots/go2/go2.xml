@@ -1,7 +1,7 @@
 <mujoco model="go2">
-  <compiler angle="radian" meshdir="../robots/go2/meshes" autolimits="true"/>
-  <!-- meshdir 相对**主模型文件**（domus01/house-go2.xml）解析，所以写成从场景目录回指的相对路径。
-       以前靠 domus01/assets 这个 symlink 兜着，两台机器人就撞名了（都想叫 assets）。-->
+  <compiler angle="radian" meshdir="robots/go2/meshes" autolimits="true"/>
+  <!-- meshdir 相对**主模型文件**（仓根的 house-go2.xml）解析，所以从仓根算起。
+       以前靠一个叫 assets 的 symlink 兜着，两台机器人就撞名了（都想叫 assets）。-->
 
   <option cone="elliptic" impratio="100"/>
 
