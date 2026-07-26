@@ -24,7 +24,10 @@ from PIL import Image
 import layout as L
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SCENE = os.path.join(HERE, "house.xml")
+# 场景按机器人分了两份（house-go2.xml / house-g1.xml）。出配图用哪份都行——房子是同一间，
+# 差别只在里面站着谁；这些图要么关掉天花板俯视、要么是机器人视角（各用各的相机）。
+SCENE_FOR = lambda robot: os.path.join(HERE, f"house-{robot}.xml")
+SCENE = SCENE_FOR("go2")
 OUT_DIR = os.path.join(os.path.dirname(HERE), "docs", "images")
 
 DOG_EYE = 0.50      # 四足机器狗头部相机的高度(m)——"狗视角"那几张用它
@@ -61,7 +64,7 @@ def _model_with_camera(pos, yaw_deg: float):
     cam = (f'<camera name="probe" pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}" '
            f'xyaxes="{right[0]:.6f} {right[1]:.6f} 0 0 0 1"/>')
     src = open(SCENE, encoding="utf-8").read().replace("</worldbody>", f"  {cam}\n</worldbody>")
-    tmp = os.path.join(HERE, "_docs_probe.xml")   # 必须与 house.xml 同目录，贴图相对路径才对
+    tmp = os.path.join(HERE, "_docs_probe.xml")   # 必须与 house-*.xml 同目录，贴图相对路径才对
     open(tmp, "w", encoding="utf-8").write(src)
     try:
         return mujoco.MjModel.from_xml_path(tmp)

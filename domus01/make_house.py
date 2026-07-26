@@ -1,26 +1,39 @@
 #!/usr/bin/env python3
-"""由 layout.py 生成屋子场景 house.xml（MJCF）。
+"""由 layout.py 生成屋子场景 house-<机器人>.xml（MJCF）。
 
 照搬 locomotion 仓 scenes/mujoco/make_building.py 的思路：几何不在 XML 里手写，
 而是从**一份布局定义**翻译出来——改屋子只改 layout.py，场景与世界服务同时生效。
 
-产物 house.xml = 完整可跑模型：
-  三间屋（地板 / 带门窗洞的墙 / 门框窗框 / 家具 / 灯）
+产物 house-<机器人>.xml = 完整可跑模型：
+  十二个空间（地板 / 带门窗洞的墙 / 门框窗框 / 家具 / 灯）
   + 屋外景色（草地、树、远处楼房，从窗口望得见）
-  + `<include>` 进来的 Go2（带头部前视相机）
+  + `<include>` 进来的那台机器人（带头部前视相机）
+
+**一台机器人一份场景文件**：机器人的网格路径（meshdir）在编译期就定死了，
+两台机器人塞不进同一份 MJCF。所以按机器人各生成一份，谁也不挤谁。
+机器人清单见 `../robots/manifest.py`。
 
 用法：
-    python make_house.py            # 生成到同目录 house.xml
-    python make_house.py 输出.xml    # 指定输出
+    python make_house.py                 # 全部机器人各生成一份
+    python make_house.py --robot g1      # 只生成人形那份
+    python make_house.py --robot go2 --out 别处.xml
 
 ⚠️ 单位换算只在这里做一次：layout.py 写的是**全长**，MJCF 的 box/cylinder size 要**半长**。
 """
 from __future__ import annotations
 
+import argparse
+import importlib.util
 import os
-import sys
 
 import layout as L
+
+# 机器人清单住在仓根的 robots/manifest.py（跨场景共用），按路径加载——
+# domus01 不是包、上一级也不是，import 不到，只能这么来。
+_spec = importlib.util.spec_from_file_location(
+    "domus_robots", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                 "robots", "manifest.py"))
+ROBOTS = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(ROBOTS)
 
 # 离屏渲染缓冲上限（决定最大可渲染分辨率）。留足 1080p，够出写真与报告插图。
 OFFSCREEN_W, OFFSCREEN_H = 1920, 1080
@@ -334,11 +347,15 @@ def _outdoor() -> list[str]:
 
 
 # ---------------------------------------------------------------------- 组装
-def build() -> str:
+def build(robot_key: str) -> str:
+    r = ROBOTS.get(robot_key)
     parts: list[str] = []
-    parts.append('<mujoco model="sim_house_nav">')
+    parts.append(f'<mujoco model="sim_house_nav_{robot_key}">')
     parts.append('  <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->')
-    parts.append('  <include file="go2.xml"/>')
+    parts.append(f'  <!-- 机器人：{r["label"]}（清单见 ../robots/manifest.py） -->')
+    # 机器人的 XML 与网格都住在 ../robots/<key>/，从这里按相对路径 include。
+    # meshdir 由机器人自己的 XML 声明（导入脚本写好的），这里不重复声明、免得两处打架。
+    parts.append(f'  <include file="../robots/{robot_key}/{os.path.basename(r["xml"])}"/>')
     parts.append('')
     # ⚠️ 必须显式声明场景尺度：MuJoCo 默认按模型包围盒自动算 extent，而我们为了"窗外有风景"
     # 加了 60m 草地和几十米高的远楼，包围盒被撑到几十米 → 近裁剪面(znear ∝ extent)跟着变大，
@@ -384,16 +401,30 @@ def build() -> str:
     return "\n".join(parts) + "\n"
 
 
+def scene_filename(robot_key: str) -> str:
+    """这台机器人对应的场景文件名。世界服务按同样的规则去找，两边别各写各的。"""
+    return f"house-{robot_key}.xml"
+
+
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--robot", default="", help=f"只生成这一台（{'/'.join(ROBOTS.ROBOTS)}）；不给=全部")
+    ap.add_argument("--out", default="", help="指定输出文件（只在 --robot 指定单台时有意义）")
+    args = ap.parse_args()
     here = os.path.dirname(os.path.abspath(__file__))
-    out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "house.xml")
-    xml = build()
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(xml)
+    keys = [args.robot] if args.robot else list(ROBOTS.ROBOTS)
+    if args.out and len(keys) != 1:
+        ap.error("--out 只能配合 --robot 用（一次只写一个文件）")
+
     area = sum((r["rect"][2] - r["rect"][0]) * (r["rect"][3] - r["rect"][1]) for r in L.ROOMS.values())
-    print(f"生成 {out_path}")
-    print(f"  {len(L.ROOMS)} 个空间（净面积 {area:.0f} ㎡）、{xml.count('<geom ')} 个 geom、"
-          f"{len(L.FURNITURE)} 件家具")
+    for key in keys:
+        out_path = args.out or os.path.join(here, scene_filename(key))
+        xml = build(key)
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(xml)
+        print(f"生成 {out_path}  ← {ROBOTS.get(key)['label']}")
+        print(f"  {len(L.ROOMS)} 个空间（净面积 {area:.0f} ㎡）、{xml.count('<geom ')} 个 geom、"
+              f"{len(L.FURNITURE)} 件家具")
     print(f"  {len(L.DOORS)} 处门/通道、{len(L.WINDOWS)} 扇窗、层高 {L.WALL_HEIGHT}m（已封天花板）")
     print(f"  屋外 {len(L.TREES)} 棵树、{len(L.BUILDINGS)} 栋远楼")
 

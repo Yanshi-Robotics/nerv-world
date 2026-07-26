@@ -15,6 +15,15 @@
 |---|---|---|---|
 | **Domus01** | 大平层三室两厅双卫 | 12 个空间 / 364 ㎡ | 参照真实豪宅户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离 |
 
+### 现有机器人
+
+| 编号 | 本体 | 眼高 | 说明 |
+|---|---|---|---|
+| **go2** | 宇树 Go2 四足机器狗 | ~0.38 m | 头部前视相机；平地速度策略 |
+| **g1** | 宇树 G1 人形（29 自由度） | ~1.25 m | 站立 1.38 m；头部相机装在躯干上、下俯 10° |
+
+同一间屋子在这两双眼睛里差别很大——这正是场景**按真实做、不为某一种机器人定制**的理由。
+
 ### Domus01 空间构成
 
 主卫（独立浴缸）· 衣帽间 · 小孩房（含卫浴）· 主卧 · 过道 · 客卫 · 次卧 ·
@@ -117,10 +126,14 @@ domus01/          场景本体
   layout.py         ⭐ 布局单一真相源（房间矩形/门窗/家具/窗外景物）
   furniture.py      参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
   make_textures.py  程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-  make_house.py     布局 → house.xml（MJCF）
-  house.xml         生成产物
+  make_house.py     布局 + 机器人 → house-<机器人>.xml（MJCF）
+  house-go2.xml     生成产物（四足机器狗那份）
+  house-g1.xml      生成产物（人形那份）
   textures/         生成的贴图
-robots/go2/       宇树 Go2 模型（含头部前视相机）
+robots/
+  manifest.py       ⭐ 机器人清单单一真相源（模型/出生高度/相机/策略/力矩怎么发）
+  go2/              宇树 Go2 模型（含头部前视相机）
+  g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
 policies/         训练好的运动策略（ONNX + 契约）
 ```
 
@@ -128,11 +141,27 @@ policies/         训练好的运动策略（ONNX + 契约）
 
 ```bash
 cd domus01
-python make_textures.py     # 贴图（改了纹理才需要重跑）
-python make_house.py        # 布局 → house.xml
+python make_textures.py         # 贴图（改了纹理才需要重跑）
+python make_house.py            # 每台机器人各生成一份场景
+python make_house.py --robot g1 # 只生成人形那份
 ```
 
 依赖：`mujoco` · `numpy` · `pillow`
+
+## 一台机器人一份场景
+
+`house-go2.xml` / `house-g1.xml` 是同一间屋子、不同的住客。为什么不合成一份：
+机器人的网格路径在 MJCF 编译期就定死了，两台塞不进同一个模型。
+
+**机器人清单 `robots/manifest.py` 是「这台机器人是什么」的单一真相源**——模型在哪、
+出生多高、相机叫什么、力矩怎么发。加一台新的就往里追加一条，再跑一次生成器。
+
+⚠️ 清单里**不重复**策略契约（`contract.json`）已有的东西（关节顺序、增益、观测格式、
+控制周期）——那些的真相源是契约，抄两份必然对不上。清单只放契约里没有的。
+
+⛔ **两台机器人的力矩发法是相反的**，写在清单的 `pd_mode` 里，搞反了当场倒：
+Go2 训练侧是显式 PD（部署器自己算 −kd·qd、模型阻尼清零），
+G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一项）。
 
 ## 加一个新场景
 
@@ -143,7 +172,7 @@ python make_house.py        # 布局 → house.xml
 
 ## 版本
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.2**。
+见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.3**。
 
 ## 许可
 
