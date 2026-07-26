@@ -143,7 +143,7 @@ python make_house.py        # 布局 → house.xml
 
 ## 版本
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.1**。
+见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.2**。
 
 ## 许可
 
