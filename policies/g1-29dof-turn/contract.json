@@ -1,0 +1,313 @@
+{
+  "generated_utc": "2026-07-26T10:50:43+00:00",
+  "task": "Unitree-G1-29dof-Velocity-Turn",
+  "policy": "/home/jeff/unitree_rl_lab/logs/rsl_rl/unitree_g1_29dof_velocity_turn/2026-07-26_03-26-09_b4-turn-s42//exported/policy.onnx",
+  "vx": 0.6,
+  "joint_names": [
+    "left_hip_pitch_joint",
+    "right_hip_pitch_joint",
+    "waist_yaw_joint",
+    "left_hip_roll_joint",
+    "right_hip_roll_joint",
+    "waist_roll_joint",
+    "left_hip_yaw_joint",
+    "right_hip_yaw_joint",
+    "waist_pitch_joint",
+    "left_knee_joint",
+    "right_knee_joint",
+    "left_shoulder_pitch_joint",
+    "right_shoulder_pitch_joint",
+    "left_ankle_pitch_joint",
+    "right_ankle_pitch_joint",
+    "left_shoulder_roll_joint",
+    "right_shoulder_roll_joint",
+    "left_ankle_roll_joint",
+    "right_ankle_roll_joint",
+    "left_shoulder_yaw_joint",
+    "right_shoulder_yaw_joint",
+    "left_elbow_joint",
+    "right_elbow_joint",
+    "left_wrist_roll_joint",
+    "right_wrist_roll_joint",
+    "left_wrist_pitch_joint",
+    "right_wrist_pitch_joint",
+    "left_wrist_yaw_joint",
+    "right_wrist_yaw_joint"
+  ],
+  "default_joint_pos": [
+    -0.10000000149011612,
+    -0.10000000149011612,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.30000001192092896,
+    0.30000001192092896,
+    0.30000001192092896,
+    0.30000001192092896,
+    -0.20000000298023224,
+    -0.20000000298023224,
+    0.25,
+    -0.25,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.9700000286102295,
+    0.9700000286102295,
+    0.15000000596046448,
+    -0.15000000596046448,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "default_root_pos_w": [
+    0.0,
+    0.0,
+    0.800000011920929
+  ],
+  "obs_terms": [
+    {
+      "term": "base_ang_vel",
+      "dim_with_history": 15
+    },
+    {
+      "term": "projected_gravity",
+      "dim_with_history": 15
+    },
+    {
+      "term": "velocity_commands",
+      "dim_with_history": 15
+    },
+    {
+      "term": "joint_pos_rel",
+      "dim_with_history": 145
+    },
+    {
+      "term": "joint_vel_rel",
+      "dim_with_history": 145
+    },
+    {
+      "term": "last_action",
+      "dim_with_history": 145
+    }
+  ],
+  "obs_dim": 480,
+  "history_length": 5,
+  "term_scales": {
+    "base_ang_vel": 0.2,
+    "projected_gravity": 1.0,
+    "velocity_commands": 1.0,
+    "joint_pos_rel": 1.0,
+    "joint_vel_rel": 0.05,
+    "last_action": 1.0
+  },
+  "action": {
+    "scale": 0.25,
+    "dim": 29
+  },
+  "timing": {
+    "policy_dt_s": 0.02,
+    "physics_dt_s": 0.005,
+    "decimation": 4
+  },
+  "actuators": {
+    "N7520-14.3": {
+      "joint_names": [
+        "left_hip_pitch_joint",
+        "right_hip_pitch_joint",
+        "waist_yaw_joint",
+        "left_hip_yaw_joint",
+        "right_hip_yaw_joint"
+      ],
+      "stiffness": [
+        100.0,
+        100.0,
+        200.0,
+        100.0,
+        100.0
+      ],
+      "damping": [
+        2.0,
+        2.0,
+        5.0,
+        2.0,
+        2.0
+      ],
+      "effort_limit": [
+        88.0,
+        88.0,
+        88.0,
+        88.0,
+        88.0
+      ],
+      "armature": [
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    "N7520-22.5": {
+      "joint_names": [
+        "left_hip_roll_joint",
+        "right_hip_roll_joint",
+        "left_knee_joint",
+        "right_knee_joint"
+      ],
+      "stiffness": [
+        100.0,
+        100.0,
+        150.0,
+        150.0
+      ],
+      "damping": [
+        2.0,
+        2.0,
+        4.0,
+        4.0
+      ],
+      "effort_limit": [
+        139.0,
+        139.0,
+        139.0,
+        139.0
+      ],
+      "armature": [
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    "N5020-16": {
+      "joint_names": [
+        "waist_roll_joint",
+        "waist_pitch_joint",
+        "left_shoulder_pitch_joint",
+        "right_shoulder_pitch_joint",
+        "left_ankle_pitch_joint",
+        "right_ankle_pitch_joint",
+        "left_shoulder_roll_joint",
+        "right_shoulder_roll_joint",
+        "left_ankle_roll_joint",
+        "right_ankle_roll_joint",
+        "left_shoulder_yaw_joint",
+        "right_shoulder_yaw_joint",
+        "left_elbow_joint",
+        "right_elbow_joint",
+        "left_wrist_roll_joint",
+        "right_wrist_roll_joint"
+      ],
+      "stiffness": [
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0
+      ],
+      "damping": [
+        5.0,
+        5.0,
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "effort_limit": [
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0
+      ],
+      "armature": [
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    },
+    "W4010-25": {
+      "joint_names": [
+        "left_wrist_pitch_joint",
+        "right_wrist_pitch_joint",
+        "left_wrist_yaw_joint",
+        "right_wrist_yaw_joint"
+      ],
+      "stiffness": [
+        40.0,
+        40.0,
+        40.0,
+        40.0
+      ],
+      "damping": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "effort_limit": [
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "armature": [
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582,
+        0.009999999776482582
+      ]
+    }
+  }
+}
