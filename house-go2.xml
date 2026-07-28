@@ -22,6 +22,7 @@
     <texture type="2d" name="tex_marble_dark" file="textures/marble_dark.png"/>
     <texture type="2d" name="tex_marble_warm" file="textures/marble_warm.png"/>
     <texture type="2d" name="tex_marble_grey" file="textures/marble_grey.png"/>
+    <texture type="2d" name="tex_marble_greige" file="textures/marble_greige.png"/>
     <texture type="2d" name="tex_carpet" file="textures/carpet.png"/>
     <texture type="2d" name="tex_fabric" file="textures/fabric.png"/>
     <texture type="2d" name="tex_fabric_blue" file="textures/fabric_blue.png"/>
@@ -41,6 +42,7 @@
     <material name="mat_marble_dark" texture="tex_marble_dark" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
     <material name="mat_marble_warm" texture="tex_marble_warm" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
     <material name="mat_marble_grey" texture="tex_marble_grey" texrepeat="2 2" specular="0.45" shininess="0.7" reflectance="0.15"/>
+    <material name="mat_marble_greige" texture="tex_marble_greige" texrepeat="2 2" specular="0.2" shininess="0.35" reflectance="0.04"/>
     <material name="mat_carpet" texture="tex_carpet" texrepeat="4 4" specular="0.02" shininess="0.05" reflectance="0.0"/>
     <material name="mat_fabric" texture="tex_fabric" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
     <material name="mat_fabric_blue" texture="tex_fabric_blue" texrepeat="6 6" specular="0.05" shininess="0.1" reflectance="0.0"/>
@@ -651,7 +653,7 @@
     <geom name="furn_lplant_leaf_c" type="sphere" size="0.2" pos="8.72 3.54 0.85" rgba="0.22 0.43 0.24 1"/>
 
     <!-- ===== 玄关 ===== -->
-    <geom name="entry_floor" type="box" size="2.75 2.5 0.025" pos="6.75 -0.5 -0.025" material="mat_marble"/>
+    <geom name="entry_floor" type="box" size="2.75 2.5 0.025" pos="6.75 -0.5 -0.025" material="mat_marble_greige"/>
     <geom name="entry_ceiling" type="box" size="2.75 2.5 0.05" pos="6.75 -0.5 3.05" rgba="0.95 0.95 0.93 1" group="1"/>
     <geom name="entry_ws0" type="box" size="2.75 0.07 1.5" pos="6.75 -2.93 1.5" material="mat_wall"/>
     <geom name="entry_wn0" type="box" size="0.65 0.07 1.5" pos="4.65 1.93 1.5" material="mat_wall"/>

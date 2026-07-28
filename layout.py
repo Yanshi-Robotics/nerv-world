@@ -116,7 +116,8 @@ ROOMS: dict[str, dict] = {
     "entry": {                                                 # ④ 入户玄关
         "rect": (4.0, -3.0, 9.5, 2.0), "label": "玄关",         # 5.5 × 5.0 = 27.5㎡
         "wall_rgba": (0.85, 0.80, 0.73, 1.0), "floor_rgba": (0.72, 0.70, 0.67, 1.0),
-        "floor_mat": "mat_marble", "wall_mat": "mat_wall",
+        # 地面原用近白 marble，俯拍+顶光下整片过曝发白（2026-07-28 Jeff 提出）→ 换深一档的灰米石材
+        "floor_mat": "mat_marble_greige", "wall_mat": "mat_wall",
     },
     "laundry": {                                               # ⑧ 洗衣
         "rect": (4.0, -7.0, 9.5, -3.0), "label": "洗衣房",      # 5.5 × 4.0 = 22㎡

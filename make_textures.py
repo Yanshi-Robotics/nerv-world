@@ -229,6 +229,9 @@ def main() -> None:
     # 各房间本来就不会铺一模一样的石头）
     _save("marble_warm.png", marble(base=(226, 214, 196)))   # 暖米色 → 厨房
     _save("marble_grey.png", marble(base=(196, 200, 205)))   # 冷灰色 → 卫生间
+    # 玄关地面专用：近白的 marble 在第三人称俯拍 + 顶光下整片过曝发白（2026-07-28 Jeff 提出），
+    # 换成明显更深的灰米色石材；亮度压到中间调，俯拍不再过曝。
+    _save("marble_greige.png", marble(base=(172, 162, 148)))
     _save("carpet.png", carpet())
     _save("fabric.png", fabric())
     _save("fabric_blue.png", fabric(base=(104, 118, 140)))
