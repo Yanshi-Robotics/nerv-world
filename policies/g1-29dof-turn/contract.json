@@ -1,7 +1,7 @@
 {
   "generated_utc": "2026-07-26T10:50:43+00:00",
-  "task": "Unitree-G1-29dof-Velocity-Turn",
-  "policy": "/home/jeff/unitree_rl_lab/logs/rsl_rl/unitree_g1_29dof_velocity_turn/2026-07-26_03-26-09_b4-turn-s42//exported/policy.onnx",
+  "task": "Unitree-G1-29dof-Velocity-TurnAligned",
+  "policy": "/home/jeff/unitree_rl_lab/logs/rsl_rl/unitree_g1_29dof_velocity_turnaligned/2026-07-27_07-41-40_s2e5-aligned-s42/exported/policy.onnx",
   "vx": 0.6,
   "joint_names": [
     "left_hip_pitch_joint",
@@ -309,5 +309,16 @@
         0.009999999776482582
       ]
     }
+  },
+  "layout_carryover": {
+    "dumped_from_task": "Unitree-G1-29dof-Velocity-Turn",
+    "dumped_utc": "2026-07-26T10:50:43+00:00",
+    "why_valid": "TurnAligned 由 Turn → TurnDeadband → TurnAligned 继承而来，三层改的全是【命令采样】与【奖励表】，overlay 里的 _align_to_upstream() 只碰 cfg.rewards；观测项/关节顺序/默认站姿/缩放/增益/时序一个字未改，因此本文件的布局字段原样有效。",
+    "evidence": [
+      "Normal 档契约与 Turn 档契约除 task/policy/generated_utc 外逐位相同（实测 diff）",
+      "对齐策略已用同一份布局在 MuJoCo 里跑出 299° 且步态健康——布局错会像 2026-07-24 那样约 1 秒倒",
+      "换装后 alice-house 官方工装 test_walk.py 直走 3.09 m / 原地转 149°，两项均通过"
+    ],
+    "note": "若日后改了观测项、关节集合或缩放，必须用 dump_contract.py 重新导出，不能再沿用。"
   }
 }
