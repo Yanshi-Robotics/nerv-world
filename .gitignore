@@ -1,3 +1,8 @@
+# Agent working notes (local only — not part of the open-source repo).
+# ⛔ AGENTS.md is NOT here on purpose: it is the public, machine-facing entry point and is tracked.
+CLAUDE.md
+.claude/
+
 __pycache__/
 *.pyc
 .venv/

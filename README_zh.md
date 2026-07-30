@@ -4,6 +4,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.4-lightgrey?style=flat-square)](CHANGELOG.md)
 
+> 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
+> 这个仓是什么、每个事实住在哪、入口命令、以及红线。
+
 **一套用代码生成的室内仿真场景，带两台宇树机器人和训练好的运动策略——克隆下来就能让它们在屋里真的迈腿走路。**
 
 **Alice 的房子**——一套**用代码生成**的室内场景，让机器人在里面看、走、找东西、干活。

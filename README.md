@@ -4,6 +4,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.4-lightgrey?style=flat-square)](CHANGELOG.md)
 
+> 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
+> what this repo is, where each fact lives, the entry commands, and the red lines.
+
 **A procedurally generated indoor simulation scene, shipped with two Unitree robots and trained locomotion policies — clone it and they actually walk around the house.**
 
 **Alice's house** — an indoor scene generated entirely from code, for robots to look around in, walk through, search, and work in.
