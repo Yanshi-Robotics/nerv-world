@@ -9,3 +9,10 @@ __pycache__/
 preview/
 output/
 .DS_Store
+
+# Scratch + stray runtime logs. NOTE: scenes/**/output/ are deliverables and stay tracked;
+# only the bare temp/ scratch dir and MuJoCo's stray log are ignored here.
+temp/
+MUJOCO_LOG.TXT
+node_modules/
+.pytest_cache/
