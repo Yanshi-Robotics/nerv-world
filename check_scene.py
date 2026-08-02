@@ -214,6 +214,60 @@ def check_walkable(key: str, layout) -> list[str]:
     return errs
 
 
+def check_egress(key: str, layout) -> list[str]:
+    """⭐ 下了楼梯之后，能不能走出去 —— 上一项只沿梯段探，探不到这一段。
+
+    真实经历（2026-08-02）：上层楼梯井整层写了 `no_floor`，梯段本身四跑全通、
+    自检全绿，但人爬到二层落点脚下是空的，当场掉回一层。
+    **"梯段是通的"和"上去之后站得住"是两件事。**
+
+    做法：从每一跑的终点起，朝出口方向每 5 cm 探一次脚下，要求
+    一路有实地、且高度不掉下去（容差一个踢面）。
+    """
+    stairs = getattr(layout, "STAIRS", [])
+    if not stairs:
+        return []
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+
+    errs: list[str] = []
+    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    m = mujoco.MjModel.from_xml_path(path)
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    rise = layout.STEP_RISE
+
+    # 每层的到达点 = 那一层最后一跑的终点；出口 = 该层楼梯间朝外的门
+    for floor in range(1, layout.N_FLOORS):
+        arriving = [f for f in stairs
+                    if abs(f["base_z"] + f["steps"] * rise - layout.FLOOR_Z(floor)) < 1e-3]
+        if not arriving:
+            _fail(errs, f"{floor} 层没有任何一跑楼梯到达 —— 这层上不去")
+            continue
+        flight = arriving[0]
+        dx, dy = flight["dir"]
+        ex = flight["start_xy"][0] + dx * flight["steps"] * layout.STEP_RUN
+        ey = flight["start_xy"][1] + dy * flight["steps"] * layout.STEP_RUN
+        # 沿最后一跑的前进方向再往前走 1.2 m（人形转身+迈出所需）
+        z_from = layout.FLOOR_Z(floor) + 0.40
+        bad = 0
+        for i in range(1, 25):
+            px, py = ex + dx * i * 0.05, ey + dy * i * 0.05
+            gid = np.zeros(1, dtype=np.int32)
+            dist = mujoco.mj_ray(m, d, np.array([px, py, z_from]),
+                                 np.array([0.0, 0.0, -1.0]), None, 1, -1, gid)
+            z = None if dist < 0 else z_from - dist
+            if z is None or z < layout.FLOOR_Z(floor) - rise:
+                bad += 1
+        if bad:
+            _fail(errs, f"{floor} 层到达点前方 1.2 m 内有 {bad}/24 个采样点脚下没有实地 —— "
+                        f"上来就踩空，需要一块到达平台（floor_rects）")
+    return errs
+
+
 CHECKS = [
     ("layout 契约完整", check_contract),
     ("产物能被 MuJoCo 加载", check_loads),
@@ -221,6 +275,7 @@ CHECKS = [
     ("楼梯几何可走", check_stairs),   # 同一函数，报告里分两行更好读
     ("门宽够机器人过", check_doors),
     ("楼梯全程可走（射线实测）", check_walkable),
+    ("下梯之后站得住、走得出", check_egress),
 ]
 
 

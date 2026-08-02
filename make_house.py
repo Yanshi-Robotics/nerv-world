@@ -196,17 +196,33 @@ def _zbase(room_key: str) -> float:
     return float(floor_z(L.ROOMS[room_key].get("floor", 0)))
 
 
-def _floor_geom(room_key: str) -> str:
-    """这间屋的地板。声明了 `no_floor` 的不出地板 —— 楼梯井上方就是这样：
+def _floor_geom(room_key: str) -> list[str]:
+    """这间屋的地板（可能不止一块）。声明了 `no_floor` 的不出地板 —— 楼梯井上方就是这样：
     铺了地板就把上楼的口封死，而且从截图上完全看不出来（只有沿梯打射线才发现）。"""
     room = L.ROOMS[room_key]
+    # ⛔ 两者互斥，同时写就报错。第一版是"no_floor 先判、直接早退"，于是同时写了
+    #    floor_rects 的房间被**静默忽略**——三层的到达平台就这么消失了，而当时
+    #    自检还是绿的。宁可启动即失败，也不要一个写了却不生效的声明。
+    if room.get("no_floor") and room.get("floor_rects"):
+        raise ValueError(
+            f"房间 {room_key!r} 同时写了 no_floor 与 floor_rects——"
+            "要么整层不铺，要么只铺这几块，不能既又。")
     if room.get("no_floor"):
-        return ""
-    x0, y0, x1, y1 = room["rect"]
-    return _box(f"{room_key}_floor",
-                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, _zbase(room_key) - _half(L.FLOOR_THICK)),
-                (x1 - x0, y1 - y0, L.FLOOR_THICK), room["floor_rgba"],
-                mat=room.get("floor_mat", ""))
+        return []
+    zb = _zbase(room_key) - _half(L.FLOOR_THICK)
+    mat, rgba = room.get("floor_mat", ""), room["floor_rgba"]
+    # `floor_rects` = 只在这些矩形上铺地板（局部楼板）。楼梯井的上层就是这样：
+    # 梯段升上来的地方必须空着，而下梯之后要有一块落脚平台，否则人上来就踩空。
+    rects = room.get("floor_rects")
+    if rects is None:
+        rects = [room["rect"]]
+    out = []
+    for i, (x0, y0, x1, y1) in enumerate(rects):
+        suffix = "" if len(rects) == 1 else f"{i}"
+        out.append(_box(f"{room_key}_floor{suffix}",
+                        ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zb),
+                        (x1 - x0, y1 - y0, L.FLOOR_THICK), rgba, mat=mat))
+    return out
 
 
 def _furniture_geom(item: dict) -> str:
@@ -498,9 +514,7 @@ def build(robot_key: str) -> str:
     parts.append('')
     for key in L.ROOMS:
         parts.append(f'    <!-- ===== {L.ROOMS[key]["label"]} ===== -->')
-        floor_geom = _floor_geom(key)
-        if floor_geom:
-            parts.append(floor_geom)
+        parts.extend(_floor_geom(key))
         ceiling_geom = _ceiling_geom(key)
         if ceiling_geom:
             parts.append(ceiling_geom)

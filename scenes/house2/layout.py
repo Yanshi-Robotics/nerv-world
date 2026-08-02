@@ -127,10 +127,12 @@ ROOMS: dict[str, dict] = {
         "rect": (STAIR_X0, STAIR_Y0, STAIR_X1, STAIR_Y1), "label": "二层楼梯间", "floor": 1,
         "wall_rgba": (0.84, 0.82, 0.79, 1.0), "floor_rgba": (0.70, 0.62, 0.50, 1.0),
         "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-        # ⛔ 梯井竖着通：不铺地（下面的楼梯要上来）、不封顶（自己的楼梯要上去）。
-        # 两个键成对，少一个就从一头被堵死，而且从截图上完全看不出来。
-        "no_floor": True,
+        # ⛔ 梯井竖着通：不封顶（自己的楼梯要上去）。
+        # 地板只铺**到达平台**那一块——整层不铺的话，人从下面爬上来脚下是空的，
+        # 当场掉回一层；整层都铺又把下面的梯段封死。所以是局部楼板。
+        # 平台范围见文件末的 _LANDING_RECT 推导。
         "no_ceiling": True,
+        "floor_rects": None,   # 在文件末按几何算出来后回填
     },
     # ═══ 2 层：阁楼工作间 / 储藏 ═══
     "studio": {
@@ -147,7 +149,9 @@ ROOMS: dict[str, dict] = {
         "rect": (STAIR_X0, STAIR_Y0, STAIR_X1, STAIR_Y1), "label": "三层楼梯间", "floor": 2,
         "wall_rgba": (0.84, 0.82, 0.79, 1.0), "floor_rgba": (0.70, 0.62, 0.50, 1.0),
         "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-        "no_floor": True,
+        # 同 stair_f1：只铺到达平台，其余留空给下面的梯段升上来。
+        "no_ceiling": True,
+        "floor_rects": None,   # 文件末回填
     },
 }
 
@@ -160,17 +164,16 @@ DOORS: list[dict] = [
     # 0 层
     {"orient": "v", "coord": -1.5, "center": -2.0, "width": 1.30, "note": "门厅-厨房"},
     {"orient": "h", "coord": 0.6, "center": -3.5, "width": 1.60, "kind": "open", "note": "门厅-客厅"},
-    {"orient": "h", "coord": 0.6, "center": 4.3, "width": 1.40, "kind": "open", "note": "厨房-楼梯间"},
-    {"orient": "v", "coord": 2.6, "center": 2.5, "width": 1.20, "note": "客厅-楼梯间"},
+    # ⭐ 楼梯间的门必须**对准梯段**：0 层的门对着上行跑的起步位，走进去就能上；
+    #    上层的门对着到达平台。第一版门开在 x=4.3 与梯段侧面，进门要横着挪才上得去。
+    {"orient": "h", "coord": 0.6, "center": 3.34, "width": 1.20, "kind": "open", "note": "厨房-楼梯间（对准上行跑）"},
     # 1 层
     {"orient": "v", "coord": -1.5, "center": -2.0, "width": 1.30, "note": "书房-卫生间"},
     {"orient": "h", "coord": 0.6, "center": -3.5, "width": 1.60, "kind": "open", "note": "书房-主卧"},
-    {"orient": "h", "coord": 0.6, "center": 4.3, "width": 1.40, "kind": "open", "note": "卫生间-楼梯间"},
-    {"orient": "v", "coord": 2.6, "center": 2.5, "width": 1.20, "note": "主卧-楼梯间"},
+    {"orient": "h", "coord": 0.6, "center": 4.90, "width": 1.20, "kind": "open", "note": "卫生间-楼梯间（对准到达平台）"},
     # 2 层
     {"orient": "h", "coord": 0.6, "center": -3.5, "width": 1.60, "kind": "open", "note": "储藏-工作间"},
-    {"orient": "h", "coord": 0.6, "center": 4.3, "width": 1.40, "kind": "open", "note": "储藏-楼梯间"},
-    {"orient": "v", "coord": 2.6, "center": 2.5, "width": 1.20, "note": "工作间-楼梯间"},
+    {"orient": "h", "coord": 0.6, "center": 4.90, "width": 1.20, "kind": "open", "note": "储藏-楼梯间（对准到达平台）"},
 ]
 
 # 门框 / 窗框 / 画框（纯视觉，让洞口看起来是"一扇门"而不是墙上一个豁口）
@@ -261,6 +264,26 @@ for _f in range(N_FLOORS - 1):                        # 0→1、1→2 各一组
                 _base + _HALF_RISE - 0.05),
         "size": (_DOWN_X - _UP_X + STEP_WIDTH, _LANDING_DEPTH, 0.10),
     })
+
+# ── 上层楼梯井的「到达平台」（局部楼板）────────────────────────────────
+# 人从下面的回头跑爬上来，落点在回头跑的**南端**；那里必须有一块实地，
+# 而且要一路连到出门口，否则上来即踩空。反过来，梯段升上来的地方绝不能铺板。
+#
+# 可铺范围 = 楼梯井净空里，既不被上行跑占、也不被回头跑与休息平台占的那块：
+#   上行跑   x∈[_IN_X0, _IN_X0+W]        y∈[_IN_Y0, _LANDING_Y0]
+#   休息平台 x∈[_IN_X0, _IN_X1]          y∈[_LANDING_Y0, _IN_Y1]
+#   回头跑   x∈[_IN_X1-W, _IN_X1]        y∈[_DOWN_END, _IN_Y1]
+# 剩下的就是 x∈[_IN_X0+W, _IN_X1]、y∈[_IN_Y0, _DOWN_END] 这一块，
+# 它同时挨着回头跑的落点（东侧）和下一段上行跑的起步位（西侧）——
+# 所以上来能落脚、能往外走、也能接着往上爬。
+_DOWN_END = _IN_Y1 - _FLIGHT_LEN                      # 回头跑南端 = 到达点
+_LANDING_RECT = (_IN_X0 + STEP_WIDTH, _IN_Y0, _IN_X1, _DOWN_END)
+
+assert _LANDING_RECT[2] - _LANDING_RECT[0] >= 0.9, "到达平台太窄，站不下人形"
+assert _LANDING_RECT[3] - _LANDING_RECT[1] >= 0.9, "到达平台太浅，站不下人形"
+
+for _k in ("stair_f1", "stair_f2"):
+    ROOMS[_k]["floor_rects"] = [_LANDING_RECT]
 
 # ────────────────────────────────────────────────────────── 家具
 # ⚠️ z 写的是**该楼层内的高度**（桌面 0.75 就是 0.75），生成器加楼层基面。

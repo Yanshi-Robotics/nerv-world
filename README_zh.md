@@ -2,17 +2,21 @@
 
 # alice-house · 给机器人住的房子
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.4-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.6-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
 > 这个仓是什么、每个事实住在哪、入口命令、以及红线。
 
-**一套用代码生成的室内仿真场景，带两台宇树机器人和训练好的运动策略——克隆下来就能让它们在屋里真的迈腿走路。**
+**用代码生成的室内仿真场景，带两台宇树机器人和训练好的运动策略——克隆下来就能让它们真的迈腿走路，连爬楼梯也算。**
 
 **Alice 的房子**——一套**用代码生成**的室内场景，让机器人在里面看、走、找东西、干活。
 
-几何一行都不手写：房间、门窗、家具、贴图全部由 `layout.py` 这一份布局定义生成。
-想改屋子就改布局、重跑生成器；场景和使用它的程序读同一份真相源，不会两处坐标打架。
+几何一行都不手写：房间、门窗、楼梯、家具、贴图全部由每个地方自己的那份布局定义
+（`scenes/<名字>/layout.py`）生成。想改屋子就改它的布局、重跑生成器；场景和使用它的程序
+读同一份真相源，不会两处坐标打架。
+
+目前有**两个地方**——一套单层大平层，一栋带楼梯的三层小楼——同一台机器人可以放进任何一个。
+「有哪些地方」和「有哪些身体」是两份独立清单，生成时交叉组合。
 
 配套还带**机器人**（宇树 Go2 四足、宇树 G1 人形）和训练好的**运动策略**——
 克隆下来就能让它们在屋里真的迈腿走路，不是瞬移。
@@ -38,9 +42,12 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 
 ## 里面有什么
 
-| 户型 | 规模 | 说明 |
-|---|---|---|
-| 大平层三室两厅双卫 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离 |
+### 现有场景
+
+| key | 户型 | 规模 | 为什么有它 |
+|---|---|---|---|
+| **house1** | 大平层三室两厅双卫，单层 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离。全屋无高差 |
+| **house2** | 门厅/客厅/厨房、主卧/书房/卫生间、阁楼工作间/储藏，**三层** | 11 个空间 / 324 ㎡ | 为高差建的。人形的爬楼、跨层导航、以及「摔在楼梯上」这类真实失败模式，在平地上一个都测不到 |
 
 ### 现有机器人
 
@@ -61,7 +68,7 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 关掉天花板俯视，可以看清整套动线：西侧是主卧套间与小孩房（静区），一条过道横贯东西，
 东侧是客厅、玄关与服务区（动区）。
 
-![户型俯视图](docs/images/A1-户型俯视图.png)
+![户型俯视图](docs/images/house1/A1-户型俯视图.png)
 
 ### 公共区
 
@@ -69,21 +76,43 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 
 | 客餐打通 | 客厅 |
 |---|---|
-| ![客餐厅打通](docs/images/B1-客餐厅打通.png) | ![客厅](docs/images/B2-客厅.png) |
+| ![客餐厅打通](docs/images/house1/B1-客餐厅打通.png) | ![客厅](docs/images/house1/B2-客厅.png) |
 
 ### 居室与服务区
 
 | 主卧 | 主卫（独立浴缸） |
 |---|---|
-| ![主卧](docs/images/C1-主卧.png) | ![主卫](docs/images/C3-主卫+浴缸.png) |
+| ![主卧](docs/images/house1/C1-主卧.png) | ![主卫](docs/images/house1/C3-主卫+浴缸.png) |
 
 | 小孩房 | 中厨 |
 |---|---|
-| ![小孩房](docs/images/D1-小孩房.png) | ![中厨](docs/images/E1-中厨.png) |
+| ![小孩房](docs/images/house1/D1-小孩房.png) | ![中厨](docs/images/house1/E1-中厨.png) |
 
 中厨这张值得多看一眼：橱柜沿西墙一字排开（洗碗机·水槽·灶台·烤箱），储物高柜与冰箱贴北墙，
 中间整条是通行区。**这是 2026-07-25 重排过的**——之前鞋帽间的整墙柜横在房间正中还堵着门，
 把 45 ㎡ 切成三块，机器狗钻进 54 cm 的缝里就出不来。
+
+### house2 — 三层楼与那道楼梯
+
+![三层外景](docs/images/house2/X1-整栋外景.png)
+
+楼梯就是这栋楼存在的理由。每层两跑成 U 形，中间一个半层高的休息平台，
+上到头有一小块实心的到达平台。
+
+| 进门正对梯段 | 踩在梯段中间，看休息平台 |
+|---|---|
+| ![梯段起步](docs/images/house2/S1-底层望向楼梯.png) | ![梯段中部](docs/images/house2/S2-站在上行梯段中间.png) |
+
+| 休息平台回望 | 二层到达平台 |
+|---|---|
+| ![休息平台](docs/images/house2/S3-休息平台回望.png) | ![到达平台](docs/images/house2/S4-二层到达平台.png) |
+
+楼梯间的门是**对着梯段**开的：进门就正对台阶，不用横着挪。
+上面两层的梯井除了那块到达平台之外不铺地板——梯段升上来的地方留空，落脚的地方是实的。
+
+| 一层 | 二层 | 三层 |
+|---|---|---|
+| ![客厅](docs/images/house2/R1-底层客厅.png) | ![主卧](docs/images/house2/R2-二层主卧.png) | ![工作间](docs/images/house2/R3-三层工作间.png) |
 
 ### 机器人视角
 
@@ -93,11 +122,11 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 
 | 出生在玄关 | 客厅（正对电视墙） | 过道 |
 |---|---|---|
-| ![玄关](docs/images/G1-狗视角-出生在玄关.png) | ![客厅](docs/images/G2-狗视角-看电视.png) | ![过道](docs/images/G5-狗视角-过道.png) |
+| ![玄关](docs/images/house1/G1-狗视角-出生在玄关.png) | ![客厅](docs/images/house1/G2-狗视角-看电视.png) | ![过道](docs/images/house1/G5-狗视角-过道.png) |
 
 | 站在门口望进中厨 | 窗外的城市 | 人形视线高度看同一间中厨 |
 |---|---|---|
-| ![厨房门口](docs/images/G3-狗视角-厨房门口.png) | ![窗外](docs/images/G4-狗视角-窗外城市.png) | ![人形视角](docs/images/H1-人形视角-中厨.png) |
+| ![厨房门口](docs/images/house1/G3-狗视角-厨房门口.png) | ![窗外](docs/images/house1/G4-狗视角-窗外城市.png) | ![人形视角](docs/images/house1/H1-人形视角-中厨.png) |
 
 > 「站在门口望进中厨」这张就是实测里 ANIMA 宣布「已到厨房」时看到的画面——
 > 吊柜、深色台面、不锈钢洗碗机门、右侧落地冰箱都在画面里。
@@ -162,7 +191,7 @@ robots/
   go2/              宇树 Go2 模型（含头部前视相机）
   g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
 policies/           训练好的运动策略（ONNX + 契约）
-docs/images/        README 配图
+docs/images/house1/        README 配图
 ```
 
 ## 快速开始
@@ -172,29 +201,39 @@ git clone https://github.com/jeffliulab/alice-house.git
 cd alice-house
 pip install mujoco numpy pillow
 
-# 看一眼这间屋子（场景已经生成好了，直接就能开）
-python -m mujoco.viewer --mjcf=house-go2.xml     # 四足机器狗那份
-python -m mujoco.viewer --mjcf=house-g1.xml      # 人形那份
+# 看一眼（场景已经生成好了，直接就能开）
+python -m mujoco.viewer --mjcf=house1-go2.xml    # 单层大平层，四足那份
+python -m mujoco.viewer --mjcf=house2-g1.xml     # 三层小楼带楼梯，人形那份
 ```
 
 改了屋子要重新生成：
 
 ```bash
-python make_textures.py         # 贴图（改了纹理才需要重跑）
-python make_house.py            # 每台机器人各生成一份场景
-python make_house.py --robot g1 # 只生成人形那份
-python make_docs_images.py      # 重出 README 配图
+python make_textures.py                        # 贴图（只在改过贴图时要跑）
+python make_house.py                           # 全场景 × 全机器人
+python make_house.py --scene house2 --robot g1 # 只出三层楼的人形那份
+python check_scene.py                          # ⭐ 生成之后必跑
+ALICE_SCENE=house2 python make_docs_images.py  # 重出配图
 ```
+
+`check_scene.py` 不是走过场。它把每份产物真的用 MuJoCo 编译一遍，然后**沿楼梯打射线**，
+确认机器人真能走上去——不能有断口、不能有超过一个踢面的落差、上到头要有实地落脚。
+它查的是**产物**不是布局里的**声明**：开发过程中布局声明了梯井是通的、生成器却静默忽略，
+梯井被楼板封死，而当时那版只查声明的检查报的是绿。
 
 想让机器人**真的走起来**：`policies/` 下是训练好的 ONNX 策略，配 `contract.json`
 （关节顺序、增益、观测格式全在里面）。喂它速度指令 `(vx, vy, wz)`，它吐关节目标角度。
 一个跑通的部署器可以参考 [anima-zero](https://github.com/jeffliulab/anima-zero)
 的 `world/sim-house-nav/sim.py`。
 
-## 一台机器人一份场景
+## 一个「场景 × 机器人」一份文件
 
-`house-go2.xml` / `house-g1.xml` 是同一间屋子、不同的住客。为什么不合成一份：
-机器人的网格路径在 MJCF 编译期就定死了，两台塞不进同一个模型。
+`house1-go2.xml`、`house2-g1.xml`……每个组合各一份。为什么不合成一份：
+机器人的网格路径在 MJCF 编译期就定死了，两台塞不进同一个模型，两个场景同理。
+
+**「有哪些地方」和「有哪些身体」是两份独立清单**（`scenes/manifest.py` 与 `robots/manifest.py`），
+生成时交叉组合。同一台 G1 两栋楼都能进，同一栋楼两台机器人都能住。
+产物文件名的规则住在 `scenes/manifest.py`，消费方调它而不是自己再拼一份——改名不会两边脱节。
 
 **机器人清单 `robots/manifest.py` 是「这台机器人是什么」的单一真相源**——模型在哪、
 出生多高、相机叫什么、力矩怎么发。加一台新的就往里追加一条，再跑一次生成器。
@@ -208,8 +247,17 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 
 ## 改屋子 / 加新地方
 
-改 `layout.py` 里的房间矩形、门窗、家具，重跑生成器即可。构件库（家具/贴图）直接复用。
-想加**别的地方**（山路、码头……）也走同一套：新写一份布局定义，生成器不用动。
+改 `scenes/<名字>/layout.py` 里的房间矩形、门窗、家具，重跑生成器，**再跑 `check_scene.py`**。
+构件库（家具/贴图）直接复用。
+
+加**新地方**＝往 `scenes/manifest.py` 追加一条 + 写 `scenes/<key>/layout.py`，生成器不用动。
+多层场景在平面模型之上只多三样：每间屋一个 `floor` 键、一个 `FLOOR_Z(n)`、一份 `STAIRS`；
+外加两个把竖井打通的键——下面几层 `no_ceiling`，上面几层 `floor_rects`（只铺到达平台，
+梯段升上来的地方留空）。
+
+⚠️ **楼梯尺寸是算出来的，不是选出来的。** 层高从楼梯反推（`STOREY_H = 2 × 级数 × 踢面`），
+绝不反过来——两者各自定死，顶步就会悬在半空，前作正是这样，直到滚球验证才发现。
+踏面取 0.30 m 是因为 G1 脚长约 0.25 m，0.26 m 只剩一厘米余量，盲走策略必然踩空。
 
 ---
 

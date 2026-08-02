@@ -2,16 +2,23 @@
 
 # alice-house · A House for Robots to Live In
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.4-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.6-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
 > what this repo is, where each fact lives, the entry commands, and the red lines.
 
-**A procedurally generated indoor simulation scene, shipped with two Unitree robots and trained locomotion policies — clone it and they actually walk around the house.**
+**Procedurally generated indoor scenes, shipped with two Unitree robots and trained locomotion policies — clone it and they actually walk around, up the stairs included.**
 
 **Alice's house** — an indoor scene generated entirely from code, for robots to look around in, walk through, search, and work in.
 
-Not one line of geometry is hand-written: rooms, doors, windows, furniture and textures all come out of a single layout definition (`layout.py`). Change the house by changing the layout and re-running the generator; the scene and whatever consumes it read the same source of truth, so coordinates can never disagree in two places.
+Not one line of geometry is hand-written: rooms, doors, windows, stairs, furniture and textures all
+come out of one layout definition per place (`scenes/<name>/layout.py`). Change a house by changing
+its layout and re-running the generator; the scene and whatever consumes it read the same source of
+truth, so coordinates can never disagree in two places.
+
+There are **two places** so far — a single-floor apartment and a three-storey house with stairs —
+and one robot can be dropped into either. Scenes and robots are two independent registries that get
+crossed at generation time.
 
 It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their trained **locomotion policies** — so they really take steps, they don't teleport.
 
@@ -33,9 +40,12 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 
 ## What's Inside
 
-| Layout | Size | Notes |
-|---|---|---|
-| 3 bedrooms, 2 living areas, 2 baths (single floor) | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens |
+### Places
+
+| Key | Layout | Size | Why it exists |
+|---|---|---|---|
+| **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
+| **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 324 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
 
 ### Robots
 
@@ -58,7 +68,7 @@ Ceiling hidden, viewed from above — you can read the whole circulation: the ma
 kid's room (quiet zone) sit west, a corridor runs east-west, and the living room, entry and
 service rooms (active zone) sit east.
 
-![Floor plan](docs/images/A1-户型俯视图.png)
+![Floor plan](docs/images/house1/A1-户型俯视图.png)
 
 ### Common Areas
 
@@ -67,23 +77,46 @@ and acts as a soft divider — the way open-plan apartments usually do it.
 
 | Living-dining opened up | Living room |
 |---|---|
-| ![Living-dining](docs/images/B1-客餐厅打通.png) | ![Living room](docs/images/B2-客厅.png) |
+| ![Living-dining](docs/images/house1/B1-客餐厅打通.png) | ![Living room](docs/images/house1/B2-客厅.png) |
 
 ### Bedrooms & Service Rooms
 
 | Master bedroom | Master bath (freestanding tub) |
 |---|---|
-| ![Master bedroom](docs/images/C1-主卧.png) | ![Master bath](docs/images/C3-主卫+浴缸.png) |
+| ![Master bedroom](docs/images/house1/C1-主卧.png) | ![Master bath](docs/images/house1/C3-主卫+浴缸.png) |
 
 | Kid's room | Chinese kitchen |
 |---|---|
-| ![Kid's room](docs/images/D1-小孩房.png) | ![Kitchen](docs/images/E1-中厨.png) |
+| ![Kid's room](docs/images/house1/D1-小孩房.png) | ![Kitchen](docs/images/house1/E1-中厨.png) |
 
 The kitchen shot is worth a second look: the counter run goes along the west wall
 (dishwasher · sink · stove · oven), tall storage and the fridge sit against the north wall,
 and the middle is left clear to walk through. **This was re-laid out on 2026-07-25** — before
 that, a full-height cabinet wall sat in the middle of the room and blocked a door, cutting
 45 m² into three pieces; the robot dog would crawl into a 54 cm gap and get stuck.
+
+### house2 — Three Storeys and a Staircase
+
+![Three-storey exterior](docs/images/house2/X1-整栋外景.png)
+
+The staircase is the reason this place exists. Two flights per storey in a U, a half-landing
+between them, and a small solid platform where you step off at the top.
+
+| Straight at the flight, from the door | Mid-flight, looking at the half-landing |
+|---|---|
+| ![Foot of the stairs](docs/images/house2/S1-底层望向楼梯.png) | ![Mid-flight](docs/images/house2/S2-站在上行梯段中间.png) |
+
+| Half-landing, looking back down | Arrival platform on floor 1 |
+|---|---|
+| ![Half-landing](docs/images/house2/S3-休息平台回望.png) | ![Arrival](docs/images/house2/S4-二层到达平台.png) |
+
+The door into the stairwell is aligned with the flight on purpose: walk in and you are already
+facing the steps, no sidestep. Above, the shaft has no floor except that arrival platform — open
+where the flights come up, solid where you land.
+
+| Ground floor | Floor 1 | Floor 2 |
+|---|---|---|
+| ![Living room](docs/images/house2/R1-底层客厅.png) | ![Bedroom](docs/images/house2/R2-二层主卧.png) | ![Attic studio](docs/images/house2/R3-三层工作间.png) |
 
 ### Through the Robot's Eyes
 
@@ -93,11 +126,11 @@ height** (1.25 m, the G1's actual camera height) for comparison.
 
 | Spawned in the entry | Living room (facing the TV wall) | Corridor |
 |---|---|---|
-| ![Entry](docs/images/G1-狗视角-出生在玄关.png) | ![Living room](docs/images/G2-狗视角-看电视.png) | ![Corridor](docs/images/G5-狗视角-过道.png) |
+| ![Entry](docs/images/house1/G1-狗视角-出生在玄关.png) | ![Living room](docs/images/house1/G2-狗视角-看电视.png) | ![Corridor](docs/images/house1/G5-狗视角-过道.png) |
 
 | Looking into the kitchen from the door | The city outside | Same kitchen, humanoid eye height |
 |---|---|---|
-| ![Kitchen door](docs/images/G3-狗视角-厨房门口.png) | ![Outside](docs/images/G4-狗视角-窗外城市.png) | ![Humanoid view](docs/images/H1-人形视角-中厨.png) |
+| ![Kitchen door](docs/images/house1/G3-狗视角-厨房门口.png) | ![Outside](docs/images/house1/G4-狗视角-窗外城市.png) | ![Humanoid view](docs/images/house1/H1-人形视角-中厨.png) |
 
 ### How the Screenshots Are Made
 
@@ -167,7 +200,7 @@ robots/
   go2/              Unitree Go2 model (with head camera)
   g1/               Unitree G1 humanoid, 29 dof (imported from Menagerie by import_from_menagerie.py)
 policies/           trained locomotion policies (ONNX + contract)
-docs/images/        README screenshots
+docs/images/house1/        README screenshots
 ```
 
 ## Quick Start
@@ -185,21 +218,35 @@ python -m mujoco.viewer --mjcf=house-g1.xml      # with the humanoid
 Re-generate after changing the house:
 
 ```bash
-python make_textures.py         # textures (only needed if you changed them)
-python make_house.py            # one scene per robot
-python make_house.py --robot g1 # humanoid only
-python make_docs_images.py      # re-render the README screenshots
+python make_textures.py                        # textures (only if you changed them)
+python make_house.py                           # every place x every robot
+python make_house.py --scene house2 --robot g1 # just the three-storey house, humanoid
+python check_scene.py                          # ⭐ always run this after generating
+ALICE_SCENE=house2 python make_docs_images.py  # re-render the screenshots
 ```
+
+`check_scene.py` is not a formality. It compiles every product in MuJoCo, then **ray-probes the
+stairs** to confirm a robot can actually walk up them — no gap, no drop bigger than one riser,
+and solid ground where you step off at the top. It checks the *product*, not what the layout
+*claims*: during development the layout declared an open stairwell that the generator silently
+ignored, so the shaft was sealed by a floor slab while the old declaration-based check reported
+green.
 
 To actually **make a robot walk**: `policies/` holds trained ONNX policies with a
 `contract.json` next to each (joint order, gains, observation layout — all of it). Feed a policy
 a velocity command `(vx, vy, wz)` and it returns joint targets. For a working deployer, see
 `world/sim-house-nav/sim.py` in [anima-zero](https://github.com/jeffliulab/anima-zero).
 
-## One Scene per Robot
+## One File per (Place, Robot)
 
-`house-go2.xml` and `house-g1.xml` are the same house with a different occupant. Why not one
-file: a robot's mesh path is baked in at MJCF compile time, so two robots can't share a model.
+`house1-go2.xml`, `house2-g1.xml` … each combination gets its own file. Why not one: a robot's
+mesh path is baked in at MJCF compile time, so two robots cannot share a model, and neither can
+two places.
+
+**Places and robots are two independent registries** — `scenes/manifest.py` and
+`robots/manifest.py` — crossed at generation time. The same G1 walks in either house; the same
+house hosts either robot. The filename rule lives in `scenes/manifest.py` and consumers call it
+rather than re-deriving it, so a rename cannot desynchronise the two sides.
 
 **`robots/manifest.py` is the single source of truth for "what this robot is"** — where the model
 lives, how high it spawns, what the camera is called, how torque is applied. Adding a robot means
@@ -214,11 +261,22 @@ getting it backwards makes the robot fall over immediately. The Go2 was trained 
 (the deployer computes `−kd·qd` itself and zeroes the model's damping); the G1 with implicit PD
 (`kd` goes into `dof_damping` for MuJoCo to apply, and the torque carries only the `kp` term).
 
-## Changing the House / Adding New Places
+## Changing a House / Adding New Places
 
-Edit the room rectangles, doors, windows and furniture in `layout.py` and re-run the generator.
-The part libraries (furniture, textures) are reused as-is. Adding a **different place** (a hillside
-trail, a dock…) works the same way: write another layout definition; the generator doesn't change.
+Edit the room rectangles, doors, windows and furniture in `scenes/<name>/layout.py` and re-run the
+generator, then `check_scene.py`. The part libraries (furniture, textures) are reused as-is.
+
+Adding a **new place** means appending an entry to `scenes/manifest.py` and writing
+`scenes/<key>/layout.py`. The generator does not change. A multi-storey place adds three things
+on top of the flat-scene model — a `floor` key per room, a `FLOOR_Z(n)`, and `STAIRS` — and two
+keys that open the shaft vertically: `no_ceiling` on the lower storeys, `floor_rects` on the upper
+ones so the arrival platform stays solid while the flights below stay open.
+
+⚠️ **Stair dimensions are derived, not chosen.** The storey height comes *out of* the stair
+arithmetic (`STOREY_H = 2 × steps × rise`), never the other way round — set them independently and
+the top step ends up hanging in mid-air, which is exactly what happened in the predecessor project
+and went unnoticed until a ball-roll test. Treads are 0.30 m because a G1 foot is ~0.25 m and 0.26 m
+leaves a one-centimetre margin that a blind policy will miss.
 
 ---
 

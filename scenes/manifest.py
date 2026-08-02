@@ -80,6 +80,28 @@ def load_layout(key: str):
     return mod
 
 
+def load_sibling(key: str, module: str):
+    """加载某个场景目录下的另一个模块（如 `shots`）。
+
+    与 layout 同样处理：临时把仓根塞进 sys.path，因为场景模块会 import 仓根的
+    共用库（furniture 等）。
+    """
+    path = os.path.join(ROOT, os.path.dirname(get(key)["layout"]), f"{module}.py")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"场景 {key!r} 没有 {module}.py（应在 {path}）")
+    spec = importlib.util.spec_from_file_location(f"alice_house_{key}_{module}", path)
+    mod = importlib.util.module_from_spec(spec)
+    injected = ROOT not in sys.path
+    if injected:
+        sys.path.insert(0, ROOT)
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        if injected:
+            sys.path.remove(ROOT)
+    return mod
+
+
 def scene_filename(scene_key: str, robot_key: str) -> str:
     """(场景, 机器人) 对应的产物文件名。
 

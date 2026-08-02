@@ -43,30 +43,14 @@ OUT_DIR = os.path.join(HERE, "docs", "images")
 # ⚠️ 这两个高度必须和 robots/manifest.py 里那两台机器人**实际**的相机高度对得上，
 #    不然配图说"人形看到的"其实是个不存在的机位（v0.3 之前这里写 1.55 m，
 #    那是还没有真人形时随手定的；真 G1 装上相机后实测眼高 1.25 m，已改）。
-DOG_EYE = 0.38      # 四足机器狗头部相机的实际高度(m)
-HUMAN_EYE = 1.25    # 人形 G1 头部相机的实际高度(m)，装在 torso_link 上
+# 镜头清单跟着场景走（scenes/<key>/shots.py）——站在哪、看哪儿只对那一栋楼成立。
+SHOTS = SCENES.load_sibling(SCENE_KEY, "shots")
 
-# ── 俯视镜头：(编号, 文件名, 看向哪, 视野距离m, 说明) ──
-TOPDOWN = [
-    ("A1", "A1-户型俯视图.png", (0.0, 0.0), 30, "整套户型，关掉天花板"),
-    ("E1", "E1-中厨.png", (1.75, -4.0), 12, "中厨：沿墙布置，中间留通行区"),
-    ("B1", "B1-客餐厅打通.png", (2.0, 6.0), 16, "客厅与餐厅之间整面墙拆除"),
-    ("C1", "C1-主卧.png", (-3.0, 6.5), 10, "主卧"),
-    ("C3", "C3-主卫+浴缸.png", (-7.5, 7.2), 9, "主卫：独立浴缸，大理石地"),
-    ("D1", "D1-小孩房.png", (-7.5, -4.5), 14, "小孩房"),
-    ("B2", "B2-客厅.png", (6.7, 6.0), 12, "客厅：转角沙发正对电视墙"),
-]
-
-# ── 站位镜头：(编号, 文件名, 站在哪, 眼高, 朝向角度, 说明) ──
-#    朝向：0=朝 +x(东)，90=朝 +y(北)，180=朝西，270=朝南
-EYE = [
-    ("G1", "G1-狗视角-出生在玄关.png", (7.29, -0.60), DOG_EYE, 181, "出生点，玄关"),
-    ("G2", "G2-狗视角-看电视.png", (6.6, 5.0), DOG_EYE, 170, "客厅，正对电视墙"),
-    ("G3", "G3-狗视角-厨房门口.png", (4.5, -1.6), DOG_EYE, 206, "站在门口望进中厨"),
-    ("G4", "G4-狗视角-窗外城市.png", (7.0, 8.6), DOG_EYE, 90, "客厅落地窗，窗外是城市"),
-    ("G5", "G5-狗视角-过道.png", (-3.0, -1.5), DOG_EYE, 90, "过道，两侧开着各房间的门"),
-    ("H1", "H1-人形视角-中厨.png", (3.0, -5.2), HUMAN_EYE, 190, "同一间中厨，人形眼高"),
-]
+# 产物写到**本仓**的 docs/images/<场景>/。
+# ⚠️ 2026-07-26 场景目录扁平化时这里没跟着改（还是 os.path.dirname(HERE)，那是场景
+#    还在 domus01/ 子目录时的写法），配图被写到了仓库外面——脚本照常打印"完成"，
+#    README 的图却一张没更新。**目录一动，所有 ".." 重新数一遍。**
+OUT_DIR = os.path.join(HERE, "docs", "images", SCENE_KEY)
 
 
 def _model_with_camera(pos, yaw_deg: float):
@@ -102,8 +86,41 @@ def render_topdown(center, dist, w=1000, h=1000):
     return r.render()
 
 
-def render_eye(pos_xy, eye_h, yaw_deg, w=960, h=720):
-    m = _model_with_camera((pos_xy[0], pos_xy[1], eye_h), yaw_deg)
+def _model_looking_at(pos, target):
+    """机位固定、镜头对准某一点。外景用。
+
+    同样走"把 <camera> 插进场景"这条路而不是自由相机的 azimuth/elevation：
+    后者是"绕着目标转"的语义，算错一次相机就跑进墙里或家具肚子里（踩过）。
+    """
+    import numpy as _np
+
+    fwd = _np.array(target, dtype=float) - _np.array(pos, dtype=float)
+    fwd /= _np.linalg.norm(fwd)
+    right = _np.cross(fwd, [0.0, 0.0, 1.0]); right /= _np.linalg.norm(right)
+    up = _np.cross(right, fwd)
+    cam = (f'<camera name="probe" pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}" '
+           f'xyaxes="{right[0]:.6f} {right[1]:.6f} {right[2]:.6f} '
+           f'{up[0]:.6f} {up[1]:.6f} {up[2]:.6f}"/>')
+    src = open(SCENE, encoding="utf-8").read().replace("</worldbody>", f"  {cam}\n</worldbody>")
+    tmp = os.path.join(HERE, "_docs_probe.xml")
+    open(tmp, "w", encoding="utf-8").write(src)
+    try:
+        return mujoco.MjModel.from_xml_path(tmp)
+    finally:
+        os.remove(tmp)
+
+
+def render_exterior(pos, target, w=1280, h=900):
+    m = _model_looking_at(pos, target)
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    r = mujoco.Renderer(m, height=h, width=w)
+    r.update_scene(d, camera="probe")
+    return r.render()
+
+
+def render_eye(pos_xyz, yaw_deg, w=960, h=720):
+    m = _model_with_camera(pos_xyz, yaw_deg)
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
     r = mujoco.Renderer(m, height=h, width=w)
@@ -115,17 +132,22 @@ def main() -> None:
     only = set(sys.argv[1:])
     os.makedirs(OUT_DIR, exist_ok=True)
     print("生成 README 配图 →", OUT_DIR)
-    for tag, fn, center, dist, note in TOPDOWN:
+    for tag, fn, center, dist, note in SHOTS.TOPDOWN:
         if only and tag not in only:
             continue
         Image.fromarray(render_topdown(center, dist)).save(os.path.join(OUT_DIR, fn))
-        print(f"  {tag}  {fn:<28} 俯视 {note}")
-    for tag, fn, xy, eye, yaw, note in EYE:
+        print(f"  {tag}  {fn:<30} 俯视 {note}")
+    for tag, fn, pos, yaw, note in SHOTS.EYE:
         if only and tag not in only:
             continue
-        Image.fromarray(render_eye(xy, eye, yaw)).save(os.path.join(OUT_DIR, fn))
-        print(f"  {tag}  {fn:<28} 眼高{eye:.2f}m 朝{yaw}° {note}")
-    print("完成。改了场景就重跑这个脚本，README 的图不会再过时。")
+        Image.fromarray(render_eye(pos, yaw)).save(os.path.join(OUT_DIR, fn))
+        print(f"  {tag}  {fn:<30} 站 z={pos[2]:.2f}m 朝{yaw}° {note}")
+    for tag, fn, pos, target, note in getattr(SHOTS, "EXTERIOR", []):
+        if only and tag not in only:
+            continue
+        Image.fromarray(render_exterior(pos, target)).save(os.path.join(OUT_DIR, fn))
+        print(f"  {tag}  {fn:<30} 外景 {note}")
+    print(f"完成（场景 {SCENE_KEY}）。改了场景就重跑：ALICE_SCENE=<场景> python make_docs_images.py")
 
 
 if __name__ == "__main__":

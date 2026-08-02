@@ -148,20 +148,7 @@
     <geom name="living_room_wfw0_r" type="box" size="0.085 0.04 0.675" pos="-5.93 3.4 1.625" rgba="0.93 0.93 0.91 1"/>
     <geom name="living_room_wfw0_top" type="box" size="0.085 0.94 0.04" pos="-5.93 2.5 2.3" rgba="0.93 0.93 0.91 1"/>
     <geom name="living_room_wfw0_bot" type="box" size="0.085 0.94 0.04" pos="-5.93 2.5 0.95" rgba="0.93 0.93 0.91 1"/>
-    <geom name="living_room_we0" type="box" size="0.07 0.65 1.325" pos="2.53 1.25 1.325" material="mat_wall"/>
-    <geom name="living_room_we1" type="box" size="0.07 0.7 1.325" pos="2.53 3.8 1.325" material="mat_wall"/>
-    <geom name="living_room_we2" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 2.375" material="mat_wall"/>
-    <geom name="living_room_we3" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 2.375" material="mat_wall"/>
-    <geom name="living_room_we4" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 2.375" material="mat_wall"/>
-    <geom name="living_room_dfe0_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe0_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe0_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe1_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe1_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe1_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe2_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe2_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="living_room_dfe2_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
+    <geom name="living_room_we0" type="box" size="0.07 1.95 1.325" pos="2.53 2.55 1.325" material="mat_wall"/>
     <geom name="furn_h2_sofa_seat" type="box" size="0.475 1.2 0.22" pos="-4.6 2.4 0.22" material="mat_fabric"/>
     <geom name="furn_h2_sofa_back" type="box" size="0.125 1.2 0.33" pos="-5.2 2.4 0.55" material="mat_fabric"/>
     <geom name="furn_h2_tv_console" type="box" size="0.21 1.1 0.26" pos="1.9 2.4 0.26" rgba="0.55 0.42 0.3 1"/>
@@ -196,8 +183,9 @@
     <geom name="kitchen_wfs0_r" type="box" size="0.04 0.085 0.675" pos="3.1 -4.43 1.625" rgba="0.93 0.93 0.91 1"/>
     <geom name="kitchen_wfs0_top" type="box" size="1.14 0.085 0.04" pos="2 -4.43 2.3" rgba="0.93 0.93 0.91 1"/>
     <geom name="kitchen_wfs0_bot" type="box" size="1.14 0.085 0.04" pos="2 -4.43 0.95" rgba="0.93 0.93 0.91 1"/>
-    <geom name="kitchen_wn0" type="box" size="2.55 0.07 1.325" pos="1.05 0.53 1.325" material="mat_tile"/>
-    <geom name="kitchen_wn1" type="box" size="0.5 0.07 1.325" pos="5.5 0.53 1.325" material="mat_tile"/>
+    <geom name="kitchen_wn0" type="box" size="2.12 0.07 1.325" pos="0.62 0.53 1.325" material="mat_tile"/>
+    <geom name="kitchen_wn1" type="box" size="0.18 0.07 1.325" pos="4.12 0.53 1.325" material="mat_tile"/>
+    <geom name="kitchen_wn2" type="box" size="0.25 0.07 1.325" pos="5.75 0.53 1.325" material="mat_tile"/>
     <geom name="kitchen_ww0" type="box" size="0.07 0.925 1.325" pos="-1.43 -3.575 1.325" material="mat_tile"/>
     <geom name="kitchen_ww1" type="box" size="0.07 0.975 1.325" pos="-1.43 -0.375 1.325" material="mat_tile"/>
     <geom name="kitchen_ww2" type="box" size="0.07 0.65 0.275" pos="-1.43 -2 2.375" material="mat_tile"/>
@@ -263,23 +251,11 @@
 
     <!-- ===== 楼梯间 ===== -->
     <geom name="stair_f0_floor" type="box" size="1.7 1.95 0.025" pos="4.3 2.55 -0.025" material="mat_wood_light"/>
-    <geom name="stair_f0_ws0" type="box" size="0.5 0.07 1.325" pos="3.1 0.67 1.325" material="mat_wall"/>
-    <geom name="stair_f0_ws1" type="box" size="0.5 0.07 1.325" pos="5.5 0.67 1.325" material="mat_wall"/>
+    <geom name="stair_f0_ws0" type="box" size="0.07 0.07 1.325" pos="2.67 0.67 1.325" material="mat_wall"/>
+    <geom name="stair_f0_ws1" type="box" size="0.18 0.07 1.325" pos="4.12 0.67 1.325" material="mat_wall"/>
+    <geom name="stair_f0_ws2" type="box" size="0.25 0.07 1.325" pos="5.75 0.67 1.325" material="mat_wall"/>
     <geom name="stair_f0_wn0" type="box" size="1.7 0.07 1.325" pos="4.3 4.43 1.325" material="mat_wall"/>
-    <geom name="stair_f0_ww0" type="box" size="0.07 0.65 1.325" pos="2.67 1.25 1.325" material="mat_wall"/>
-    <geom name="stair_f0_ww1" type="box" size="0.07 0.7 1.325" pos="2.67 3.8 1.325" material="mat_wall"/>
-    <geom name="stair_f0_ww2" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 2.375" material="mat_wall"/>
-    <geom name="stair_f0_ww3" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 2.375" material="mat_wall"/>
-    <geom name="stair_f0_ww4" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 2.375" material="mat_wall"/>
-    <geom name="stair_f0_dfw0_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw0_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw0_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw1_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw1_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw1_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw2_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw2_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 1.05" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f0_dfw2_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 2.1" rgba="0.4 0.29 0.2 1"/>
+    <geom name="stair_f0_ww0" type="box" size="0.07 1.95 1.325" pos="2.67 2.55 1.325" material="mat_wall"/>
     <geom name="stair_f0_we0" type="box" size="0.07 0.65 1.325" pos="5.93 1.25 1.325" material="mat_wall"/>
     <geom name="stair_f0_we1" type="box" size="0.07 0.7 1.325" pos="5.93 3.8 1.325" material="mat_wall"/>
     <geom name="stair_f0_we2" type="box" size="0.07 0.6 0.475" pos="5.93 2.5 0.475" material="mat_wall"/>
@@ -303,20 +279,7 @@
     <geom name="bedroom_wfn0_top" type="box" size="1.54 0.085 0.04" pos="-2 4.43 5.1" rgba="0.93 0.93 0.91 1"/>
     <geom name="bedroom_wfn0_bot" type="box" size="1.54 0.085 0.04" pos="-2 4.43 2.86" rgba="0.93 0.93 0.91 1"/>
     <geom name="bedroom_ww0" type="box" size="0.07 1.95 1.325" pos="-5.93 2.55 4.125" material="mat_wall"/>
-    <geom name="bedroom_we0" type="box" size="0.07 0.65 1.325" pos="2.53 1.25 4.125" material="mat_wall"/>
-    <geom name="bedroom_we1" type="box" size="0.07 0.7 1.325" pos="2.53 3.8 4.125" material="mat_wall"/>
-    <geom name="bedroom_we2" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 5.175" material="mat_wall"/>
-    <geom name="bedroom_we3" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 5.175" material="mat_wall"/>
-    <geom name="bedroom_we4" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 5.175" material="mat_wall"/>
-    <geom name="bedroom_dfe0_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe0_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe0_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe1_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe1_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe1_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe2_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe2_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="bedroom_dfe2_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
+    <geom name="bedroom_we0" type="box" size="0.07 1.95 1.325" pos="2.53 2.55 4.125" material="mat_wall"/>
     <geom name="furn_h2_bed" type="box" size="1.025 0.925 0.28" pos="-4.2 2.6 3.08" material="mat_fabric"/>
     <geom name="furn_h2_bed_head" type="box" size="0.07 0.975 0.55" pos="-5.4 2.6 3.42" rgba="0.55 0.42 0.3 1"/>
     <geom name="furn_h2_wardrobe" type="box" size="0.29 1 1.1" pos="1.9 3.2 3.9" rgba="0.55 0.42 0.3 1"/>
@@ -382,8 +345,9 @@
     <geom name="bathroom_wfs0_r" type="box" size="0.04 0.085 0.675" pos="2.7 -4.43 4.425" rgba="0.93 0.93 0.91 1"/>
     <geom name="bathroom_wfs0_top" type="box" size="0.74 0.085 0.04" pos="2 -4.43 5.1" rgba="0.93 0.93 0.91 1"/>
     <geom name="bathroom_wfs0_bot" type="box" size="0.74 0.085 0.04" pos="2 -4.43 3.75" rgba="0.93 0.93 0.91 1"/>
-    <geom name="bathroom_wn0" type="box" size="2.55 0.07 1.325" pos="1.05 0.53 4.125" material="mat_tile"/>
-    <geom name="bathroom_wn1" type="box" size="0.5 0.07 1.325" pos="5.5 0.53 4.125" material="mat_tile"/>
+    <geom name="bathroom_wn0" type="box" size="2.12 0.07 1.325" pos="0.62 0.53 4.125" material="mat_tile"/>
+    <geom name="bathroom_wn1" type="box" size="0.18 0.07 1.325" pos="4.12 0.53 4.125" material="mat_tile"/>
+    <geom name="bathroom_wn2" type="box" size="0.25 0.07 1.325" pos="5.75 0.53 4.125" material="mat_tile"/>
     <geom name="bathroom_ww0" type="box" size="0.07 0.925 1.325" pos="-1.43 -3.575 4.125" material="mat_tile"/>
     <geom name="bathroom_ww1" type="box" size="0.07 0.975 1.325" pos="-1.43 -0.375 4.125" material="mat_tile"/>
     <geom name="bathroom_ww2" type="box" size="0.07 0.65 0.275" pos="-1.43 -2 5.175" material="mat_tile"/>
@@ -399,23 +363,12 @@
     <geom name="furn_h2_tub" type="box" size="0.85 0.4 0.28" pos="4.4 -3.6 3.08" rgba="0.9 0.9 0.88 1"/>
 
     <!-- ===== 二层楼梯间 ===== -->
-    <geom name="stair_f1_ws0" type="box" size="0.5 0.07 1.325" pos="3.1 0.67 4.125" material="mat_wall"/>
-    <geom name="stair_f1_ws1" type="box" size="0.5 0.07 1.325" pos="5.5 0.67 4.125" material="mat_wall"/>
+    <geom name="stair_f1_floor" type="box" size="0.96 0.61 0.025" pos="4.9 1.35 2.775" material="mat_wood_light"/>
+    <geom name="stair_f1_ws0" type="box" size="0.07 0.07 1.325" pos="2.67 0.67 4.125" material="mat_wall"/>
+    <geom name="stair_f1_ws1" type="box" size="0.18 0.07 1.325" pos="4.12 0.67 4.125" material="mat_wall"/>
+    <geom name="stair_f1_ws2" type="box" size="0.25 0.07 1.325" pos="5.75 0.67 4.125" material="mat_wall"/>
     <geom name="stair_f1_wn0" type="box" size="1.7 0.07 1.325" pos="4.3 4.43 4.125" material="mat_wall"/>
-    <geom name="stair_f1_ww0" type="box" size="0.07 0.65 1.325" pos="2.67 1.25 4.125" material="mat_wall"/>
-    <geom name="stair_f1_ww1" type="box" size="0.07 0.7 1.325" pos="2.67 3.8 4.125" material="mat_wall"/>
-    <geom name="stair_f1_ww2" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 5.175" material="mat_wall"/>
-    <geom name="stair_f1_ww3" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 5.175" material="mat_wall"/>
-    <geom name="stair_f1_ww4" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 5.175" material="mat_wall"/>
-    <geom name="stair_f1_dfw0_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw0_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw0_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw1_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw1_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw1_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw2_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw2_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 3.85" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f1_dfw2_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 4.9" rgba="0.4 0.29 0.2 1"/>
+    <geom name="stair_f1_ww0" type="box" size="0.07 1.95 1.325" pos="2.67 2.55 4.125" material="mat_wall"/>
     <geom name="stair_f1_we0" type="box" size="0.07 0.65 1.325" pos="5.93 1.25 4.125" material="mat_wall"/>
     <geom name="stair_f1_we1" type="box" size="0.07 0.7 1.325" pos="5.93 3.8 4.125" material="mat_wall"/>
     <geom name="stair_f1_we2" type="box" size="0.07 0.6 0.475" pos="5.93 2.5 3.275" material="mat_wall"/>
@@ -439,20 +392,7 @@
     <geom name="studio_wfn0_top" type="box" size="1.74 0.085 0.04" pos="-2 4.43 7.9" rgba="0.93 0.93 0.91 1"/>
     <geom name="studio_wfn0_bot" type="box" size="1.74 0.085 0.04" pos="-2 4.43 5.66" rgba="0.93 0.93 0.91 1"/>
     <geom name="studio_ww0" type="box" size="0.07 1.95 1.325" pos="-5.93 2.55 6.925" material="mat_wall"/>
-    <geom name="studio_we0" type="box" size="0.07 0.65 1.325" pos="2.53 1.25 6.925" material="mat_wall"/>
-    <geom name="studio_we1" type="box" size="0.07 0.7 1.325" pos="2.53 3.8 6.925" material="mat_wall"/>
-    <geom name="studio_we2" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 7.975" material="mat_wall"/>
-    <geom name="studio_we3" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 7.975" material="mat_wall"/>
-    <geom name="studio_we4" type="box" size="0.07 0.6 0.275" pos="2.53 2.5 7.975" material="mat_wall"/>
-    <geom name="studio_dfe0_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe0_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe0_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe1_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe1_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe1_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe2_l" type="box" size="0.085 0.05 1.05" pos="2.53 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe2_r" type="box" size="0.085 0.05 1.05" pos="2.53 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="studio_dfe2_top" type="box" size="0.085 0.65 0.05" pos="2.53 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
+    <geom name="studio_we0" type="box" size="0.07 1.95 1.325" pos="2.53 2.55 6.925" material="mat_wall"/>
     <geom name="furn_h2_studio_desk_top" type="box" size="1 0.4 0.03" pos="-4 2.4 6.35" rgba="0.46 0.33 0.22 1"/>
     <geom name="furn_h2_studio_desk_apron_n" type="box" size="0.92 0.02 0.05" pos="-4 2.74 6.26" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_studio_desk_apron_s" type="box" size="0.92 0.02 0.05" pos="-4 2.06 6.26" rgba="0.34 0.24 0.16 1"/>
@@ -492,32 +432,21 @@
     <geom name="storage_wfs0_top" type="box" size="0.84 0.085 0.04" pos="0 -4.43 7.9" rgba="0.93 0.93 0.91 1"/>
     <geom name="storage_wfs0_bot" type="box" size="0.84 0.085 0.04" pos="0 -4.43 6.55" rgba="0.93 0.93 0.91 1"/>
     <geom name="storage_wn0" type="box" size="0.85 0.07 1.325" pos="-5.15 0.53 6.925" material="mat_wall"/>
-    <geom name="storage_wn1" type="box" size="3.15 0.07 1.325" pos="0.45 0.53 6.925" material="mat_wall"/>
-    <geom name="storage_wn2" type="box" size="0.5 0.07 1.325" pos="5.5 0.53 6.925" material="mat_wall"/>
+    <geom name="storage_wn1" type="box" size="2.72 0.07 1.325" pos="0.02 0.53 6.925" material="mat_wall"/>
+    <geom name="storage_wn2" type="box" size="0.18 0.07 1.325" pos="4.12 0.53 6.925" material="mat_wall"/>
+    <geom name="storage_wn3" type="box" size="0.25 0.07 1.325" pos="5.75 0.53 6.925" material="mat_wall"/>
     <geom name="storage_ww0" type="box" size="0.07 2.55 1.325" pos="-5.93 -1.95 6.925" material="mat_wall"/>
     <geom name="storage_we0" type="box" size="0.07 2.55 1.325" pos="5.93 -1.95 6.925" material="mat_wall"/>
     <geom name="furn_h2_rack_a" type="box" size="1.2 0.25 0.95" pos="-4.6 -3.9 6.55" rgba="0.58 0.56 0.53 1"/>
     <geom name="furn_h2_rack_b" type="box" size="1.2 0.25 0.95" pos="3.4 -3.9 6.55" rgba="0.58 0.56 0.53 1"/>
 
     <!-- ===== 三层楼梯间 ===== -->
-    <geom name="stair_f2_ceiling" type="box" size="1.7 1.95 0.05" pos="4.3 2.55 8.3" rgba="0.95 0.95 0.93 1" group="1"/>
-    <geom name="stair_f2_ws0" type="box" size="0.5 0.07 1.325" pos="3.1 0.67 6.925" material="mat_wall"/>
-    <geom name="stair_f2_ws1" type="box" size="0.5 0.07 1.325" pos="5.5 0.67 6.925" material="mat_wall"/>
+    <geom name="stair_f2_floor" type="box" size="0.96 0.61 0.025" pos="4.9 1.35 5.575" material="mat_wood_light"/>
+    <geom name="stair_f2_ws0" type="box" size="0.07 0.07 1.325" pos="2.67 0.67 6.925" material="mat_wall"/>
+    <geom name="stair_f2_ws1" type="box" size="0.18 0.07 1.325" pos="4.12 0.67 6.925" material="mat_wall"/>
+    <geom name="stair_f2_ws2" type="box" size="0.25 0.07 1.325" pos="5.75 0.67 6.925" material="mat_wall"/>
     <geom name="stair_f2_wn0" type="box" size="1.7 0.07 1.325" pos="4.3 4.43 6.925" material="mat_wall"/>
-    <geom name="stair_f2_ww0" type="box" size="0.07 0.65 1.325" pos="2.67 1.25 6.925" material="mat_wall"/>
-    <geom name="stair_f2_ww1" type="box" size="0.07 0.7 1.325" pos="2.67 3.8 6.925" material="mat_wall"/>
-    <geom name="stair_f2_ww2" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 7.975" material="mat_wall"/>
-    <geom name="stair_f2_ww3" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 7.975" material="mat_wall"/>
-    <geom name="stair_f2_ww4" type="box" size="0.07 0.6 0.275" pos="2.67 2.5 7.975" material="mat_wall"/>
-    <geom name="stair_f2_dfw0_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw0_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw0_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw1_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw1_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw1_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw2_l" type="box" size="0.085 0.05 1.05" pos="2.67 1.9 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw2_r" type="box" size="0.085 0.05 1.05" pos="2.67 3.1 6.65" rgba="0.4 0.29 0.2 1"/>
-    <geom name="stair_f2_dfw2_top" type="box" size="0.085 0.65 0.05" pos="2.67 2.5 7.7" rgba="0.4 0.29 0.2 1"/>
+    <geom name="stair_f2_ww0" type="box" size="0.07 1.95 1.325" pos="2.67 2.55 6.925" material="mat_wall"/>
     <geom name="stair_f2_we0" type="box" size="0.07 0.65 1.325" pos="5.93 1.25 6.925" material="mat_wall"/>
     <geom name="stair_f2_we1" type="box" size="0.07 0.7 1.325" pos="5.93 3.8 6.925" material="mat_wall"/>
     <geom name="stair_f2_we2" type="box" size="0.07 0.6 0.475" pos="5.93 2.5 6.075" material="mat_wall"/>
