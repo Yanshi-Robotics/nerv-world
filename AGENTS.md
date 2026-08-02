@@ -20,7 +20,9 @@
 
 | 你想…… | 改 / 读 | 为什么是这个 |
 |---|---|---|
-| 改屋子（房间、门窗、家具、出生点） | `layout.py`，然后重跑 `make_house.py` | `house-*.xml` 是**产物**，手改会被下一次重跑覆盖 |
+| 改屋子（房间、门窗、家具、出生点） | `scenes/<场景>/layout.py`，然后重跑 `make_house.py --scene <场景>` | `<场景>-<机器人>.xml` 是**产物**，手改会被下一次重跑覆盖 |
+| 加一个新地方（house3…） | `scenes/manifest.py` 追加一条 + 建 `scenes/<key>/layout.py` | 变体名与产物名的规则住 `scenes/manifest.py`，⛔ 别在别处再拼一份 |
+| 场景改完验一下 | `python check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
 | 知道某台机器人是什么（模型 / 出生高度 / 相机 / 力矩模式） | `robots/manifest.py` | 机器人事实的**单一真相源** |
 | 知道某个策略怎么用（关节序 / 增益 / 观测布局 / 控制周期） | `policies/<名字>/contract.json` | 契约是策略侧的单一真相源，**别抄进 manifest** |
 | 换 README 里的配图 | `make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
@@ -32,11 +34,13 @@
 
 | 路径 | 装什么 |
 |---|---|
-| `layout.py` | **屋子的唯一布局定义**：房间矩形、门窗洞、家具摆位、出生点 |
+| `scenes/manifest.py` | **有哪些地方**（与 `robots/manifest.py` 成对：那边是有哪些身体）。两者正交，交叉组合生成 |
+| `scenes/<场景>/layout.py` | **那个地方的唯一布局定义**：房间矩形、门窗洞、家具摆位、出生点；多层场景另有楼层与楼梯 |
+| `check_scene.py` | 场景自检：能不能被 MuJoCo 加载、楼梯能不能走通、门够不够宽 |
 | `furniture.py` | 家具/零件的几何生成函数 |
-| `make_house.py` | 布局 → MJCF 场景生成器（**一台机器人一份场景文件**） |
+| `make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
 | `make_textures.py` · `make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
-| `house-g1.xml` · `house-go2.xml` | **产物**：完整可跑场景（含屋外景色 + `<include>` 进来的那台机器人） |
+| `house1-g1.xml` · `house2-g1.xml` … | **产物**：完整可跑场景（含屋外景色 + `<include>` 进来的那台机器人） |
 | `robots/manifest.py` | 机器人清单与事实源；`robots/g1/`、`robots/go2/` 是模型资产 |
 | `policies/<名字>/` | 训练好的 `policy.onnx` + 与它配套的 `contract.json` |
 | `textures/` · `docs/` | 生成出来的贴图 · 配图与文档 |
@@ -46,12 +50,13 @@
 ```bash
 pip install mujoco numpy pillow
 
-python -m mujoco.viewer --mjcf=house-go2.xml    # 看屋子（四足那份）
-python -m mujoco.viewer --mjcf=house-g1.xml     # 看屋子（人形那份）
+python -m mujoco.viewer --mjcf=house1-go2.xml   # 单层大平层（四足那份）
+python -m mujoco.viewer --mjcf=house2-g1.xml    # 三层小楼带楼梯（人形那份）
 
 python make_textures.py        # 改过贴图才需要
-python make_house.py           # 每台机器人各生成一份场景
-python make_house.py --robot g1
+python make_house.py                       # 全场景 × 全机器人
+python make_house.py --scene house2 --robot g1
+python check_scene.py                      # ⭐ 生成之后必跑
 python make_docs_images.py     # 重出 README 配图
 ```
 
@@ -62,7 +67,8 @@ python make_docs_images.py     # 重出 README 配图
 
 ### ⛔ 几何不手写
 
-`house-*.xml` 是**产物**，不许手改。改屋子只改 `layout.py` 再重跑 `make_house.py`。
+`<场景>-<机器人>.xml` 是**产物**，不许手改。改屋子只改对应的 `scenes/<场景>/layout.py`
+再重跑 `make_house.py`。改完跑 `check_scene.py`——它查的是产物，不是你在布局里的声明。
 手改产物的下场：下一次重跑就被覆盖，而且场景与消费方的坐标真相源从此分叉。
 
 同理，README 的配图不许手工截——机位写在 `make_docs_images.py` 里，改了场景重跑那个脚本。
@@ -71,7 +77,8 @@ python make_docs_images.py     # 重出 README 配图
 
 | 事实 | 住哪儿 | 别在哪儿重复 |
 |---|---|---|
-| 房间矩形 / 门窗 / 家具 / 出生点 | `layout.py` | 别写进 `house-*.xml`（那是产物） |
+| 房间矩形 / 门窗 / 家具 / 出生点 | `scenes/<场景>/layout.py` | 别写进产物 xml |
+| 有哪些场景、产物叫什么名字 | `scenes/manifest.py` | 消费方也调它的 `scene_filename()`，⛔ 两边别各拼各的 |
 | 机器人是什么（模型/出生高度/相机/力矩模式） | `robots/manifest.py` | 别写进消费方的代码 |
 | 关节顺序 / 增益 / 观测格式 / 控制周期 | 各策略目录下的 `contract.json` | **别抄进 manifest**——抄两份必然对不上 |
 
