@@ -114,6 +114,7 @@ def _wall_geoms(room_key: str) -> list[str]:
     x0, y0, x1, y1 = room["rect"]
     rgba = room["wall_rgba"]
     t, H = L.WALL_THICK, L.WALL_HEIGHT
+    zb = _zbase(room_key)
     out: list[str] = []
 
     # 四条边：(side, 是否水平, 沿墙起止, 固定坐标, 墙心朝屋内偏移的符号)
@@ -144,7 +145,7 @@ def _wall_geoms(room_key: str) -> list[str]:
             if b - a < 1e-6 or z1 - z0 < 1e-6:
                 continue
             along_c, along_len = (a + b) / 2.0, b - a
-            zc, zlen = (z0 + z1) / 2.0, z1 - z0
+            zc, zlen = (z0 + z1) / 2.0 + zb, z1 - z0
             pos = (along_c, fixed_c, zc) if horizontal else (fixed_c, along_c, zc)
             size = (along_len, t, zlen) if horizontal else (t, along_len, zlen)
             out.append(_box(f"{room_key}_w{side}{i}", pos, size, rgba,
@@ -155,10 +156,10 @@ def _wall_geoms(room_key: str) -> list[str]:
             if kind == "open":      # 墙整段拆了，没有门框可画
                 continue
             out += _frame(f"{room_key}_df{side}{j}", horizontal, c, w, fixed_c, t,
-                          0.0, L.DOOR_HEIGHT, L.DOOR_FRAME_RGBA, L.DOOR_FRAME_THICK, bottom=False)
+                          zb, zb + L.DOOR_HEIGHT, L.DOOR_FRAME_RGBA, L.DOOR_FRAME_THICK, bottom=False)
         for j, (c, w, sill) in enumerate(windows):
             out += _frame(f"{room_key}_wf{side}{j}", horizontal, c, w, fixed_c, t,
-                          sill, L.WINDOW_TOP_H, L.WINDOW_FRAME_RGBA, L.WINDOW_FRAME_T,
+                          zb + sill, zb + L.WINDOW_TOP_H, L.WINDOW_FRAME_RGBA, L.WINDOW_FRAME_T,
                           bottom=True)
     return out
 
@@ -182,18 +183,43 @@ def _frame(name: str, horizontal: bool, center: float, width: float, fixed_c: fl
 
 
 # ---------------------------------------------------------------------- 其它构件
+def _zbase(room_key: str) -> float:
+    """这间屋所在楼层的地面高度（m）。
+
+    多层场景的 layout 提供 `FLOOR_Z(floor)`，并在每间屋上写 `"floor": n`；
+    单层场景两样都没有，这里恒返回 0——所以同一套生成器代码对两种场景都成立，
+    而且单层场景的产物逐字节不变。
+    """
+    floor_z = getattr(L, "FLOOR_Z", None)
+    if floor_z is None:
+        return 0.0
+    return float(floor_z(L.ROOMS[room_key].get("floor", 0)))
+
+
 def _floor_geom(room_key: str) -> str:
+    """这间屋的地板。声明了 `no_floor` 的不出地板 —— 楼梯井上方就是这样：
+    铺了地板就把上楼的口封死，而且从截图上完全看不出来（只有沿梯打射线才发现）。"""
     room = L.ROOMS[room_key]
+    if room.get("no_floor"):
+        return ""
     x0, y0, x1, y1 = room["rect"]
     return _box(f"{room_key}_floor",
-                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, -_half(L.FLOOR_THICK)),
+                ((x0 + x1) / 2.0, (y0 + y1) / 2.0, _zbase(room_key) - _half(L.FLOOR_THICK)),
                 (x1 - x0, y1 - y0, L.FLOOR_THICK), room["floor_rgba"],
                 mat=room.get("floor_mat", ""))
 
 
 def _furniture_geom(item: dict) -> str:
+    """一件家具。
+
+    ⚠️ layout 里的 z 写的是**该楼层内的高度**（桌面 0.75 就是 0.75），生成器在这里加上
+    楼层基面。让作者心算 "三楼的桌子 = 0.75 + 5.76" 是制造错误的做法。
+    """
     sx, sy, sz = item["size"]
     mat, eu = item.get("mat", ""), item.get("euler")
+    zb = _zbase(item["room"])
+    px, py, pz = item["pos"]
+    item = {**item, "pos": (px, py, pz + zb)}
     if item["type"] in ("cylinder", "sphere"):
         look = f'material="{mat}"' if mat else f'rgba="{_rgba(item["rgba"])}"'
         rot = f' euler="{eu[0]:g} {eu[1]:g} {eu[2]:g}"' if eu else ""
@@ -207,15 +233,90 @@ def _furniture_geom(item: dict) -> str:
 def _ceiling_geom(room_key: str) -> str:
     """天花板：封顶，狗抬头看到的是屋顶而不是天空。
 
+    声明了 `no_ceiling` 的不出顶。**楼梯井是竖着通的**，所以它在下面几层不能有天花板，
+    在上面几层不能有地板——两个键成对使用，少一个梯井就从一头被封死。
+
     单独归一个 geom group（CEILING_GROUP），出俯视写真时把这一组关掉就能看清屋内布局，
     而第一视角照常渲染——不用维护两份场景。
     """
     room = L.ROOMS[room_key]
+    if room.get("no_ceiling"):
+        return ""
     x0, y0, x1, y1 = room["rect"]
-    zc = L.WALL_HEIGHT + _half(L.CEILING_THICK)
+    zc = _zbase(room_key) + L.WALL_HEIGHT + _half(L.CEILING_THICK)
     return _box(f"{room_key}_ceiling", ((x0 + x1) / 2.0, (y0 + y1) / 2.0, zc),
                 (x1 - x0, y1 - y0, L.CEILING_THICK), L.CEILING_RGBA,
                 extra=f' group="{L.CEILING_GROUP}"')
+
+
+def _stairs() -> list[str]:
+    """楼梯：每一级一个盒子，加两侧扶手。多层场景才有（单层 layout 没有 STAIRS）。
+
+    ⭐ 为什么每级单独出 geom 而不是画个斜面：斜面对轮式/四足也许够用，但人形是**踩台阶**的，
+    盲走策略靠脚底接触反馈判断落脚点，斜面给不出那个信号。踏面尺寸也因此是关键参数——
+    见 layout 的 STEP_RUN 注释（G1 脚长约 0.25 m，踏面必须留出真余量）。
+
+    ⭐ 每级单独给 friction：楼梯摩擦是想扫的变量（上楼滑不滑），所以它必须是场景里
+    一个能改的旋钮，而不是继承 MuJoCo 默认值后无处可调。
+    """
+    if not hasattr(L, "STAIRS"):
+        return []
+    out: list[str] = ['    <!-- ===== 楼梯 ===== -->']
+    for flight in L.STAIRS:
+        name = flight["name"]
+        rise, run = L.STEP_RISE, L.STEP_RUN
+        w = flight["width"]
+        # 起点 = 这一跑第一级踏面的**前缘中心**在地面上的投影；dir 是水平前进方向
+        x, y = flight["start_xy"]
+        z0 = flight["base_z"]
+        dx, dy = flight["dir"]
+        fric = flight.get("friction", L.STEP_FRICTION)
+        for i in range(flight["steps"]):
+            # 第 i 级：踏面顶在 z0 + (i+1)*rise，盒子从地面一路砌上来（实心踏步，
+            # 不是悬空板——悬空板下面的空洞会让摔倒的机器人卡进去）
+            top = z0 + (i + 1) * rise
+            cx = x + dx * (i + 0.5) * run
+            cy = y + dy * (i + 0.5) * run
+            sx = run if dx else w
+            sy = w if dx else run
+            out.append(_box(f"{name}_s{i}", (cx, cy, (z0 + top) / 2.0),
+                            (sx, sy, top - z0), L.STEP_RGBA,
+                            extra=f' friction="{fric} 0.005 0.0001"', mat=L.STEP_MAT))
+        # 扶手：只在**敞开的那一侧**出。靠墙那侧不出——真实楼梯就是一侧靠墙一侧扶手，
+        # 而且贴着墙画会让扶手嵌进墙里（第一版就是这样，渲染出来像穿墙的斜杆）。
+        if flight.get("rail_side"):
+            out += _stair_rails(flight)
+    for slab in getattr(L, "LANDINGS", []):
+        out.append(_box(slab["name"], slab["pos"], slab["size"], L.STEP_RGBA,
+                        extra=f' friction="{L.STEP_FRICTION} 0.005 0.0001"', mat=L.STEP_MAT))
+    return out
+
+
+def _stair_rails(flight: dict) -> list[str]:
+    """一跑楼梯敞开侧的扶手（不只是视觉：人形踉跄时有实体挡一下）。
+
+    `rail_side` 是**世界坐标轴**的符号：沿 y 跑的梯，+1 = 扶手在 +x 侧；沿 x 跑的梯，
+    +1 = 在 +y 侧。⚠️ 与前进方向无关——回头跑虽然朝 -y 走，它的 +1 仍然是 +x。
+    """
+    import math
+
+    rise, run = L.STEP_RISE, L.STEP_RUN
+    n, w = flight["steps"], flight["width"]
+    x, y = flight["start_xy"]
+    z0, (dx, dy) = flight["base_z"], flight["dir"]
+    length = n * run
+    slope = math.atan2(n * rise, length)
+    cx, cy = x + dx * length / 2.0, y + dy * length / 2.0
+    cz = z0 + n * rise / 2.0 + L.RAIL_HEIGHT
+    sign = flight["rail_side"]
+    # 往里收半个扶手厚度，让它贴着梯边而不是骑在边界线上
+    inset = w / 2.0 - L.RAIL_THICK / 2.0
+    ox, oy = (0.0, sign * inset) if dx else (sign * inset, 0.0)
+    euler = (0.0, -slope, 0.0) if dx else (slope, 0.0, 0.0)
+    size = (length / math.cos(slope), L.RAIL_THICK, L.RAIL_THICK) if dx else \
+           (L.RAIL_THICK, length / math.cos(slope), L.RAIL_THICK)
+    return [_box(f"{flight['name']}_rail", (cx + ox, cy + oy, cz), size,
+                 L.RAIL_RGBA, euler=euler)]
 
 
 def _lights() -> list[str]:
@@ -225,7 +326,7 @@ def _lights() -> list[str]:
         x0, y0, x1, y1 = room["rect"]
         out.append(
             f'    <light name="light_{key}" pos="{(x0 + x1) / 2.0:g} {(y0 + y1) / 2.0:g} '
-            f'{L.WALL_HEIGHT - 0.15:g}" dir="0 0 -1" diffuse="0.62 0.61 0.58" '
+            f'{_zbase(key) + L.WALL_HEIGHT - 0.15:g}" dir="0 0 -1" diffuse="0.62 0.61 0.58" '
             f'specular="0.05 0.05 0.05" attenuation="0.55 0.06 0.010"/>')
     # 屋外一盏"太阳"，让窗外的草地树木亮起来（否则窗外一片死黑，白开窗）
     out.append('    <light name="sun" pos="10 -18 22" dir="-0.35 0.62 -0.70" directional="true" '
@@ -397,14 +498,22 @@ def build(robot_key: str) -> str:
     parts.append('')
     for key in L.ROOMS:
         parts.append(f'    <!-- ===== {L.ROOMS[key]["label"]} ===== -->')
-        parts.append(_floor_geom(key))
-        parts.append(_ceiling_geom(key))
+        floor_geom = _floor_geom(key)
+        if floor_geom:
+            parts.append(floor_geom)
+        ceiling_geom = _ceiling_geom(key)
+        if ceiling_geom:
+            parts.append(ceiling_geom)
         parts.extend(_wall_geoms(key))
         for item in L.FURNITURE:
             if item["room"] == key:
                 parts.append(_furniture_geom(item))
         parts.append('')
     # 入户门（玄关南外墙上的门板 + 把手，纯视觉；狗在屋里活动、不出门）
+    stair_geoms = _stairs()
+    if stair_geoms:                      # 单层场景没有楼梯，连分隔空行都不该多出来
+        parts.extend(stair_geoms)
+        parts.append('')
     parts.append('    <!-- 入户门（视觉件） -->')
     parts.append(_box("front_door", L.FRONT_DOOR["pos"], L.FRONT_DOOR["size"], L.FRONT_DOOR["rgba"]))
     parts.append(_box("front_door_handle", L.FRONT_DOOR_HANDLE["pos"],
@@ -449,8 +558,10 @@ def _generate(here: str, scene_key: str, robot_keys: list[str], out_override: st
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(xml)
         print(f"生成 {out_path}  ← {ROBOTS.get(key)['label']}")
+        stairs = getattr(L, "STAIRS", [])
+        extra = f"、{len(stairs)} 跑楼梯（共 {sum(f['steps'] for f in stairs)} 级）" if stairs else ""
         print(f"  {len(L.ROOMS)} 个空间（净面积 {area:.0f} ㎡）、{xml.count('<geom ')} 个 geom、"
-              f"{len(L.FURNITURE)} 件家具")
+              f"{len(L.FURNITURE)} 件家具{extra}")
     print(f"  {len(L.DOORS)} 处门/通道、{len(L.WINDOWS)} 扇窗、层高 {L.WALL_HEIGHT}m（已封天花板）")
     print(f"  屋外 {len(L.TREES)} 棵树、{len(L.BUILDINGS)} 栋远楼")
 

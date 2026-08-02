@@ -21,12 +21,18 @@ import mujoco
 import numpy as np
 from PIL import Image
 
-import layout as L
+from scenes import manifest as SCENES
+
+# ⚠️ 2026-08-02 资产库改多场景：layout 不再躺在仓根，产物也改名 <场景>-<机器人>.xml。
+#    这个文件 2026-07-26 就因为目录一动没跟着改而把配图写到仓库外面（脚本照常打印
+#    「完成」）。**目录一动，这里所有路径重新数一遍。**
+SCENE_KEY = os.environ.get("ALICE_SCENE", SCENES.DEFAULT_SCENE)
+L = SCENES.load_layout(SCENE_KEY)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# 场景按机器人分了两份（house-go2.xml / house-g1.xml）。出配图用哪份都行——房子是同一间，
+# 场景按 (场景, 机器人) 分文件。出配图用哪台机器人都行——房子是同一间，
 # 差别只在里面站着谁；这些图要么关掉天花板俯视、要么是机器人视角（各用各的相机）。
-SCENE_FOR = lambda robot: os.path.join(HERE, f"house-{robot}.xml")
+SCENE_FOR = lambda robot: os.path.join(HERE, SCENES.scene_filename(SCENE_KEY, robot))
 SCENE = SCENE_FOR("go2")
 # ⚠️ 写到**本仓**的 docs/images。2026-07-26 场景目录扁平化时这里没跟着改（还是
 #    os.path.dirname(HERE)，那是场景还在 domus01/ 子目录时的写法），结果配图被写到了
@@ -71,7 +77,7 @@ def _model_with_camera(pos, yaw_deg: float):
     cam = (f'<camera name="probe" pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}" '
            f'xyaxes="{right[0]:.6f} {right[1]:.6f} 0 0 0 1"/>')
     src = open(SCENE, encoding="utf-8").read().replace("</worldbody>", f"  {cam}\n</worldbody>")
-    tmp = os.path.join(HERE, "_docs_probe.xml")   # 必须与 house-*.xml 同目录，贴图相对路径才对
+    tmp = os.path.join(HERE, "_docs_probe.xml")   # 必须与场景 xml 同目录，贴图相对路径才对
     open(tmp, "w", encoding="utf-8").write(src)
     try:
         return mujoco.MjModel.from_xml_path(tmp)
