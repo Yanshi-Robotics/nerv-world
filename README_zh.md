@@ -115,6 +115,10 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 |---|---|
 | ![门口平视](docs/images/house2/X2-从门口平视楼梯.png) | ![顶层栏板](docs/images/house2/X3-顶层梯口栏板俯视.png) |
 
+爬到上一层，落脚的是**楼层平台**——那是这一层唯一铺了楼板的地方，其余留空给梯段升上来：
+
+![二层楼层平台](docs/images/house2/S5-二层楼层平台.png)
+
 尺寸按《住宅设计规范》GB 50096-2011 §6.3 取：踢面 0.16 m、踏面 0.30 m、梯段净宽 1.20 m、
 平台进深 1.40 m、梯段净高 2.63 m。层高 2.88 m 是**由楼梯反推**出来的（2 × 9 × 0.16）。
 两跑之间是一道 0.12 m 的实心隔墙而不是空槽——空槽正好卡机器人的脚。
@@ -126,6 +130,10 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 | 一层 | 二层 | 三层 |
 |---|---|---|
 | ![客厅](docs/images/house2/R1-底层客厅.png) | ![主卧](docs/images/house2/R2-二层主卧.png) | ![工作间](docs/images/house2/R3-三层工作间.png) |
+
+俯视只拍得到最上面那层（三层的平面是重叠的），所以这张是顶层：
+
+![三层楼俯视](docs/images/house2/A1-三层楼-顶视.png)
 
 ### 机器人视角
 
@@ -191,20 +199,26 @@ python make_docs_images.py E1 G3  # 只出指定几张
 ## 目录结构
 
 ```
-layout.py           ⭐ 布局单一真相源（房间矩形/门窗/家具/窗外景物）
-furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
-make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-make_house.py       布局 + 机器人 → house-<机器人>.xml（MJCF）
-make_docs_images.py 出 README 配图（机位写在代码里，改了场景一条命令重出）
-house-go2.xml       生成产物（四足机器狗那份）
-house-g1.xml        生成产物（人形那份）
-textures/           生成的贴图
+scenes/
+  manifest.py       ⭐ 有哪些地方（与 robots/manifest.py 成对，正交交叉组合）
+  house1/layout.py  ⭐ 那个地方的布局单一真相源（房间矩形/门窗/家具/窗外景物）
+  house1/shots.py   那个地方的配图机位
+  house2/layout.py  三层小楼：多出楼层、楼梯、平台、梯井隔墙、栏板
+  house2/shots.py
+  house2/楼梯设计.md ⭐ 楼梯尺寸怎么推出来的、依据哪条规范、做错过什么
 robots/
   manifest.py       ⭐ 机器人清单单一真相源（模型/出生高度/相机/策略/力矩怎么发）
   go2/              宇树 Go2 模型（含头部前视相机）
   g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
+furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
+make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
+make_house.py       布局 + 机器人 → <场景>-<机器人>.xml（MJCF）
+check_scene.py      ⭐ 场景自检：查产物不查声明，生成之后必跑
+walkthrough.py      第一人称漫游，用来人眼验收（WASD + 鼠标，带碰撞与重力）
+make_docs_images.py 出 README 配图（机位写在 shots.py，一条命令重出）
+house1-g1.xml · house2-g1.xml …   生成产物（一个「场景 × 机器人」一份）
 policies/           训练好的运动策略（ONNX + 契约）
-docs/images/house1/        README 配图
+textures/ · docs/images/<场景>/   生成的贴图 · README 配图
 ```
 
 ## 快速开始
@@ -217,6 +231,8 @@ pip install mujoco numpy pillow
 # 看一眼（场景已经生成好了，直接就能开）
 python -m mujoco.viewer --mjcf=house1-go2.xml    # 单层大平层，四足那份
 python -m mujoco.viewer --mjcf=house2-g1.xml     # 三层小楼带楼梯，人形那份
+
+python walkthrough.py --scene house2            # 自己走进去看（第一人称）
 ```
 
 改了屋子要重新生成：
@@ -283,7 +299,7 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 
 ## 版本
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.4**。
+见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.6**。
 
 ## 许可
 

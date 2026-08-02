@@ -120,6 +120,11 @@ so the stair is continuous by construction rather than by remembering to line th
 |---|---|
 | ![From the door](docs/images/house2/X2-从门口平视楼梯.png) | ![Parapet](docs/images/house2/X3-顶层梯口栏板俯视.png) |
 
+You step off onto the **floor landing** — the only part of the shaft that is floored on the upper
+storeys; everything else stays open for the flights coming up:
+
+![Floor landing on storey 1](docs/images/house2/S5-二层楼层平台.png)
+
 Dimensions follow the Chinese residential code GB 50096-2011 §6.3: 0.16 m riser, 0.30 m tread,
 1.20 m flight width, 1.40 m landing depth, 2.63 m headroom. The 2.88 m storey height is **derived
 from the stair** (2 × 9 × 0.16). Between the two flights is a solid 0.12 m wall rather than an open
@@ -132,6 +137,10 @@ The derivation, the code clauses it follows, and the two ways this got built wro
 | Ground floor | Floor 1 | Floor 2 |
 |---|---|---|
 | ![Living room](docs/images/house2/R1-底层客厅.png) | ![Bedroom](docs/images/house2/R2-二层主卧.png) | ![Attic studio](docs/images/house2/R3-三层工作间.png) |
+
+A top-down view only catches the topmost storey (the three floor plans overlap), so this is floor 2:
+
+![Three-storey plan](docs/images/house2/A1-三层楼-顶视.png)
 
 ### Through the Robot's Eyes
 
@@ -202,20 +211,26 @@ city skyline backdrop (matte-painting style).
 ## Project Structure
 
 ```
-layout.py           ⭐ single source of truth for the layout (room rects / doors / windows / furniture / outdoor scenery)
-furniture.py        parametric furniture part library (chairs / tables / lamps / vases / plants…)
-make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
-make_house.py       layout + robot → house-<robot>.xml (MJCF)
-make_docs_images.py renders the README screenshots (poses live in code; one command re-renders)
-house-go2.xml       generated scene (quadruped)
-house-g1.xml        generated scene (humanoid)
-textures/           generated textures
+scenes/
+  manifest.py       ⭐ which places exist (paired with robots/manifest.py; the two cross freely)
+  house1/layout.py  ⭐ single source of truth for that place (room rects / doors / windows / furniture / scenery)
+  house1/shots.py   camera poses for that place's screenshots
+  house2/layout.py  three-storey house: storeys, flights, landings, well wall, parapet
+  house2/shots.py
+  house2/楼梯设计.md ⭐ how the stair dimensions are derived, which code clauses, what got built wrong
 robots/
   manifest.py       ⭐ single source of truth for robots (model / spawn height / camera / policy / how torque is applied)
   go2/              Unitree Go2 model (with head camera)
   g1/               Unitree G1 humanoid, 29 dof (imported from Menagerie by import_from_menagerie.py)
+furniture.py        parametric furniture part library (chairs / tables / lamps / vases / plants…)
+make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
+make_house.py       layout + robot → <scene>-<robot>.xml (MJCF)
+check_scene.py      ⭐ scene self-check: verifies the product, not the claim. Run it after generating
+walkthrough.py      first-person walkthrough for eyeballing a scene (WASD + mouse, collision + gravity)
+make_docs_images.py renders the README screenshots (poses live in shots.py; one command re-renders)
+house1-g1.xml · house2-g1.xml …   generated scenes (one file per scene x robot)
 policies/           trained locomotion policies (ONNX + contract)
-docs/images/house1/        README screenshots
+textures/ · docs/images/<scene>/  generated textures · README screenshots
 ```
 
 ## Quick Start
@@ -226,8 +241,10 @@ cd alice-house
 pip install mujoco numpy pillow
 
 # Take a look at the house (scenes are already generated — just open them)
-python -m mujoco.viewer --mjcf=house-go2.xml     # with the quadruped
-python -m mujoco.viewer --mjcf=house-g1.xml      # with the humanoid
+python -m mujoco.viewer --mjcf=house1-go2.xml    # single-floor apartment, with the quadruped
+python -m mujoco.viewer --mjcf=house2-g1.xml     # three-storey house with stairs, with the humanoid
+
+python walkthrough.py --scene house2             # or walk in yourself (first person)
 ```
 
 Re-generate after changing the house:
@@ -305,7 +322,7 @@ went unnoticed until a ball-roll test. Two more rules learned the hard way: **a 
 
 ## Versioning
 
-See [CHANGELOG.md](CHANGELOG.md). Currently **v0.4**.
+See [CHANGELOG.md](CHANGELOG.md). Currently **v0.6**.
 
 ## License
 
