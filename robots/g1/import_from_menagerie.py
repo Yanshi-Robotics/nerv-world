@@ -20,10 +20,15 @@
    世界侧的激光测距靠这个分组把"射线打到墙"和"射线打到自己胳膊"分开，撞上就拒绝启动。
 
 上游来源与许可：MuJoCo Menagerie 的 `unitree_g1`（BSD-3-Clause，见同目录 G1_MODEL_LICENSE）。
-本地取自 `unitree-g1-locomotion/scenes/mujoco/assets/mujoco_menagerie/unitree_g1/`。
 
-用法：
-    python import_from_menagerie.py --source <menagerie 的 unitree_g1 目录>
+⚠️ 2026-08-02 起 `--source` 是**必填**的。它原先默认指向隔壁 `unitree-g1-locomotion`
+仓里的一份 menagerie 副本，而那个仓已归档并删除本地——留着一个猜不中的默认路径，
+只会让人拿到一句"文件不存在"而不知道该给什么。自己从上游拉一份：
+
+    git clone --depth 1 https://github.com/google-deepmind/mujoco_menagerie
+    python import_from_menagerie.py --source mujoco_menagerie/unitree_g1
+
+（产物已经在本仓里了，只有上游更新时才需要重跑。）
 """
 from __future__ import annotations
 
@@ -34,9 +39,6 @@ import re
 import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_SOURCE = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(HERE))),
-    "unitree-g1-locomotion", "scenes", "mujoco", "assets", "mujoco_menagerie", "unitree_g1")
 
 # ---- 头部相机 ----
 # 装在 torso_link 上。torso_link 在默认站姿下位于世界 z=0.844，整机最高点 1.379 m（实测）。
@@ -60,7 +62,11 @@ def camera_xml() -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--source", default=DEFAULT_SOURCE, help="menagerie 的 unitree_g1 目录")
+    ap.add_argument(
+        "--source",
+        required=True,
+        help="menagerie 的 unitree_g1 目录（必填；见本文件头部怎么拉一份）",
+    )
     args = ap.parse_args()
     src_xml = os.path.join(args.source, "g1.xml")
     if not os.path.exists(src_xml):
