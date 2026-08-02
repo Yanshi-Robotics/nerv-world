@@ -197,22 +197,17 @@ def _zbase(room_key: str) -> float:
 
 
 def _floor_geom(room_key: str) -> list[str]:
-    """这间屋的地板（可能不止一块）。声明了 `no_floor` 的不出地板 —— 楼梯井上方就是这样：
-    铺了地板就把上楼的口封死，而且从截图上完全看不出来（只有沿梯打射线才发现）。"""
+    """这间屋的地板（可能不止一块）。
+
+    ⭐ `floor_rects` = 只在这些矩形上铺地板（**局部楼板**）。楼梯井的上面几层就是这样：
+    梯段升上来的地方必须空着，而下梯之后要有一块楼层平台，否则人上来就踩空。
+    两头都错过：整层铺 → 把上楼的口封死；整层不铺 → 人爬上来掉回下一层。
+    而且这两种错**从截图上完全看不出来**，只有沿着整条路线打射线才发现
+    （见 check_scene.py 的 check_route）。
+    """
     room = L.ROOMS[room_key]
-    # ⛔ 两者互斥，同时写就报错。第一版是"no_floor 先判、直接早退"，于是同时写了
-    #    floor_rects 的房间被**静默忽略**——三层的到达平台就这么消失了，而当时
-    #    自检还是绿的。宁可启动即失败，也不要一个写了却不生效的声明。
-    if room.get("no_floor") and room.get("floor_rects"):
-        raise ValueError(
-            f"房间 {room_key!r} 同时写了 no_floor 与 floor_rects——"
-            "要么整层不铺，要么只铺这几块，不能既又。")
-    if room.get("no_floor"):
-        return []
     zb = _zbase(room_key) - _half(L.FLOOR_THICK)
     mat, rgba = room.get("floor_mat", ""), room["floor_rgba"]
-    # `floor_rects` = 只在这些矩形上铺地板（局部楼板）。楼梯井的上层就是这样：
-    # 梯段升上来的地方必须空着，而下梯之后要有一块落脚平台，否则人上来就踩空。
     rects = room.get("floor_rects")
     if rects is None:
         rects = [room["rect"]]
@@ -266,7 +261,11 @@ def _ceiling_geom(room_key: str) -> str:
 
 
 def _stairs() -> list[str]:
-    """楼梯：每一级一个盒子，加两侧扶手。多层场景才有（单层 layout 没有 STAIRS）。
+    """楼梯：踏板 + 平台 + 梯井隔墙 + 扶手护栏。多层场景才有（单层 layout 没有 STAIRS）。
+
+    ⛔⛔ **一跑楼梯出 `risers − 1` 块踏板，不是 `risers` 块**——最上面那一级由平台充当。
+       这是行业标准算法（treads = risers − 1，the landing is never counted under tread）。
+       多出一块，就等于在平台边上叠了一块同高的板。
 
     ⭐ 为什么每级单独出 geom 而不是画个斜面：斜面对轮式/四足也许够用，但人形是**踩台阶**的，
     盲走策略靠脚底接触反馈判断落脚点，斜面给不出那个信号。踏面尺寸也因此是关键参数——
@@ -278,38 +277,55 @@ def _stairs() -> list[str]:
     if not hasattr(L, "STAIRS"):
         return []
     out: list[str] = ['    <!-- ===== 楼梯 ===== -->']
+    fric_attr = f' friction="{L.STEP_FRICTION} 0.005 0.0001"'
     for flight in L.STAIRS:
         name = flight["name"]
         rise, run = L.STEP_RISE, L.STEP_RUN
         w = flight["width"]
-        # 起点 = 这一跑第一级踏面的**前缘中心**在地面上的投影；dir 是水平前进方向
+        # 起跑线 = **这一跑下面那块平台的边缘**；dir 是水平前进方向
         x, y = flight["start_xy"]
         z0 = flight["base_z"]
         dx, dy = flight["dir"]
         fric = flight.get("friction", L.STEP_FRICTION)
-        for i in range(flight["steps"]):
-            # 第 i 级：踏面顶在 z0 + (i+1)*rise，盒子从地面一路砌上来（实心踏步，
-            # 不是悬空板——悬空板下面的空洞会让摔倒的机器人卡进去）
+        slab = L.STEP_SLAB
+        for i in range(flight["risers"] - 1):
+            # 第 i 块踏板 = 一块**厚板**，顶面就是踏面。板厚 > 踢面，所以相邻两级重叠、
+            # 踢面处不露缝；而底面跟着坡度斜下去，头顶净空才是常数
+            # （= 层高 − 板厚）。⛔ 别改回"从地面填上来的实心块"：那样上面那跑的
+            # 底面会变成平顶，把下面那跑的净空压到一个人过不去的高度。
             top = z0 + (i + 1) * rise
+            bottom = top - slab
             cx = x + dx * (i + 0.5) * run
             cy = y + dy * (i + 0.5) * run
             sx = run if dx else w
             sy = w if dx else run
-            out.append(_box(f"{name}_s{i}", (cx, cy, (z0 + top) / 2.0),
-                            (sx, sy, top - z0), L.STEP_RGBA,
+            out.append(_box(f"{name}_s{i}", (cx, cy, (bottom + top) / 2.0),
+                            (sx, sy, slab), L.STEP_RGBA,
                             extra=f' friction="{fric} 0.005 0.0001"', mat=L.STEP_MAT))
         # 扶手：只在**敞开的那一侧**出。靠墙那侧不出——真实楼梯就是一侧靠墙一侧扶手，
         # 而且贴着墙画会让扶手嵌进墙里（第一版就是这样，渲染出来像穿墙的斜杆）。
         if flight.get("rail_side"):
             out += _stair_rails(flight)
+    # 中间休息平台：把两跑接起来的那块板。⛔ 少了它，走到上行跑顶端就没路了。
     for slab in getattr(L, "LANDINGS", []):
         out.append(_box(slab["name"], slab["pos"], slab["size"], L.STEP_RGBA,
-                        extra=f' friction="{L.STEP_FRICTION} 0.005 0.0001"', mat=L.STEP_MAT))
+                        extra=fric_attr, mat=L.STEP_MAT))
+    # 梯井隔墙：两跑之间那道墙（不留缝，见 layout 的 WELL_WALL_THICK 注释）
+    for wall in getattr(L, "WELL_WALLS", []):
+        out.append(_box(wall["name"], wall["pos"], wall["size"], L.WELL_WALL_RGBA,
+                        mat=L.WELL_WALL_MAT))
+    # 梯口栏板：顶层那条没有梯段接上去的车道，是个直通下面的洞，必须围住
+    for bar in getattr(L, "GUARDS", []):
+        out.append(_box(bar["name"], bar["pos"], bar["size"], L.WELL_WALL_RGBA,
+                        mat=L.WELL_WALL_MAT))
     return out
 
 
 def _stair_rails(flight: dict) -> list[str]:
     """一跑楼梯敞开侧的扶手（不只是视觉：人形踉跄时有实体挡一下）。
+
+    扶手沿**踏步鼻线**走：从起跑线（下平台边缘）到最后一块踏板的鼻端，
+    水平跨 `(risers−1) × 踏面`、升 `(risers−1) × 踢面`。
 
     `rail_side` 是**世界坐标轴**的符号：沿 y 跑的梯，+1 = 扶手在 +x 侧；沿 x 跑的梯，
     +1 = 在 +y 侧。⚠️ 与前进方向无关——回头跑虽然朝 -y 走，它的 +1 仍然是 +x。
@@ -317,7 +333,7 @@ def _stair_rails(flight: dict) -> list[str]:
     import math
 
     rise, run = L.STEP_RISE, L.STEP_RUN
-    n, w = flight["steps"], flight["width"]
+    n, w = flight["risers"] - 1, flight["width"]
     x, y = flight["start_xy"]
     z0, (dx, dy) = flight["base_z"], flight["dir"]
     length = n * run
@@ -573,7 +589,7 @@ def _generate(here: str, scene_key: str, robot_keys: list[str], out_override: st
             f.write(xml)
         print(f"生成 {out_path}  ← {ROBOTS.get(key)['label']}")
         stairs = getattr(L, "STAIRS", [])
-        extra = f"、{len(stairs)} 跑楼梯（共 {sum(f['steps'] for f in stairs)} 级）" if stairs else ""
+        extra = f"、{len(stairs)} 跑楼梯（共 {sum(f['risers'] for f in stairs)} 级踢面）" if stairs else ""
         print(f"  {len(L.ROOMS)} 个空间（净面积 {area:.0f} ㎡）、{xml.count('<geom ')} 个 geom、"
               f"{len(L.FURNITURE)} 件家具{extra}")
     print(f"  {len(L.DOORS)} 处门/通道、{len(L.WINDOWS)} 扇窗、层高 {L.WALL_HEIGHT}m（已封天花板）")

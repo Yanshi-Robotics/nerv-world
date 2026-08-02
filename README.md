@@ -45,7 +45,7 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 | Key | Layout | Size | Why it exists |
 |---|---|---|---|
 | **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
-| **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 324 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
+| **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 381 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
 
 ### Robots
 
@@ -99,20 +99,35 @@ that, a full-height cabinet wall sat in the middle of the room and blocked a doo
 
 ![Three-storey exterior](docs/images/house2/X1-整栋外景.png)
 
-The staircase is the reason this place exists. Two flights per storey in a U, a half-landing
-between them, and a small solid platform where you step off at the top.
+The staircase is the reason this place exists, and it is built the way a **real** staircase is
+built, not as "two rows of steps".
 
-| Straight at the flight, from the door | Mid-flight, looking at the half-landing |
+A half-turn stair is **five parts, two of which are landings** — floor landing → up flight →
+half-landing → return flight → the floor landing above. Neither landing is optional: without the
+half-landing the two flights never meet; without the floor landing you arrive to thin air. Each
+part's **last tread meets the next part's starting landing edge-to-edge, exactly one riser below**,
+so the stair is continuous by construction rather than by remembering to line things up.
+
+| On the floor landing, facing the up flight | Mid-flight, the well wall on your right |
 |---|---|
-| ![Foot of the stairs](docs/images/house2/S1-底层望向楼梯.png) | ![Mid-flight](docs/images/house2/S2-站在上行梯段中间.png) |
+| ![Foot of the stairs](docs/images/house2/S1-楼层平台望向上行跑.png) | ![Mid-flight](docs/images/house2/S2-站在上行跑中间.png) |
 
-| Half-landing, looking back down | Arrival platform on floor 1 |
+| ⭐ Half-landing: the return flight starts at your feet | Same landing, looking back down the up flight |
 |---|---|
-| ![Half-landing](docs/images/house2/S3-休息平台回望.png) | ![Arrival](docs/images/house2/S4-二层到达平台.png) |
+| ![Flights joined](docs/images/house2/S3-中间平台-回头跑从脚下起步.png) | ![Looking back](docs/images/house2/S4-中间平台-回望上行跑.png) |
 
-The door into the stairwell is aligned with the flight on purpose: walk in and you are already
-facing the steps, no sidestep. Above, the shaft has no floor except that arrival platform — open
-where the flights come up, solid where you land.
+| The whole stair, from the doorway | Top floor: no flight above, so a solid parapet |
+|---|---|
+| ![From the door](docs/images/house2/X2-从门口平视楼梯.png) | ![Parapet](docs/images/house2/X3-顶层梯口栏板俯视.png) |
+
+Dimensions follow the Chinese residential code GB 50096-2011 §6.3: 0.16 m riser, 0.30 m tread,
+1.20 m flight width, 1.40 m landing depth, 2.63 m headroom. The 2.88 m storey height is **derived
+from the stair** (2 × 9 × 0.16). Between the two flights is a solid 0.12 m wall rather than an open
+well — an open well is exactly the width that traps a robot's foot. Upstairs the shaft is floored
+only across the **floor landing**; where the flights come up it stays open.
+
+The derivation, the code clauses it follows, and the two ways this got built wrong are all in
+[`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md) (Chinese). **Read it before changing the stair.**
 
 | Ground floor | Floor 1 | Floor 2 |
 |---|---|---|
@@ -226,11 +241,15 @@ ALICE_SCENE=house2 python make_docs_images.py  # re-render the screenshots
 ```
 
 `check_scene.py` is not a formality. It compiles every product in MuJoCo, then **ray-probes the
-stairs** to confirm a robot can actually walk up them — no gap, no drop bigger than one riser,
-and solid ground where you step off at the top. It checks the *product*, not what the layout
-*claims*: during development the layout declared an open stairwell that the generator silently
-ignored, so the shaft was sealed by a floor slab while the old declaration-based check reported
-green.
+whole climb** — floor landing → up flight → half-landing → return flight → the storey above →
+the door — sampling every 4.7 cm and requiring solid ground everywhere, no step taller than one
+riser, and an end point exactly one storey higher. A separate check verifies the **four joints**
+(each flight's last tread against the next landing: edge-to-edge, one riser apart).
+
+Both checks exist for a reason. The earlier version probed each flight **in isolation**, so when
+the return flight was attached to the shaft's far wall instead of the half-landing — a stair split
+into two disconnected pieces — it reported **green**: walking around, there *was* a path.
+**Proving a path exists does not prove it is a staircase.**
 
 To actually **make a robot walk**: `policies/` holds trained ONNX policies with a
 `contract.json` next to each (joint order, gains, observation layout — all of it). Feed a policy
@@ -268,15 +287,19 @@ generator, then `check_scene.py`. The part libraries (furniture, textures) are r
 
 Adding a **new place** means appending an entry to `scenes/manifest.py` and writing
 `scenes/<key>/layout.py`. The generator does not change. A multi-storey place adds three things
-on top of the flat-scene model — a `floor` key per room, a `FLOOR_Z(n)`, and `STAIRS` — and two
-keys that open the shaft vertically: `no_ceiling` on the lower storeys, `floor_rects` on the upper
-ones so the arrival platform stays solid while the flights below stay open.
+on top of the flat-scene model — a `floor` key per room, a `FLOOR_Z(n)`, plus `STAIRS` (flights),
+`LANDINGS` (half-landings), `WELL_WALLS` and `GUARDS` — and two keys that open the shaft
+vertically: `no_ceiling` on the lower storeys, `floor_rects` on the upper ones so the floor landing
+stays solid while the flights below stay open. How the stair is walked is described **once**, by
+`stair_route(floor)`; the self-check and the walkthrough both follow it. Two independent copies of
+that answer is precisely what went wrong before.
 
-⚠️ **Stair dimensions are derived, not chosen.** The storey height comes *out of* the stair
-arithmetic (`STOREY_H = 2 × steps × rise`), never the other way round — set them independently and
-the top step ends up hanging in mid-air, which is exactly what happened in the predecessor project
-and went unnoticed until a ball-roll test. Treads are 0.30 m because a G1 foot is ~0.25 m and 0.26 m
-leaves a one-centimetre margin that a blind policy will miss.
+⚠️ **Stair dimensions are derived, not chosen.** Steps first → storey height → stairwell →
+building footprint, never the other way round — set storey height and stair independently and the
+top step ends up hanging in mid-air, which is exactly what happened in the predecessor project and
+went unnoticed until a ball-roll test. Two more rules learned the hard way: **a flight has
+`risers − 1` treads** (the top one *is* the landing); and treads are 0.30 m because a G1 foot is
+~0.25 m and 0.26 m leaves a one-centimetre margin that a blind policy will miss.
 
 ---
 

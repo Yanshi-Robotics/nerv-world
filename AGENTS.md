@@ -22,6 +22,8 @@
 |---|---|---|
 | 改屋子（房间、门窗、家具、出生点） | `scenes/<场景>/layout.py`，然后重跑 `make_house.py --scene <场景>` | `<场景>-<机器人>.xml` 是**产物**，手改会被下一次重跑覆盖 |
 | 加一个新地方（house3…） | `scenes/manifest.py` 追加一条 + 建 `scenes/<key>/layout.py` | 变体名与产物名的规则住 `scenes/manifest.py`，⛔ 别在别处再拼一份 |
+| ⛔ 改楼梯 | **先读 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
+| 自己进去看看 | `python walkthrough.py --scene house2`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
 | 场景改完验一下 | `python check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
 | 知道某台机器人是什么（模型 / 出生高度 / 相机 / 力矩模式） | `robots/manifest.py` | 机器人事实的**单一真相源** |
 | 知道某个策略怎么用（关节序 / 增益 / 观测布局 / 控制周期） | `policies/<名字>/contract.json` | 契约是策略侧的单一真相源，**别抄进 manifest** |
@@ -36,7 +38,8 @@
 |---|---|
 | `scenes/manifest.py` | **有哪些地方**（与 `robots/manifest.py` 成对：那边是有哪些身体）。两者正交，交叉组合生成 |
 | `scenes/<场景>/layout.py` | **那个地方的唯一布局定义**：房间矩形、门窗洞、家具摆位、出生点；多层场景另有楼层与楼梯 |
-| `check_scene.py` | 场景自检：能不能被 MuJoCo 加载、楼梯能不能走通、门够不够宽 |
+| `check_scene.py` | 场景自检：能不能被 MuJoCo 加载、**整条上楼路线走不走得通**、四个接头闭不闭合、门够不够宽 |
+| `walkthrough.py` | 第一人称漫游（WASD + 鼠标），用来人眼验收；`--selftest` 无窗口自测 |
 | `furniture.py` | 家具/零件的几何生成函数 |
 | `make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
 | `make_textures.py` · `make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
@@ -57,7 +60,8 @@ python make_textures.py        # 改过贴图才需要
 python make_house.py                       # 全场景 × 全机器人
 python make_house.py --scene house2 --robot g1
 python check_scene.py                      # ⭐ 生成之后必跑
-python make_docs_images.py     # 重出 README 配图
+python walkthrough.py --scene house2       # 自己走进去看（--selftest = 无窗口自测）
+ALICE_SCENE=house2 python make_docs_images.py   # 重出 README 配图
 ```
 
 **要让机器人真走起来**：拿 `policies/<名字>/policy.onnx`，严格照同目录 `contract.json` 拼观测、
