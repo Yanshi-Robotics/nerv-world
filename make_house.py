@@ -26,7 +26,18 @@ import argparse
 import importlib.util
 import os
 
-import layout as L
+from scenes import manifest as SCENES
+
+# 当前正在生成的场景的 layout 模块。build() 会按 --scene 换掉它。
+# ⚠️ 之所以是模块级变量而不是参数：本文件里几十个 _xxx_geom() 帮手都读 L.*，
+# 一个个加参数会把这次重构变成一次重写。换场景走 use_scene()，它是唯一的写入点。
+L = SCENES.load_layout(SCENES.DEFAULT_SCENE)
+
+
+def use_scene(scene_key: str) -> None:
+    """切换到另一个场景的 layout。生成器的所有帮手都读模块级的 L。"""
+    global L
+    L = SCENES.load_layout(scene_key)
 
 # 机器人清单住在仓根的 robots/manifest.py（跨场景共用），按路径加载——
 # 仓根不是包，import 不到，只能按路径加载。
@@ -404,24 +415,36 @@ def build(robot_key: str) -> str:
     return "\n".join(parts) + "\n"
 
 
-def scene_filename(robot_key: str) -> str:
-    """这台机器人对应的场景文件名。世界服务按同样的规则去找，两边别各写各的。"""
-    return f"house-{robot_key}.xml"
+def scene_filename(scene_key: str, robot_key: str) -> str:
+    """(场景, 机器人) 对应的产物文件名 —— 转发到 scenes/manifest.py 的同名函数。
+
+    单一真相源在那边：世界服务也按它去找，两边别各写各的。
+    """
+    return SCENES.scene_filename(scene_key, robot_key)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--robot", default="", help=f"只生成这一台（{'/'.join(ROBOTS.ROBOTS)}）；不给=全部")
-    ap.add_argument("--out", default="", help="指定输出文件（只在 --robot 指定单台时有意义）")
+    ap.add_argument("--scene", default="", help=f"只生成这个场景（{'/'.join(SCENES.keys())}）；不给=全部")
+    ap.add_argument("--out", default="", help="指定输出文件（只在 --robot + --scene 都单指定时有意义）")
     args = ap.parse_args()
     here = os.path.dirname(os.path.abspath(__file__))
-    keys = [args.robot] if args.robot else list(ROBOTS.ROBOTS)
-    if args.out and len(keys) != 1:
-        ap.error("--out 只能配合 --robot 用（一次只写一个文件）")
+    robot_keys = [args.robot] if args.robot else list(ROBOTS.ROBOTS)
+    scene_keys = [args.scene] if args.scene else SCENES.keys()
+    if args.out and (len(robot_keys) != 1 or len(scene_keys) != 1):
+        ap.error("--out 只能配合 --robot + --scene 一起用（一次只写一个文件）")
 
+    for scene_key in scene_keys:
+        use_scene(scene_key)
+        _generate(here, scene_key, robot_keys, args.out)
+
+
+def _generate(here: str, scene_key: str, robot_keys: list[str], out_override: str) -> None:
     area = sum((r["rect"][2] - r["rect"][0]) * (r["rect"][3] - r["rect"][1]) for r in L.ROOMS.values())
-    for key in keys:
-        out_path = args.out or os.path.join(here, scene_filename(key))
+    print(f"── 场景 {scene_key}：{SCENES.get(scene_key)['label']}")
+    for key in robot_keys:
+        out_path = out_override or os.path.join(here, scene_filename(scene_key, key))
         xml = build(key)
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(xml)
