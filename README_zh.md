@@ -2,7 +2,7 @@
 
 # alice-house · 给机器人住的房子
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.6-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.8-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
 > 这个仓是什么、每个事实住在哪、入口命令、以及红线。
@@ -15,7 +15,8 @@
 （`scenes/<名字>/layout.py`）生成。想改屋子就改它的布局、重跑生成器；场景和使用它的程序
 读同一份真相源，不会两处坐标打架。
 
-目前有**两个地方**——一套单层大平层，一栋带楼梯的三层小楼——同一台机器人可以放进任何一个。
+目前有**三个地方**——一套单层大平层，一栋带楼梯的三层小楼，还有一套 62 层、窗外是中央公园的
+曼哈顿大平层——同一台机器人可以放进任何一个。
 「有哪些地方」和「有哪些身体」是两份独立清单，生成时交叉组合。
 
 配套还带**机器人**（宇树 Go2 四足、宇树 G1 人形）和训练好的**运动策略**——
@@ -32,7 +33,8 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 ## 目录
 
 - [里面有什么](#里面有什么) · [现有机器人](#现有机器人) · [户型与实拍](#户型)
-- [设计原则](#设计原则)
+- [house3 — 232 米高空，正对中央公园](#house3--232-米高空正对中央公园)
+- [设计原则](#设计原则) · [网格只是外衣](#网格只是外衣)
 - [目录结构](#目录结构)
 - [快速开始](#快速开始)
 - [一台机器人一份场景](#一台机器人一份场景)
@@ -48,6 +50,7 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 |---|---|---|---|
 | **house1** | 大平层三室两厅双卫，单层 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离。全屋无高差 |
 | **house2** | 门厅/客厅/厨房、主卧/书房/卫生间、阁楼工作间/储藏，**三层** | 11 个空间 / 381 ㎡ | 为高差建的。人形的爬楼、跨层导航、以及「摔在楼梯上」这类真实失败模式，在平地上一个都测不到 |
+| **house3** | 曼哈顿满层一户，**62 层**——玄关/画廊/大客厅/餐厅/厨房/主卧套间/客卧 | 13 个空间 / 345 ㎡ | 为**窗外**建的。三面落地玻璃、脚下 232 米空气、正前方是中央公园的真实航拍。考的是「视觉信息极强但绝大部分够不着」这种情形 |
 
 ### 现有机器人
 
@@ -135,6 +138,71 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 
 ![三层楼俯视](docs/images/house2/A1-三层楼-顶视.png)
 
+### house3 — 232 米高空，正对中央公园
+
+![曼哈顿大平层，隐去天花](docs/images/house3/A1-户型俯视图.png)
+
+house1 考平层导航，house2 考爬楼，**house3 考的是窗户**。三面落地玻璃，楼板离街面 232.5 米，
+而透过玻璃看到的一切都**够不着**——走多远都改变不了。
+
+| 大客厅整面观景墙 | 从入户门望出去的 15 米轴线 |
+|---|---|
+| ![观景墙](docs/images/house3/V2-大客厅-整面观景墙.png) | ![贯通轴线](docs/images/house3/V1-贯通轴线-从入户门望公园.png) |
+
+**这片景色没有一层是画上去的贴图。** 它分四层搭出来，每层从哪儿开始是**算视差算出来的**——
+横移 8 米，120 米处的楼在画面上移动 61 像素，600 米处移动 12 像素，3 公里外只移动 2.4 像素。
+600 米以内必须是真几何：
+
+| 层 | 是什么 | 来源 |
+|---|---|---|
+| 无限远 | 真实实拍天空，做成六面立方图 | [Poly Haven](https://polyhaven.com) HDRI（CC0） |
+| 120–600 m | 12 栋点名塔楼，用它们的真实高度（中央公园大厦 472.4 m、111 W57 435.3 m…） | NYC Open Data |
+| 0.6–4 km | **2716 栋真实曼哈顿建筑**，只做体量 | NYC Open Data 建筑轮廓 |
+| 地面 | 中央公园的真实航拍照片，按街网转正 29.05° | USGS NAIP（公共领域） |
+
+⚠️ 拉建筑数据时，过滤条件必须**含 `'Merged'`**——111 West 57th Street 继承的是 1924 年
+Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前亿万富翁街剪影的三根针之一。
+
+#### 怎么证明它不是一张背景板
+
+同一个朝向，相机东移 6 米。盯着近处的窗框相对身后的公园移动：**近景和远景移动的量不一样**，
+这是画上去的背景板做不到的。中景之所以非得用真几何而不是照片，原因就在这里。
+
+| 相机在中线偏西 3 米 | 同朝向，东移 6 米 |
+|---|---|
+| ![视差左](docs/images/house3/P1-视差对照-左.png) | ![视差右](docs/images/house3/P2-视差对照-右.png) |
+
+#### 这栋楼本身，以及它挨着谁
+
+本楼也是建出来的——你站在一个真实体量里面，不是一个飘着的盒子。它离公园南沿 **34 米**
+（中央公园南路的路宽）。这个数字是自检逼出来的：第一版放在 120 米开外（大约 57 街），
+**公寓和公园之间整整隔着一排真实的楼**。
+
+| 本楼外景 | 越过窗框往正下方看 | 中央公园全宽 |
+|---|---|---|
+| ![本楼外景](docs/images/house3/X1-本楼外景.png) | ![俯瞰](docs/images/house3/X2-越过窗框俯瞰公园.png) | ![公园全景](docs/images/house3/X3-公园全景.png) |
+
+#### 屋里
+
+平面是一条贯通轴线：入户门 → 画廊 → 大客厅在同一条轴上，形成 15 米通视，尽头就是公园。
+画廊是一面 12 米长的挂画墙；大客厅向餐厅与厨房敞开。
+
+![大客厅、餐厅与厨房](docs/images/house3/A2-客厅餐厅厨房.png)
+
+| 画廊 12 米展线 | 餐厅 | 厨房中岛 |
+|---|---|---|
+| ![画廊](docs/images/house3/V3-画廊-12米展线.png) | ![餐厅](docs/images/house3/V4-餐厅望公园.png) | ![厨房](docs/images/house3/V8-厨房中岛.png) |
+
+| 主卧转角窗 | 客卧望中城 | 出生点，机器狗眼高 |
+|---|---|---|
+| ![主卧](docs/images/house3/V5-主卧转角窗.png) | ![客卧](docs/images/house3/V6-客卧望中城.png) | ![狗视角](docs/images/house3/V7-狗视角-玄关出生点.png) |
+
+最后那张才是整个场景的意义所在：0.38 米高度上，机器狗看到的主要是地板、踢脚线和家具底面，
+外加一条它永远够不着的天空。同一个房间，换成人形 1.25 米的相机就是另一个房间。
+
+屋里的家具，house3 是第一个穿上**真实网格外衣**而不是全靠基本体拼的场景。
+怎么在**不改变任何一次碰撞**的前提下把网格挂上去，见[网格只是外衣](#网格只是外衣)。
+
 ### 机器人视角
 
 场景最终要服务的是机器人的眼睛。下面几张都是**四足机器狗头部相机**看到的画面（高度 0.38 m），
@@ -192,7 +260,36 @@ python make_docs_images.py E1 G3  # 只出指定几张
 **封顶。** 有天花板，机器人抬头看到的是屋顶不是天空；天花板单独归一个 geom group，
 出俯视图时整层关掉即可。
 
-**窗外有世界。** 近处树木草地 → 中景楼房 → 远处城市天际线背景板（matte painting 手法）。
+**窗外有世界。** 近处树木草地 → 中景楼房 → 远处城市天际线背景板。house3 里这块背景板
+被换成了一路到底的真实数据。
+
+### 网格只是外衣
+
+house1 和 house2 的每件家具都是基本体拼出来的。house3 继续这么拼——然后再把**下载来的网格
+当外衣套上去**。底下的盒子仍然是碰撞真相，网格是纯视觉的（`contype="0" conaffinity="0"`）。
+
+让这件事安全的规矩是一条**包含性不变式**：每张网格都缩到完全装进它所装饰的盒子里，
+于是任何打得到网格的射线**一定先打到盒子**，**所有射线读数和没穿外衣时逐位相同**。
+这一条非要不可，因为 **`mj_ray` 根本不看 `contype`**——「它只是视觉的」这句话对物理成立、
+对射线不成立，而消费方的雷达和导航探测走的全是 `mj_ray`。
+
+而且这条不变式是**自检强制**的，不是靠自觉：`check_decor_ray_invariance` 从每件穿了外衣的
+家具外面打射线，要求带外衣和不带外衣的读数完全一致。
+
+两个用血换来的坑，两个都**编译干净、渲染正常**：
+
+- ⛔ **把碰撞盒的 `rgba` alpha 设成 0 来隐身，会把它从 `mj_ray` 里删掉。**
+  盒子照样碰撞，所以物理看着没事，而导航和雷达悄悄地能直接穿过家具。
+  正解是 `group="3"`——它只管画不画，射线不受影响。
+- ⛔ **网格探出盒子时，把盒子改大完全没用**，因为包含性缩放会把网格按比例一起撑大，
+  超出量原封不动。真正的原因有两个：MuJoCo 按每张网格**自身的重心**重定位顶点，
+  而管线记的是**包围盒中心**（实测最大差 3.1 米）；以及记下来的包围盒取自导出**之前**的对象，
+  和落盘的 OBJ 对不上。`decor/calibrate.py` 用一个编译出来的探针模型把这两样都实测出来，
+  写回 lock 文件。
+
+资产字节**不入库**。`decor/manifest.py` 登记要拉什么，`decor/fetch.py` 负责下载并守着一道
+**可执行的许可闸**——上游许可不在白名单里的字节直接拒绝写入，而不是只打个警告——
+`decor.lock.json` 逐个部件记 SHA-256。裸 clone 照样能生成全部场景，只是家具不穿外衣而已。
 
 ---
 
@@ -206,12 +303,24 @@ scenes/
   house2/layout.py  三层小楼：多出楼层、楼梯、平台、梯井隔墙、栏板
   house2/shots.py
   house2/楼梯设计.md ⭐ 楼梯尺寸怎么推出来的、依据哪条规范、做错过什么
+  house3/layout.py  62 层曼哈顿大平层：玻璃幕墙、窗景四层、真家具
+  house3/shots.py
+  house3/nyc_massing.py  ⭐ 2716 栋真实曼哈顿建筑（由 make_view.py --nyc 生成，入库）
+decor/              ⭐ 真家具网格——脚本入库，资产字节永不入库
+  manifest.py       拉什么 + 可执行的许可白名单
+  fetch.py          下载 → 转换 → 减面 → 写 decor.lock.json 与 ATTRIBUTION.md
+  convert.py        glTF/GLB → 按材质拆成单网格 OBJ + PNG（要 trimesh，⛔ 生成器永不 import 它）
+  calibrate.py      ⛔ 用编译出来的探针模型实测每张网格的真实重心与包围盒
+  robocasa.py       RoboCasa 厨房电器 → decor 零件（剥掉 joint/actuator/option）
+  assets/           gitignore——拓下来的字节住这儿
 robots/
   manifest.py       ⭐ 机器人清单单一真相源（模型/出生高度/相机/策略/力矩怎么发）
   go2/              宇树 Go2 模型（含头部前视相机）
   g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
 furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
 make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
+make_view.py        house3 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
+fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
 make_house.py       布局 + 机器人 → <场景>-<机器人>.xml（MJCF）
 check_scene.py      ⭐ 场景自检：查产物不查声明，生成之后必跑
 walkthrough.py      第一人称漫游，用来人眼验收（WASD + 鼠标，带碰撞与重力）
@@ -231,8 +340,9 @@ pip install mujoco numpy pillow
 # 看一眼（场景已经生成好了，直接就能开）
 python -m mujoco.viewer --mjcf=house1-go2.xml    # 单层大平层，四足那份
 python -m mujoco.viewer --mjcf=house2-g1.xml     # 三层小楼带楼梯，人形那份
+python -m mujoco.viewer --mjcf=house3-g1.xml    # 62 层俯瞰中央公园，人形那份
 
-python walkthrough.py --scene house2            # 自己走进去看（第一人称）
+python walkthrough.py --scene house3            # 自己走进去看（第一人称）
 ```
 
 改了屋子要重新生成：
@@ -244,6 +354,24 @@ python make_house.py --scene house2 --robot g1 # 只出三层楼的人形那份
 python check_scene.py                          # ⭐ 生成之后必跑
 ALICE_SCENE=house2 python make_docs_images.py  # 重出配图
 ```
+
+下面这些是可选的。house3 的贴图和那 2716 栋楼**已经入库**，clone 下来直接就能编译；
+只有想改它们时才需要重跑。**家具网格是例外**——字节永不入库，所以裸 clone 上
+house3 的家具会一直是素盒子，直到你把它们拉下来：
+
+```bash
+pip install trimesh fast-simplification           # 只有下载/转换那一侧要它
+
+python fetch_assets.py                            # CC0 室内材质（ambientCG）
+python make_view.py --all                         # 天空六面 · 中央公园航拍 · 2716 栋楼
+python -m decor.fetch                             # 家具网格（Poly Haven CC0 + Objaverse CC-BY）
+python -m decor.robocasa                          # 厨房电器（RoboCasa，CC-BY）
+python -m decor.calibrate                         # ⛔ 上面两条只要跑过，这条必跑
+python make_house.py && python check_scene.py     # 重新生成并自检
+```
+
+⛔ `decor/calibrate.py` 不是可选的。它用编译出来的探针模型实测每张网格的真实重心与包围盒；
+不跑它，网格会摆偏、探出碰撞盒，射线不变性自检会直接判红。
 
 `check_scene.py` 不是走过场。它把每份产物真的用 MuJoCo 编译一遍，然后**沿整条上楼路线
 逐点打射线**——楼层平台 → 上行跑 → 中间平台 → 回头跑 → 上一层 → 门口，
@@ -299,7 +427,7 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 
 ## 版本
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.6**。
+见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.8**。
 
 ## 许可
 
@@ -309,6 +437,22 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie)，
 BSD-3-Clause，见 `robots/go2/GO2_MODEL_LICENSE` 与 `robots/g1/G1_MODEL_LICENSE`；
 G1 我们改了什么、为什么改，写在 `robots/g1/G1_MODEL_UPSTREAM.md`。
+
+house3 的窗景是拿**数据**搭的，不是从谁的数据集里拷字节出来。只有派生出来的坐标表
+（`scenes/house3/nyc_massing.py`）入库，其余一律在你自己机器上拉：
+
+| 是什么 | 来源 | 条款 |
+|---|---|---|
+| 2716 栋建筑轮廓（只存包围盒） | NYC Open Data `5zhs-2jue` | Local Law 11 of 2012，Admin Code §23-502(d)：无注册、无许可、无使用限制，**且无 share-alike**。署名留在 `textures/house3/ATTRIBUTION.md` |
+| 中央公园航拍 | USGS NAIP | **公共领域**（美国联邦作品） |
+| 天空六面、室内材质 | Poly Haven · ambientCG | **CC0-1.0**——派生出来的 PNG **入库**（`textures/house3/`），否则 house3 编译不过 |
+| 家具网格 | Poly Haven | **CC0-1.0**——拉取，不入库 |
+| 床与床头柜网格 | Objaverse（@elba） | **CC-BY-4.0**，逐件核过——拉取，不入库 |
+| 厨房电器 | RoboCasa（经 NVIDIA 的 HuggingFace 镜像） | **CC-BY-4.0**——拉取，不入库 |
+
+⛔ **建筑数据有意不用 OpenStreetMap 当主源。** 覆盖率相当（它本来就大半是从纽约市这份数据导入的），
+但把 2716 行、由 OSM 派生的坐标表提交进 MIT 仓，构成 ODbL 意义上的「派生数据库」，
+share-alike 会附着到那个文件上。
 
 ## 致谢
 

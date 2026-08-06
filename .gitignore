@@ -16,3 +16,9 @@ temp/
 MUJOCO_LOG.TXT
 node_modules/
 .pytest_cache/
+decor/assets/
+# 上游原始压缩包与 GeoJSON 缓存（RoboCasa zip 有 135 MB）——只是下载中转，不入库
+.cache/
+
+# 给 Jeff 看图的中转夹（正本在工作区根，见全局 CLAUDE.md）——绝不入库
+临时图片拷贝版本/

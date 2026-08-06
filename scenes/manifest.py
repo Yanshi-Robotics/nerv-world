@@ -36,6 +36,13 @@ SCENES: dict[str, dict] = {
         "floors": 1,
         "note": "首个场景。无高差、无楼梯，适合导航与房间识别。",
     },
+    "house3": {
+        "label": "曼哈顿高层豪宅大平层（13 空间，约 345 ㎡，62 层）",
+        "layout": "scenes/house3/layout.py",
+        "floors": 1,
+        "note": "北面整墙落地窗俯瞰中央公园。考的是视觉信息极强、且窗外是 232 米空气的环境；"
+                "落地窗有可碰撞玻璃，不然机器人会直接走出去。",
+    },
 }
 
 DEFAULT_SCENE = "house1"

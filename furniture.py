@@ -9,6 +9,8 @@
     （name / room / type / pos / size / rgba，可选 mat、euler）
   · size 一律写**全长**（与 layout 同约定），make_house.py 负责折半
   · yaw 单位是度，绕 z 轴；0 = 朝 +x（东），90 = 朝 +y（北）
+    ⚠️ 度只是**这个库对外的说法**；写进 dict 的是 quat（见 _p 的说明），
+       因为 MJCF 那边的 euler 单位跟着全局 <compiler angle> 走，靠不住。
 """
 from __future__ import annotations
 
@@ -26,11 +28,19 @@ def _rot(dx: float, dy: float, yaw_deg: float) -> tuple[float, float]:
 
 
 def _p(name, room, typ, pos, size, rgba, mat="", yaw=0.0):
+    """把一个零件打包成 layout.FURNITURE 认的 dict。
+
+    ⛔ 朝向输出的是 **quat 不是 euler**（2026-08-05 修）：`<compiler angle>` 是整个编译模型
+       全局的，而它来自 include 进来的机器人 XML（写着 angle="radian"），所以
+       `euler="0 0 90"` 会被当成 **90 弧度**读。实测本该 180° 的椅子曾经是 −126.76°。
+       四元数没有单位，这类错不会再犯。换算在 make_house.yaw_quat 里，那边有完整说明。
+    """
     d = {"name": name, "room": room, "type": typ, "pos": pos, "size": size, "rgba": rgba}
     if mat:
         d["mat"] = mat
     if abs(yaw) > 1e-6:
-        d["euler"] = (0.0, 0.0, yaw)
+        a = math.radians(yaw) / 2.0
+        d["quat"] = (math.cos(a), 0.0, 0.0, math.sin(a))
     return d
 
 
@@ -206,3 +216,29 @@ def tray_set(name: str, room: str, x: float, y: float, z: float) -> list[dict]:
         _p(f"{name}_cup_b", room, "cylinder", (x + 0.08, y, z + 0.075), (0.13, 0.13, 0.12),
            (0.95, 0.95, 0.94, 1)),
     ]
+
+
+def mesh_piece(name: str, room: str, x: float, y: float, *, size, mesh: str,
+               yaw: float = 0.0, z: float | None = None, rgba=(0.62, 0.60, 0.58, 1.0),
+               mat: str = "", offset=(0.0, 0.0, 0.0), fit: str = "contain",
+               shrink: float = 1.0) -> list[dict]:
+    """一件"穿了真网格外衣"的家具。
+
+    ⭐ 返回的仍然是**一个普通的 box 零件**——它就是碰撞真相；只是多带一个 `mesh` 字段，
+       生成器据此再发一张纯视觉的网格几何**套在这个盒子里**。
+       所以：改尺寸只改 `size`，网格自动跟着缩；不装资产时场景照样完整（只是没外衣）。
+    ⛔ `size` 一律写**全长**（和本文件其余部分同约定）。
+
+    `shrink` = **额外收缩系数**（默认 1.0 = 不额外收）。
+    ⚠️ 只在个别资产上需要：`decor/convert.py` 记的是每个部件的**包围盒中心**，而 MuJoCo
+       编译时按**重心**重定位顶点，两者在非闭合网格上能差几十厘米。`decor/calibrate.py`
+       已经把实测重心写回 lock 补掉了主要部分，但少数资产（软包床、抱枕这类布料件）
+       残差仍会让网格探出碰撞盒。判据只有一个：`check_scene.py` 的
+       **⭐⭐ 装饰网格没改变任何射线读数** 那条必须绿。
+    ⛔ 别改成"放大碰撞盒"——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
+    """
+    zc = size[2] / 2.0 if z is None else z
+    d = _p(name, room, "box", (x, y, zc), size, rgba, mat, yaw)
+    d["mesh"] = {"id": mesh, "yaw": yaw, "fit": fit, "offset": tuple(offset),
+                 "shrink": float(shrink)}
+    return [d]

@@ -76,31 +76,6 @@
     <light name="light_stair_f2" pos="4.6 3.34 8.34" dir="0 0 -1" diffuse="0.62 0.61 0.58" specular="0.05 0.05 0.05" attenuation="0.55 0.06 0.010"/>
     <light name="sun" pos="10 -18 22" dir="-0.35 0.62 -0.70" directional="true" diffuse="0.55 0.54 0.50" specular="0.10 0.10 0.10"/>
 
-    <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->
-    <geom name="outdoor_ground" type="box" size="60 60 0.05" pos="0 0 -0.06" rgba="0.36 0.46 0.3 1" contype="0" conaffinity="0"/>
-    <geom name="tree0_trunk" type="cylinder" size="0.16 1.7" pos="-11 8 1.7" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree0_crown" type="sphere" size="0.95" pos="-11 8 4.065" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="tree1_trunk" type="cylinder" size="0.16 2" pos="-4 10.5 2" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree1_crown" type="sphere" size="1.1" pos="-4 10.5 4.77" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="tree2_trunk" type="cylinder" size="0.16 1.6" pos="4 10 1.6" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree2_crown" type="sphere" size="0.9" pos="4 10 3.83" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="tree3_trunk" type="cylinder" size="0.16 1.9" pos="11 5 1.9" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree3_crown" type="sphere" size="1.05" pos="11 5 4.535" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="tree4_trunk" type="cylinder" size="0.16 1.5" pos="11.5 -6 1.5" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree4_crown" type="sphere" size="0.85" pos="11.5 -6 3.595" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="tree5_trunk" type="cylinder" size="0.16 1.8" pos="-11.5 -6.5 1.8" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
-    <geom name="tree5_crown" type="sphere" size="1" pos="-11.5 -6.5 4.3" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
-    <geom name="bldg0" type="box" size="5 5 13" pos="-34 40 13" rgba="0.55 0.57 0.6 1" contype="0" conaffinity="0"/>
-    <geom name="bldg1" type="box" size="7 6 16" pos="-10 46 16" rgba="0.5 0.52 0.56 1" contype="0" conaffinity="0"/>
-    <geom name="bldg2" type="box" size="6 5.5 12" pos="18 42 12" rgba="0.58 0.6 0.62 1" contype="0" conaffinity="0"/>
-    <geom name="bldg3" type="box" size="5.5 6.5 15" pos="40 38 15" rgba="0.52 0.54 0.58 1" contype="0" conaffinity="0"/>
-
-    <!-- ===== 城市背景板（窗外风景）===== -->
-    <geom name="city_north" type="box" size="65 0.2 17" pos="0 46 12" material="mat_city" contype="0" conaffinity="0"/>
-    <geom name="city_south" type="box" size="65 0.2 17" pos="0 -46 12" material="mat_city" contype="0" conaffinity="0"/>
-    <geom name="city_east" type="box" size="0.2 65 17" pos="46 0 12" material="mat_city" contype="0" conaffinity="0"/>
-    <geom name="city_west" type="box" size="0.2 65 17" pos="-46 0 12" material="mat_city" contype="0" conaffinity="0"/>
-
     <!-- ===== 门厅 ===== -->
     <geom name="entry_floor" type="box" size="2.25 2.55 0.025" pos="-3.75 -1.95 -0.025" material="mat_marble_grey"/>
     <geom name="entry_ceiling" type="box" size="2.25 2.55 0.05" pos="-3.75 -1.95 2.78" rgba="0.95 0.95 0.93 1" group="1"/>
@@ -207,46 +182,46 @@
     <geom name="furn_h2_dining_legb" type="box" size="0.04 0.04 0.36" pos="3.8 -2.55 0.36" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_dining_legc" type="box" size="0.04 0.04 0.36" pos="2.6 -1.85 0.36" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_dining_legd" type="box" size="0.04 0.04 0.36" pos="2.6 -2.55 0.36" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_seat" type="box" size="0.23 0.23 0.03" pos="2.75 -1.45 0.45" euler="0 0 -90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_n1_back" type="box" size="0.03 0.2185 0.26" pos="2.75 -1.26 0.71" euler="0 0 -90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_n1_slata" type="box" size="0.035 0.025 0.2548" pos="2.6212 -1.26 0.71" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_slatb" type="box" size="0.035 0.025 0.2548" pos="2.8788 -1.26 0.71" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_legfl" type="box" size="0.025 0.025 0.21" pos="2.925 -1.625 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_legfr" type="box" size="0.025 0.025 0.21" pos="2.575 -1.625 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_legrl" type="box" size="0.025 0.025 0.21" pos="2.925 -1.275 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_legrr" type="box" size="0.025 0.025 0.21" pos="2.575 -1.275 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_railf" type="box" size="0.02 0.175 0.02" pos="2.75 -1.625 0.153" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n1_railr" type="box" size="0.02 0.175 0.02" pos="2.75 -1.275 0.153" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_seat" type="box" size="0.23 0.23 0.03" pos="3.65 -1.45 0.45" euler="0 0 -90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_n2_back" type="box" size="0.03 0.2185 0.26" pos="3.65 -1.26 0.71" euler="0 0 -90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_n2_slata" type="box" size="0.035 0.025 0.2548" pos="3.5212 -1.26 0.71" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_slatb" type="box" size="0.035 0.025 0.2548" pos="3.7788 -1.26 0.71" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_legfl" type="box" size="0.025 0.025 0.21" pos="3.825 -1.625 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_legfr" type="box" size="0.025 0.025 0.21" pos="3.475 -1.625 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_legrl" type="box" size="0.025 0.025 0.21" pos="3.825 -1.275 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_legrr" type="box" size="0.025 0.025 0.21" pos="3.475 -1.275 0.21" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_railf" type="box" size="0.02 0.175 0.02" pos="3.65 -1.625 0.153" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_n2_railr" type="box" size="0.02 0.175 0.02" pos="3.65 -1.275 0.153" euler="0 0 -90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_seat" type="box" size="0.23 0.23 0.03" pos="2.75 -2.95 0.45" euler="0 0 90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_s1_back" type="box" size="0.03 0.2185 0.26" pos="2.75 -3.14 0.71" euler="0 0 90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_s1_slata" type="box" size="0.035 0.025 0.2548" pos="2.8788 -3.14 0.71" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_slatb" type="box" size="0.035 0.025 0.2548" pos="2.6212 -3.14 0.71" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_legfl" type="box" size="0.025 0.025 0.21" pos="2.575 -2.775 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_legfr" type="box" size="0.025 0.025 0.21" pos="2.925 -2.775 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_legrl" type="box" size="0.025 0.025 0.21" pos="2.575 -3.125 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_legrr" type="box" size="0.025 0.025 0.21" pos="2.925 -3.125 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_railf" type="box" size="0.02 0.175 0.02" pos="2.75 -2.775 0.153" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s1_railr" type="box" size="0.02 0.175 0.02" pos="2.75 -3.125 0.153" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_seat" type="box" size="0.23 0.23 0.03" pos="3.65 -2.95 0.45" euler="0 0 90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_s2_back" type="box" size="0.03 0.2185 0.26" pos="3.65 -3.14 0.71" euler="0 0 90" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_dc_s2_slata" type="box" size="0.035 0.025 0.2548" pos="3.7788 -3.14 0.71" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_slatb" type="box" size="0.035 0.025 0.2548" pos="3.5212 -3.14 0.71" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_legfl" type="box" size="0.025 0.025 0.21" pos="3.475 -2.775 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_legfr" type="box" size="0.025 0.025 0.21" pos="3.825 -2.775 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_legrl" type="box" size="0.025 0.025 0.21" pos="3.475 -3.125 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_legrr" type="box" size="0.025 0.025 0.21" pos="3.825 -3.125 0.21" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_railf" type="box" size="0.02 0.175 0.02" pos="3.65 -2.775 0.153" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_dc_s2_railr" type="box" size="0.02 0.175 0.02" pos="3.65 -3.125 0.153" euler="0 0 90" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_seat" type="box" size="0.23 0.23 0.03" pos="2.75 -1.45 0.45" quat="0.707107 0 0 -0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_n1_back" type="box" size="0.03 0.2185 0.26" pos="2.75 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_n1_slata" type="box" size="0.035 0.025 0.2548" pos="2.6212 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_slatb" type="box" size="0.035 0.025 0.2548" pos="2.8788 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_legfl" type="box" size="0.025 0.025 0.21" pos="2.925 -1.625 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_legfr" type="box" size="0.025 0.025 0.21" pos="2.575 -1.625 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_legrl" type="box" size="0.025 0.025 0.21" pos="2.925 -1.275 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_legrr" type="box" size="0.025 0.025 0.21" pos="2.575 -1.275 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_railf" type="box" size="0.02 0.175 0.02" pos="2.75 -1.625 0.153" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n1_railr" type="box" size="0.02 0.175 0.02" pos="2.75 -1.275 0.153" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_seat" type="box" size="0.23 0.23 0.03" pos="3.65 -1.45 0.45" quat="0.707107 0 0 -0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_n2_back" type="box" size="0.03 0.2185 0.26" pos="3.65 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_n2_slata" type="box" size="0.035 0.025 0.2548" pos="3.5212 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_slatb" type="box" size="0.035 0.025 0.2548" pos="3.7788 -1.26 0.71" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_legfl" type="box" size="0.025 0.025 0.21" pos="3.825 -1.625 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_legfr" type="box" size="0.025 0.025 0.21" pos="3.475 -1.625 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_legrl" type="box" size="0.025 0.025 0.21" pos="3.825 -1.275 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_legrr" type="box" size="0.025 0.025 0.21" pos="3.475 -1.275 0.21" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_railf" type="box" size="0.02 0.175 0.02" pos="3.65 -1.625 0.153" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_n2_railr" type="box" size="0.02 0.175 0.02" pos="3.65 -1.275 0.153" quat="0.707107 0 0 -0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_seat" type="box" size="0.23 0.23 0.03" pos="2.75 -2.95 0.45" quat="0.707107 0 0 0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_s1_back" type="box" size="0.03 0.2185 0.26" pos="2.75 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_s1_slata" type="box" size="0.035 0.025 0.2548" pos="2.8788 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_slatb" type="box" size="0.035 0.025 0.2548" pos="2.6212 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_legfl" type="box" size="0.025 0.025 0.21" pos="2.575 -2.775 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_legfr" type="box" size="0.025 0.025 0.21" pos="2.925 -2.775 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_legrl" type="box" size="0.025 0.025 0.21" pos="2.575 -3.125 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_legrr" type="box" size="0.025 0.025 0.21" pos="2.925 -3.125 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_railf" type="box" size="0.02 0.175 0.02" pos="2.75 -2.775 0.153" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s1_railr" type="box" size="0.02 0.175 0.02" pos="2.75 -3.125 0.153" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_seat" type="box" size="0.23 0.23 0.03" pos="3.65 -2.95 0.45" quat="0.707107 0 0 0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_s2_back" type="box" size="0.03 0.2185 0.26" pos="3.65 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_dc_s2_slata" type="box" size="0.035 0.025 0.2548" pos="3.7788 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_slatb" type="box" size="0.035 0.025 0.2548" pos="3.5212 -3.14 0.71" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_legfl" type="box" size="0.025 0.025 0.21" pos="3.475 -2.775 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_legfr" type="box" size="0.025 0.025 0.21" pos="3.825 -2.775 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_legrl" type="box" size="0.025 0.025 0.21" pos="3.475 -3.125 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_legrr" type="box" size="0.025 0.025 0.21" pos="3.825 -3.125 0.21" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_railf" type="box" size="0.02 0.175 0.02" pos="3.65 -2.775 0.153" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_dc_s2_railr" type="box" size="0.02 0.175 0.02" pos="3.65 -3.125 0.153" quat="0.707107 0 0 0.707107" rgba="0.34 0.24 0.16 1"/>
 
     <!-- ===== 楼梯间 ===== -->
     <geom name="stair_f0_floor" type="box" size="1.4 2.74 0.025" pos="4.6 3.34 -0.025" material="mat_wood_light"/>
@@ -296,16 +271,16 @@
     <geom name="furn_h2_desk_legb" type="box" size="0.04 0.04 0.36" pos="-3.8 -2.65 3.24" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_desk_legc" type="box" size="0.04 0.04 0.36" pos="-5 -2.15 3.24" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_desk_legd" type="box" size="0.04 0.04 0.36" pos="-5 -2.65 3.24" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_seat" type="box" size="0.23 0.23 0.03" pos="-4.4 -1.6 3.33" euler="0 0 180" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_desk_chair_back" type="box" size="0.03 0.2185 0.26" pos="-4.21 -1.6 3.59" euler="0 0 180" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_desk_chair_slata" type="box" size="0.035 0.025 0.2548" pos="-4.21 -1.4712 3.59" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_slatb" type="box" size="0.035 0.025 0.2548" pos="-4.21 -1.7288 3.59" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_legfl" type="box" size="0.025 0.025 0.21" pos="-4.575 -1.775 3.09" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_legfr" type="box" size="0.025 0.025 0.21" pos="-4.575 -1.425 3.09" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_legrl" type="box" size="0.025 0.025 0.21" pos="-4.225 -1.775 3.09" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_legrr" type="box" size="0.025 0.025 0.21" pos="-4.225 -1.425 3.09" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_railf" type="box" size="0.02 0.175 0.02" pos="-4.575 -1.6 3.033" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_desk_chair_railr" type="box" size="0.02 0.175 0.02" pos="-4.225 -1.6 3.033" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_seat" type="box" size="0.23 0.23 0.03" pos="-4.4 -1.6 3.33" quat="0 0 0 1" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_desk_chair_back" type="box" size="0.03 0.2185 0.26" pos="-4.21 -1.6 3.59" quat="0 0 0 1" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_desk_chair_slata" type="box" size="0.035 0.025 0.2548" pos="-4.21 -1.4712 3.59" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_slatb" type="box" size="0.035 0.025 0.2548" pos="-4.21 -1.7288 3.59" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_legfl" type="box" size="0.025 0.025 0.21" pos="-4.575 -1.775 3.09" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_legfr" type="box" size="0.025 0.025 0.21" pos="-4.575 -1.425 3.09" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_legrl" type="box" size="0.025 0.025 0.21" pos="-4.225 -1.775 3.09" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_legrr" type="box" size="0.025 0.025 0.21" pos="-4.225 -1.425 3.09" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_railf" type="box" size="0.02 0.175 0.02" pos="-4.575 -1.6 3.033" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_desk_chair_railr" type="box" size="0.02 0.175 0.02" pos="-4.225 -1.6 3.033" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_dlamp_base" type="cylinder" size="0.09 0.025" pos="-4.9 -2.55 3.685" rgba="0.28 0.28 0.3 1"/>
     <geom name="furn_h2_dlamp_pole" type="cylinder" size="0.015 0.13" pos="-4.9 -2.55 3.82" rgba="0.42 0.43 0.46 1"/>
     <geom name="furn_h2_dlamp_shade" type="cylinder" size="0.15 0.12" pos="-4.9 -2.55 4.02" rgba="0.96 0.9 0.62 1"/>
@@ -417,16 +392,16 @@
     <geom name="furn_h2_studio_desk_legb" type="box" size="0.04 0.04 0.36" pos="-3.1 3.04 6.12" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_studio_desk_legc" type="box" size="0.04 0.04 0.36" pos="-4.9 3.64 6.12" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_studio_desk_legd" type="box" size="0.04 0.04 0.36" pos="-4.9 3.04 6.12" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_seat" type="box" size="0.23 0.23 0.03" pos="-4 2.49 6.21" euler="0 0 180" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_studio_chair_back" type="box" size="0.03 0.2185 0.26" pos="-3.81 2.49 6.47" euler="0 0 180" rgba="0.46 0.33 0.22 1"/>
-    <geom name="furn_h2_studio_chair_slata" type="box" size="0.035 0.025 0.2548" pos="-3.81 2.6188 6.47" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_slatb" type="box" size="0.035 0.025 0.2548" pos="-3.81 2.3612 6.47" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_legfl" type="box" size="0.025 0.025 0.21" pos="-4.175 2.315 5.97" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_legfr" type="box" size="0.025 0.025 0.21" pos="-4.175 2.665 5.97" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_legrl" type="box" size="0.025 0.025 0.21" pos="-3.825 2.315 5.97" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_legrr" type="box" size="0.025 0.025 0.21" pos="-3.825 2.665 5.97" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_railf" type="box" size="0.02 0.175 0.02" pos="-4.175 2.49 5.913" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
-    <geom name="furn_h2_studio_chair_railr" type="box" size="0.02 0.175 0.02" pos="-3.825 2.49 5.913" euler="0 0 180" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_seat" type="box" size="0.23 0.23 0.03" pos="-4 2.49 6.21" quat="0 0 0 1" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_studio_chair_back" type="box" size="0.03 0.2185 0.26" pos="-3.81 2.49 6.47" quat="0 0 0 1" rgba="0.46 0.33 0.22 1"/>
+    <geom name="furn_h2_studio_chair_slata" type="box" size="0.035 0.025 0.2548" pos="-3.81 2.6188 6.47" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_slatb" type="box" size="0.035 0.025 0.2548" pos="-3.81 2.3612 6.47" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_legfl" type="box" size="0.025 0.025 0.21" pos="-4.175 2.315 5.97" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_legfr" type="box" size="0.025 0.025 0.21" pos="-4.175 2.665 5.97" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_legrl" type="box" size="0.025 0.025 0.21" pos="-3.825 2.315 5.97" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_legrr" type="box" size="0.025 0.025 0.21" pos="-3.825 2.665 5.97" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_railf" type="box" size="0.02 0.175 0.02" pos="-4.175 2.49 5.913" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
+    <geom name="furn_h2_studio_chair_railr" type="box" size="0.02 0.175 0.02" pos="-3.825 2.49 5.913" quat="0 0 0 1" rgba="0.34 0.24 0.16 1"/>
     <geom name="furn_h2_plant_st_pot" type="cylinder" size="0.23 0.2" pos="2.56 1.4 5.96" rgba="0.52 0.4 0.33 1"/>
     <geom name="furn_h2_plant_st_pot_rim" type="cylinder" size="0.2484 0.025" pos="2.56 1.4 6.17" rgba="0.46 0.35 0.29 1"/>
     <geom name="furn_h2_plant_st_soil" type="cylinder" size="0.207 0.015" pos="2.56 1.4 6.19" rgba="0.22 0.17 0.13 1"/>
@@ -496,6 +471,31 @@
     <!-- 入户门（视觉件） -->
     <geom name="front_door" type="box" size="0.04 0.6 1.05" pos="-6.04 -3.4 1.05" rgba="0.38 0.27 0.18 1"/>
     <geom name="front_door_handle" type="box" size="0.03 0.03 0.12" pos="-5.97 -2.95 1" rgba="0.72 0.7 0.66 1"/>
+
+    <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->
+    <geom name="outdoor_ground" type="box" size="60 60 0.05" pos="0 0 -0.06" rgba="0.36 0.46 0.3 1" contype="0" conaffinity="0"/>
+    <geom name="tree0_trunk" type="cylinder" size="0.16 1.7" pos="-11 8 1.7" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree0_crown" type="sphere" size="0.95" pos="-11 8 4.065" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="tree1_trunk" type="cylinder" size="0.16 2" pos="-4 10.5 2" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree1_crown" type="sphere" size="1.1" pos="-4 10.5 4.77" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="tree2_trunk" type="cylinder" size="0.16 1.6" pos="4 10 1.6" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree2_crown" type="sphere" size="0.9" pos="4 10 3.83" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="tree3_trunk" type="cylinder" size="0.16 1.9" pos="11 5 1.9" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree3_crown" type="sphere" size="1.05" pos="11 5 4.535" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="tree4_trunk" type="cylinder" size="0.16 1.5" pos="11.5 -6 1.5" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree4_crown" type="sphere" size="0.85" pos="11.5 -6 3.595" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="tree5_trunk" type="cylinder" size="0.16 1.8" pos="-11.5 -6.5 1.8" rgba="0.36 0.25 0.16 1" contype="0" conaffinity="0"/>
+    <geom name="tree5_crown" type="sphere" size="1" pos="-11.5 -6.5 4.3" rgba="0.24 0.45 0.22 1" contype="0" conaffinity="0"/>
+    <geom name="bldg0" type="box" size="5 5 13" pos="-34 40 13" rgba="0.55 0.57 0.6 1" contype="0" conaffinity="0"/>
+    <geom name="bldg1" type="box" size="7 6 16" pos="-10 46 16" rgba="0.5 0.52 0.56 1" contype="0" conaffinity="0"/>
+    <geom name="bldg2" type="box" size="6 5.5 12" pos="18 42 12" rgba="0.58 0.6 0.62 1" contype="0" conaffinity="0"/>
+    <geom name="bldg3" type="box" size="5.5 6.5 15" pos="40 38 15" rgba="0.52 0.54 0.58 1" contype="0" conaffinity="0"/>
+
+    <!-- ===== 城市背景板（窗外风景）===== -->
+    <geom name="city_north" type="box" size="65 17 0.2" pos="0 46 12" quat="0.707107 0.707107 0 0" material="mat_city" contype="0" conaffinity="0"/>
+    <geom name="city_south" type="box" size="65 17 0.2" pos="0 -46 12" quat="0.707107 0.707107 0 0" material="mat_city" contype="0" conaffinity="0"/>
+    <geom name="city_east" type="box" size="65 17 0.2" pos="46 0 12" quat="0.5 0.5 0.5 0.5" material="mat_city" contype="0" conaffinity="0"/>
+    <geom name="city_west" type="box" size="65 17 0.2" pos="-46 0 12" quat="0.5 0.5 0.5 0.5" material="mat_city" contype="0" conaffinity="0"/>
 
   </worldbody>
 </mujoco>

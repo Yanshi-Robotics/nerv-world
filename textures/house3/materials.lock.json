@@ -1,0 +1,83 @@
+{
+  "h3_linen": {
+    "ambientcg_id": "Fabric036",
+    "license": "CC0-1.0",
+    "note": "细密平织：沙发与床品软包",
+    "resolution": "2K",
+    "sha256": "c43eeaffc17c3259dea167c7887627bae4dff1036ee5c476283f2561b5d66a80",
+    "source": "https://ambientcg.com/get?file=Fabric036_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_marble": {
+    "ambientcg_id": "Marble021",
+    "license": "CC0-1.0",
+    "note": "亮面白大理石：画廊地面（12.6 m 展线要通透）",
+    "resolution": "2K",
+    "sha256": "5c9631f44df618a6c33ed7aa33dc3a35bf8dc117dbd6889d1d4058664bf88f9c",
+    "source": "https://ambientcg.com/get?file=Marble021_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_marble_blk": {
+    "ambientcg_id": "Marble016",
+    "license": "CC0-1.0",
+    "note": "黑大理石：厨房台面与岛台，和白地面对比",
+    "resolution": "2K",
+    "sha256": "dbe779cc4b00d6a4b90f8a5ecad078092b4ce1ab74b89ad25ef9c992a4199f71",
+    "source": "https://ambientcg.com/get?file=Marble016_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_oak": {
+    "ambientcg_id": "WoodFloor070",
+    "license": "CC0-1.0",
+    "note": "主木地板：米褐、干净的宽板，北带三间与主卧",
+    "resolution": "2K",
+    "sha256": "7a162e982062fd207413e75c1638f2284b59fa0547b3de8939954ed7649a75f7",
+    "source": "https://ambientcg.com/get?file=WoodFloor070_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_oak_dark": {
+    "ambientcg_id": "WoodFloor064",
+    "license": "CC0-1.0",
+    "note": "深色拼花：书房/衣帽间，和主地板拉开层次",
+    "resolution": "2K",
+    "sha256": "d056adf150f436cddeee74ca8c50f95a87ece3899a42218b3f3c5cac2a0512a0",
+    "source": "https://ambientcg.com/get?file=WoodFloor064_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_onyx": {
+    "ambientcg_id": "Onyx012",
+    "license": "CC0-1.0",
+    "note": "米色玛瑙：主卫墙面（独立浴缸那面）",
+    "resolution": "2K",
+    "sha256": "11955872469552d0a2f2e36d6fbf368af3287abebc9a9c505c79ab18eaf1d555",
+    "source": "https://ambientcg.com/get?file=Onyx012_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_plaster": {
+    "ambientcg_id": "Plaster001",
+    "license": "CC0-1.0",
+    "note": "干净哑光石膏：全屋墙面（比程序化的那张细腻）",
+    "resolution": "2K",
+    "sha256": "baa1f718c98fe4cb6092829df9c35404cb5278355d999aea0afe5c3d28ee8281",
+    "source": "https://ambientcg.com/get?file=Plaster001_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_rug": {
+    "ambientcg_id": "Carpet016",
+    "license": "CC0-1.0",
+    "note": "米色地毯：大客厅与玄关地毯",
+    "resolution": "2K",
+    "sha256": "92dec0e1a9557a0129ba255a9533627ddafb5858712cb2d7049a9ce78a2d7a1e",
+    "source": "https://ambientcg.com/get?file=Carpet016_2K-PNG.zip",
+    "target_px": 1024
+  },
+  "h3_travertine": {
+    "ambientcg_id": "Travertine009",
+    "license": "CC0-1.0",
+    "note": "米黄洞石：玄关、东过厅、厨房地面",
+    "resolution": "2K",
+    "sha256": "bb40efdb0f83a3bd4efeadc950cdbbdbd2dda736eb607ae4bd753308edc7340d",
+    "source": "https://ambientcg.com/get?file=Travertine009_2K-PNG.zip",
+    "target_px": 1024
+  }
+}

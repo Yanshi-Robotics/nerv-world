@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import math
 import os
 
 from scenes import manifest as SCENES
@@ -59,13 +60,52 @@ def _rgba(c) -> str:
     return " ".join(f"{v:g}" for v in c)
 
 
-def _box(name: str, pos, size, rgba, extra: str = "", mat: str = "", euler=None) -> str:
-    """一个 box geom（size 传全长，这里统一折半）。给了 mat 就用材质，否则用纯色。"""
+def yaw_quat(yaw_deg: float):
+    """绕 z 轴转 yaw（**度**）对应的四元数 (w, x, y, z)。
+
+    ⛔ 为什么旋转一律走 quat 而不是 euler：`<compiler angle="...">` 是**整个编译模型全局**的，
+       而它来自 include 进来的机器人 XML（robots/g1/g1.xml、robots/go2/go2.xml 都写着
+       angle="radian"）。也就是说 `euler="0 0 90"` 会被当成 **90 弧度**读，不是 90 度。
+       2026-08-05 实测：本仓所有家具的朝向因此全是错的——本该 180° 的椅子实际是 −126.76°，
+       本该 90° 的实际是 116.62°。
+       四元数**没有单位**，换谁当机器人、上游哪天改了 angle 都不会再错一次。
+    """
+    a = math.radians(yaw_deg) / 2.0
+    return (math.cos(a), 0.0, 0.0, math.sin(a))
+
+
+def _box(name: str, pos, size, rgba, extra: str = "", mat: str = "",
+         euler=None, quat=None, group: int = 0) -> str:
+    """一个 box geom（size 传全长，这里统一折半）。给了 mat 就用材质，否则用纯色。
+
+    旋转二选一：`quat`（首选，无单位）或 `euler`。
+    ⚠️ `euler` 的单位跟随全局 `<compiler angle>`，本模型是**弧度**（见 yaw_quat 的说明）。
+       只有 `_stair_rails` 还在用它，因为它本来算出来的就是弧度。新代码一律用 quat。
+    """
+    if euler is not None and quat is not None:
+        raise ValueError(f"geom {name!r} 同时给了 euler 和 quat，只能给一个")
     look = f'material="{mat}"' if mat else f'rgba="{_rgba(rgba)}"'
-    rot = f' euler="{euler[0]:g} {euler[1]:g} {euler[2]:g}"' if euler else ""
+    rot = _rot_attr(euler, quat)
+    # `group` 只管画不画（默认渲染器只画 0–2 组），**不影响碰撞，也不影响 mj_ray**。
+    grp = f' group="{group}"' if group else ""
     return (f'    <geom name="{name}" type="box" '
             f'size="{_half(size[0]):g} {_half(size[1]):g} {_half(size[2]):g}" '
-            f'pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}"{rot} {look}{extra}/>')
+            f'pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}"{rot} {look}{grp}{extra}/>')
+
+
+def _rot_attr(euler=None, quat=None) -> str:
+    """把旋转渲染成 XML 属性串；两个都没有就返回空串。
+
+    ⚠️ 四元数分量按 1e-12 归零：cos(180°/2) 算出来是 6.12e-17 而不是 0，
+       原样写进产物既难读、又让 diff 里出现一串无意义的科学计数法。
+       1e-12 远小于任何有意义的旋转（1e-12 rad ≈ 6e-11 度），归零不改变几何。
+    """
+    if quat is not None:
+        q = [0.0 if abs(v) < 1e-12 else v for v in quat]
+        return f' quat="{q[0]:g} {q[1]:g} {q[2]:g} {q[3]:g}"'
+    if euler is not None:
+        return f' euler="{euler[0]:g} {euler[1]:g} {euler[2]:g}"'
+    return ""
 
 
 def _solid_runs(start: float, end: float, gaps: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -95,8 +135,10 @@ def _openings_on(room_key: str, side: str, horizontal: bool, fixed: float,
     want = "h" if horizontal else "v"
     doors = [(d["center"], d["width"], d.get("kind", "door")) for d in L.DOORS
              if d["orient"] == want and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
-    # 窗多带一个窗台高度：普通窗用默认值，落地窗在 layout 里用 "sill" 覆盖成贴地
-    windows = [(w["center"], w["width"], w.get("sill", L.WINDOW_SILL_H)) for w in L.WINDOWS
+    # 窗多带窗台高和窗楣高：普通窗用默认值，落地窗在 layout 里用 "sill"/"top" 各自覆盖
+    # （落地窗 sill≈0、top≈层高，一整片玻璃从地到顶）
+    windows = [(w["center"], w["width"], w.get("sill", L.WINDOW_SILL_H),
+                w.get("top", L.WINDOW_TOP_H)) for w in L.WINDOWS
                if w["room"] == room_key and w["side"] == side and lo <= w["center"] <= hi]
     return doors, windows
 
@@ -130,26 +172,38 @@ def _wall_geoms(room_key: str) -> list[str]:
 
         # 待画矩形列表：(沿墙起, 沿墙止, z 下, z 上)
         rects: list[tuple[float, float, float, float]] = []
-        all_gaps = [(c, w) for c, w, _k in doors] + [(c, w) for c, w, _s in windows]
+        all_gaps = [(c, w) for c, w, _k in doors] + [(c, w) for c, w, _s, _t in windows]
         for a, b in _solid_runs(lo, hi, all_gaps):
             rects.append((a, b, 0.0, H))                      # 整高实墙
         for c, w, kind in doors:                               # 门楣（整段拆除的通道没有门楣）
             if kind != "open":
                 rects.append((c - w / 2, c + w / 2, L.DOOR_HEIGHT, H))
-        for c, w, sill in windows:                             # 窗台墙 + 窗楣墙
+        for c, w, sill, top in windows:                        # 窗台墙 + 窗楣墙
             if sill > 1e-6:                                    # 落地窗窗台≈0，就不画下面那截
                 rects.append((c - w / 2, c + w / 2, 0.0, sill))
-            rects.append((c - w / 2, c + w / 2, L.WINDOW_TOP_H, H))
+            if H - top > 1e-6:                                 # 落地窗顶到天花板，也就没有窗楣墙
+                rects.append((c - w / 2, c + w / 2, top, H))
 
+        # ⚠️ 墙是**竖着**的板，而 MuJoCo 给基本体贴 2D 图是沿几何体局部 Z 轴投影的——
+        #    不转的话墙面贴图会被拉成竖条纹。house1/house2 用的是程序化噪点，
+        #    条纹读起来像"拉毛墙面"所以一直没人发现；换成有纹理的石膏就露馅了。
+        #    ⛔ 转过来会改变老场景的产物，所以由 layout 的 `WALL_FACE_FIX` 开关控制，
+        #       默认关（house1/house2 逐字节不变），house3 打开。
+        face_fix = getattr(L, "WALL_FACE_FIX", False) and room.get("wall_mat")
+        wquat = (_FACE_NS if horizontal else _FACE_EW) if face_fix else None
         for i, (a, b, z0, z1) in enumerate(rects):
             if b - a < 1e-6 or z1 - z0 < 1e-6:
                 continue
             along_c, along_len = (a + b) / 2.0, b - a
             zc, zlen = (z0 + z1) / 2.0 + zb, z1 - z0
             pos = (along_c, fixed_c, zc) if horizontal else (fixed_c, along_c, zc)
-            size = (along_len, t, zlen) if horizontal else (t, along_len, zlen)
+            if wquat:
+                # 转过之后：局部 X = 墙的水平方向、局部 Y = 竖直、局部 Z = 法线
+                size = (along_len, zlen, t)
+            else:
+                size = (along_len, t, zlen) if horizontal else (t, along_len, zlen)
             out.append(_box(f"{room_key}_w{side}{i}", pos, size, rgba,
-                            mat=room.get("wall_mat", "")))
+                            mat=room.get("wall_mat", ""), quat=wquat))
 
         # 门框 / 窗框（纯视觉，让洞口看起来是"一扇门/一扇窗"而不是墙上一个豁口）
         for j, (c, w, kind) in enumerate(doors):
@@ -157,9 +211,9 @@ def _wall_geoms(room_key: str) -> list[str]:
                 continue
             out += _frame(f"{room_key}_df{side}{j}", horizontal, c, w, fixed_c, t,
                           zb, zb + L.DOOR_HEIGHT, L.DOOR_FRAME_RGBA, L.DOOR_FRAME_THICK, bottom=False)
-        for j, (c, w, sill) in enumerate(windows):
+        for j, (c, w, sill, top) in enumerate(windows):
             out += _frame(f"{room_key}_wf{side}{j}", horizontal, c, w, fixed_c, t,
-                          zb + sill, zb + L.WINDOW_TOP_H, L.WINDOW_FRAME_RGBA, L.WINDOW_FRAME_T,
+                          zb + sill, zb + top, L.WINDOW_FRAME_RGBA, L.WINDOW_FRAME_T,
                           bottom=True)
     return out
 
@@ -220,25 +274,53 @@ def _floor_geom(room_key: str) -> list[str]:
     return out
 
 
+_FURN_TYPES = ("box", "cylinder", "sphere")
+
+
+def _has_mesh_coat(item: dict) -> bool:
+    """这件家具是不是真的会发出一张网格外衣（资产已登记且字节在磁盘上）。"""
+    key = (item.get("mesh") or {}).get("id", "")
+    if not key:
+        return False
+    from decor import lock
+    return lock.has(key) and lock.bytes_present(key)
+
+
 def _furniture_geom(item: dict) -> str:
     """一件家具。
 
     ⚠️ layout 里的 z 写的是**该楼层内的高度**（桌面 0.75 就是 0.75），生成器在这里加上
     楼层基面。让作者心算 "三楼的桌子 = 0.75 + 5.76" 是制造错误的做法。
     """
+    if item["type"] not in _FURN_TYPES:
+        raise ValueError(
+            f'家具 {item["name"]!r} 的 type={item["type"]!r} 不认识（只支持 '
+            f'{"/".join(_FURN_TYPES)}）。⛔ 这里以前会**悄悄按 box 出**——打错一个字'
+            f'就是屋里凭空多一块板，而且从截图上根本看不出来。')
     sx, sy, sz = item["size"]
-    mat, eu = item.get("mat", ""), item.get("euler")
+    mat, eu, qt = item.get("mat", ""), item.get("euler"), item.get("quat")
+    # ⭐ 穿了真网格外衣的家具，**碰撞盒本身不能画出来**。
+    #    网格是缩到盒子里面去的（包含性不变式），盒子不透明就把外衣整个盖住了——
+    #    ⚠️ 这个错渲染不报错、自检也全绿，只有看图才发现"上了真家具还是一堆白盒子"。
+    #
+    # ⛔⛔ 隐身只能用 `group="3"`，**绝不能把 rgba 的 alpha 设成 0**。
+    #    实测：alpha=0 之后 `mj_ray` 直接跳过这个 geom——碰撞盒等于被悄悄挖空，
+    #    导航和雷达全变，而**编译不报错**。是本仓的射线不变性自检当场抓到的
+    #    （3 条射线穿过茶几打到了后面）。
+    #    `group` 只管画不画：MuJoCo 默认渲染器只画第 0–2 组，而射线一律照打。
+    hide_box = _has_mesh_coat(item)
     zb = _zbase(item["room"])
     px, py, pz = item["pos"]
     item = {**item, "pos": (px, py, pz + zb)}
     if item["type"] in ("cylinder", "sphere"):
         look = f'material="{mat}"' if mat else f'rgba="{_rgba(item["rgba"])}"'
-        rot = f' euler="{eu[0]:g} {eu[1]:g} {eu[2]:g}"' if eu else ""
+        rot = _rot_attr(eu, qt)
         # cylinder 的 size = (半径, 半高)；sphere 只要半径；layout 里一律写 (直径, 直径, 高)
         dims = f'{_half(sx):g}' if item["type"] == "sphere" else f'{_half(sx):g} {_half(sz):g}'
         return (f'    <geom name="furn_{item["name"]}" type="{item["type"]}" size="{dims}" '
                 f'pos="{item["pos"][0]:g} {item["pos"][1]:g} {item["pos"][2]:g}"{rot} {look}/>')
-    return _box(f'furn_{item["name"]}', item["pos"], item["size"], item["rgba"], mat=mat, euler=eu)
+    return _box(f'furn_{item["name"]}', item["pos"], item["size"], item["rgba"],
+                mat=mat, euler=eu, quat=qt, group=3 if hide_box else 0)
 
 
 def _ceiling_geom(room_key: str) -> str:
@@ -344,6 +426,9 @@ def _stair_rails(flight: dict) -> list[str]:
     # 往里收半个扶手厚度，让它贴着梯边而不是骑在边界线上
     inset = w / 2.0 - L.RAIL_THICK / 2.0
     ox, oy = (0.0, sign * inset) if dx else (sign * inset, 0.0)
+    # ⚠️ 这里用 euler 而不是 quat 是**有意的且正确的**：slope 来自 math.atan2，本来就是弧度，
+    #    而全局 <compiler angle="radian">（机器人 XML 带进来的）正好也是弧度，两边对得上。
+    #    家具那条路径当年就是栽在这里——它按"度"写却走同一个 euler 出口。新代码请用 quat。
     euler = (0.0, -slope, 0.0) if dx else (slope, 0.0, 0.0)
     size = (length / math.cos(slope), L.RAIL_THICK, L.RAIL_THICK) if dx else \
            (L.RAIL_THICK, length / math.cos(slope), L.RAIL_THICK)
@@ -352,7 +437,18 @@ def _stair_rails(flight: dict) -> list[str]:
 
 
 def _lights() -> list[str]:
-    """每间屋一盏吸顶灯 —— 封了顶之后天光进不来，室内全靠这些灯，没灯就是一片黑。"""
+    """每间屋一盏吸顶灯 —— 封了顶之后天光进不来，室内全靠这些灯，没灯就是一片黑。
+
+    场景可以声明 `LIGHTS` 自己排灯位（house3 那种朝北大平层要的是"沿窗墙一排天光"，
+    不是"一房一盏"）。声明了就整份接管，不再走下面的默认规则。
+    ⚠️ 灯数没有 8 盏上限那回事——实测 mjMAXLIGHT = 100，house1 的 14 盏一直正常。
+    """
+    if getattr(L, "LIGHTS", None):
+        out = ['    <!-- ===== 灯光（场景自排）===== -->']
+        for lt in L.LIGHTS:
+            attrs = " ".join(f'{k}="{v}"' for k, v in lt.items() if k != "name")
+            out.append(f'    <light name="{lt["name"]}" {attrs}/>')
+        return out
     out = []
     for key, room in L.ROOMS.items():
         x0, y0, x1, y1 = room["rect"]
@@ -366,22 +462,41 @@ def _lights() -> list[str]:
     return out
 
 
-def _assets() -> list[str]:
+# make_textures.py 生成的那批基础贴图。⛔ 改这里要同步改 make_textures.py，两边名字必须对得上。
+# 场景专属的贴图不要往这里加，走 layout 的 TEXTURES_EXTRA（不撞名 = 老场景零回归面）。
+_BASE_TEXTURES = ("wood_floor", "wood_floor_light", "tile_white", "tile_grey",
+                  "marble", "marble_dark", "marble_warm", "marble_grey", "marble_greige",
+                  "carpet", "fabric", "fabric_blue", "wall_paint",
+                  "city_skyline", "art0", "art1", "art2", "art3",
+                  "oven_glass", "appliance_panel")
+
+
+def _assets(robot_key: str) -> list[str]:
     """<asset> 段：天空盒 + 程序化贴图（make_textures.py 生成）+ 材质定义。
 
     材质带 specular/shininess/reflectance：金属龙头会有高光、玻璃隔断半透、瓷砖有光泽感——
     这些属性比几何体本身更能把"积木感"压下去。
     """
     out = ['  <asset>']
-    out.append('    <texture type="skybox" builtin="gradient" rgb1="0.52 0.68 0.88" '
-               'rgb2="0.88 0.92 0.96" width="512" height="1024"/>')
+    # ⛔ 一个模型只能有一个 skybox（多了是编译错误）。场景自带 SKYBOX 就不出这个内置渐变天空。
+    if not getattr(L, "SKYBOX", None):
+        out.append('    <texture type="skybox" builtin="gradient" rgb1="0.52 0.68 0.88" '
+                   'rgb2="0.88 0.92 0.96" width="512" height="1024"/>')
+    else:
+        attrs = " ".join(f'{k}="{v}"' for k, v in L.SKYBOX.items())
+        out.append(f'    <texture type="skybox" {attrs}/>')
     # 贴图（file 路径相对本 XML 所在目录）
-    for name in ("wood_floor", "wood_floor_light", "tile_white", "tile_grey",
-                 "marble", "marble_dark", "marble_warm", "marble_grey", "marble_greige",
-                 "carpet", "fabric", "fabric_blue", "wall_paint",
-                 "city_skyline", "art0", "art1", "art2", "art3",
-                 "oven_glass", "appliance_panel"):
+    for name in _BASE_TEXTURES:
         out.append(f'    <texture type="2d" name="tex_{name}" file="textures/{name}.png"/>')
+    # 场景自己的额外贴图（house3 的公园航拍、城市底图、塔楼立面等）。
+    # ⛔ 名字必须和 _BASE_TEXTURES 不撞——不撞 = 对 house1/house2 零回归面。
+    # ⚠️ type 默认 "2d"，但**允许字典自己覆盖**（塔楼立面要 type="cube"，
+    #    因为 2d 贴图在竖着的基本体上会被沿局部 Z 拉成条纹）。
+    #    别把 type 硬写在 f-string 里再 join 一遍字典——会出两个 type 属性，XML 直接解析失败。
+    for t in getattr(L, "TEXTURES_EXTRA", []):
+        d = {"type": "2d", **t}
+        attrs = " ".join(f'{k}="{v}"' for k, v in d.items())
+        out.append(f'    <texture {attrs}/>')
     # 材质：texrepeat 控制平铺密度（数字越大格子越小）
     mats = [
         ("mat_wood", "tex_wood_floor", 3, 3, 0.15, 0.25, 0.02),
@@ -423,14 +538,30 @@ def _assets() -> list[str]:
                    f'specular="0.1" shininess="0.2"/>')
     out.append('    <material name="mat_mirror" rgba="0.78 0.85 0.90 1" '
                'specular="1.0" shininess="0.98" reflectance="0.6"/>')
+    # 场景自己的额外材质。同样⛔不许和上面的名字撞。
+    for m in getattr(L, "MATERIALS_EXTRA", []):
+        attrs = " ".join(f'{k}="{v}"' for k, v in m.items())
+        out.append(f'    <material {attrs}/>')
+    # ⛔ 装饰网格的 <mesh>/<texture>/<material> 必须在 **</asset> 之前**——
+    #    MJCF 的 schema 不认 <asset> 外面的 <mesh>，报的是
+    #    "Schema violation: unrecognized element"，看不出是位置错了。
+    out.extend(_mesh_assets(robot_key))
     out.append('  </asset>')
     return out
 
 
 def _wall_arts() -> list[str]:
-    """墙上挂画：画心（贴图）+ 四周画框。贴在指定房间指定墙的内表面上。"""
+    """墙上挂画：画心（贴图）+ 四周画框。贴在指定房间指定墙的内表面上。
+
+    ⚠️ 挂画和城市背景板踩的是同一个坑：竖着的板贴 2D 图会被沿局部 Z 投影成条纹。
+       所以这里也把板转到"局部 +Z = 法线"，size 一律写成 (画宽, 画高, 板厚) 的**局部**尺寸。
+       详见 _FACE_NS / _FACE_EW 上面那段说明。
+    """
+    if not getattr(L, "WALL_ARTS", None):
+        return []
     out: list[str] = ['    <!-- ===== 墙上挂画（视觉干扰项）===== -->']
     t = L.WALL_THICK
+    ft = L.ART_FRAME_T
     for i, a in enumerate(L.WALL_ARTS):
         x0, y0, x1, y1 = L.ROOMS[a["room"]]["rect"]
         horizontal = a["side"] in ("n", "s")
@@ -444,28 +575,48 @@ def _wall_arts() -> list[str]:
         else:
             fixed, off = x0 + t, +0.02
         c, z, w, h = a["center"], a["z"], a["w"], a["h"]
+        quat = _FACE_NS if horizontal else _FACE_EW
+        zb = _zbase(a["room"])
         if horizontal:
-            pos, size = (c, fixed + off, z), (w, 0.03, h)
-            fpos, fsize = (c, fixed + off * 0.6, z), (w + 2 * L.ART_FRAME_T, 0.04, h + 2 * L.ART_FRAME_T)
+            pos, fpos = (c, fixed + off, z + zb), (c, fixed + off * 0.6, z + zb)
         else:
-            pos, size = (fixed + off, c, z), (0.03, w, h)
-            fpos, fsize = (fixed + off * 0.6, c, z), (0.04, w + 2 * L.ART_FRAME_T, h + 2 * L.ART_FRAME_T)
-        out.append(_box(f"artframe{i}", fpos, fsize, L.ART_FRAME_RGBA))
-        out.append(_box(f"art{i}", pos, size, (1, 1, 1, 1), mat=f'mat_{a["tex"]}'))
+            pos, fpos = (fixed + off, c, z + zb), (fixed + off * 0.6, c, z + zb)
+        out.append(_box(f"artframe{i}", fpos, (w + 2 * ft, h + 2 * ft, 0.04),
+                        L.ART_FRAME_RGBA, quat=quat, extra=_DECOR))
+        out.append(_box(f"art{i}", pos, (w, h, 0.03), (1, 1, 1, 1),
+                        mat=f'mat_{a["tex"]}', quat=quat, extra=_DECOR))
     return out
 
 
+# 把一块板转到"局部 +Z 指向法线方向"的两个四元数。
+# ⛔ 为什么必须转（2026-08-05 修的老 bug）：MuJoCo 给**基本体**贴 type="2d" 纹理时没有 UV，
+#    它是**沿几何体自己的局部 Z 轴投影**的。所以只有法线朝局部 +Z 的面才贴得对——
+#    本仓的地板一直是对的，正因为地板是水平的、局部 +Z 朝上。
+#    而城市背景板是**竖着**的，局部 +Z 是那根 34 m 的竖轴，大面正好投不上，
+#    2048×768 的天际线图被拉成了竖条纹（见 docs/images/house1 里 2026-08-05 前的窗外截图）。
+#    转过来之后：局部 X = 板子的水平方向（贴图 u）、局部 Y = 竖直（贴图 v）、局部 Z = 法线。
+_FACE_NS = (0.70710678, 0.70710678, 0.0, 0.0)          # 绕 X 转 90°：局部 Z → 世界 −Y
+_FACE_EW = (0.5, 0.5, 0.5, 0.5)                        # 绕 (1,1,1) 转 120°：局部 Z → 世界 +X
+
+
 def _city_backdrop() -> list[str]:
-    """屋外四面城市背景板：贴天际线贴图的大立面，任何一扇窗望出去都能看到城市。"""
+    """屋外四面城市背景板：贴天际线贴图的大立面，任何一扇窗望出去都能看到城市。
+
+    ⚠️ size 一律写成 (板宽, 板高, 板厚)——那是**局部**尺寸。转过去之后世界里的
+       长宽高会换位，别拿世界坐标去核对这三个数。
+    """
+    if not L.CITY_BACKDROP:              # house3 用的是 VIEW 那套四层窗景，不出这个
+        return []
     cb = L.CITY_BACKDROP
     d, w, h, z = cb["dist"], cb["width"], cb["height"], cb["z"]
     out = ['    <!-- ===== 城市背景板（窗外风景）===== -->']
-    for name, pos, size in [
-            ("north", (0, d, z), (w, 0.4, h)),
-            ("south", (0, -d, z), (w, 0.4, h)),
-            ("east", (d, 0, z), (0.4, w, h)),
-            ("west", (-d, 0, z), (0.4, w, h))]:
-        out.append(_box(f"city_{name}", pos, size, (1, 1, 1, 1), mat="mat_city", extra=_DECOR))
+    for name, pos, quat in [
+            ("north", (0, d, z), _FACE_NS),
+            ("south", (0, -d, z), _FACE_NS),
+            ("east", (d, 0, z), _FACE_EW),
+            ("west", (-d, 0, z), _FACE_EW)]:
+        out.append(_box(f"city_{name}", pos, (w, h, 0.4), (1, 1, 1, 1),
+                        mat="mat_city", extra=_DECOR, quat=quat))
     return out
 
 
@@ -478,9 +629,12 @@ _DECOR = ' contype="0" conaffinity="0"'
 
 def _outdoor() -> list[str]:
     """屋外景色：草地 + 树 + 远处楼房。从窗口望出去有东西可看，屋子才不像个盒子。"""
+    if not (L.OUTDOOR_GROUND or L.TREES or L.BUILDINGS):
+        return []                        # 高层公寓脚下没有草地和树，整段不出
     out: list[str] = ['    <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->']
-    g = L.OUTDOOR_GROUND
-    out.append(_box("outdoor_ground", g["pos"], g["size"], g["rgba"], extra=_DECOR))
+    if L.OUTDOOR_GROUND:
+        g = L.OUTDOOR_GROUND
+        out.append(_box("outdoor_ground", g["pos"], g["size"], g["rgba"], extra=_DECOR))
     for i, (x, y, trunk_h, crown_d) in enumerate(L.TREES):
         out.append(f'    <geom name="tree{i}_trunk" type="cylinder" '
                    f'size="{0.16:g} {_half(trunk_h):g}" pos="{x:g} {y:g} {_half(trunk_h):g}" '
@@ -490,6 +644,268 @@ def _outdoor() -> list[str]:
                    f'rgba="{_rgba(L.FOLIAGE_RGBA)}"{_DECOR}/>')
     for i, (x, y, sx, sy, h, rgba) in enumerate(L.BUILDINGS):
         out.append(_box(f"bldg{i}", (x, y, h / 2.0), (sx, sy, h), rgba, extra=_DECOR))
+    return out
+
+
+def _view() -> list[str]:
+    """高层窗景：脚下的水平地面板 + 中景实体塔楼 + 本楼自己的外皮。
+
+    ⭐ 为什么分层、切点为什么在 600 m —— 算的是视差，不是拍的：
+       屋里相机横向能走约 ±4 m，取 8 m 最坏情况；960×720 + 默认 45° 视场 = 0.0625°/像素。
+       距离 d 处的特征走 8 m 的角位移是 8/d：
+         120 m（公园近边）→ 3.8° = 61 像素      300 m（亿万富翁街）→ 1.53° = 24 像素
+         600 m            → 0.76° = 12 像素     3000 m             → 0.15° = 2.4 像素
+       所以 600 m 以内必须是**真几何**（不然窗框一做参照就穿帮），以外交给无限远的天空盒，
+       全屋走一遍误差不到 10 像素，看不出来。
+
+    ⭐ GROUND_SLABS 是**水平**的板 —— 这是 MuJoCo 给基本体贴 2D 图**唯一投影正确**的朝向
+       （本仓的地板就是活证据，城市背景板当年就是栽在竖着贴）。而且从 62 层往外看，
+       视线大部分本来就是往下往外扫的，俯角天生正确 —— 这是任何一张平视照片都给不了的。
+    """
+    out: list[str] = []
+    slabs = getattr(L, "GROUND_SLABS", [])
+    if slabs:
+        out.append('    <!-- ===== 窗景 C 层：脚下的地面（水平板，贴图投影唯一正确的朝向）===== -->')
+        for s in slabs:
+            out.append(_box(s["name"], s["pos"], s["size"], s.get("rgba", (1, 1, 1, 1)),
+                            mat=s.get("mat", ""), extra=_DECOR))
+    skyline = getattr(L, "SKYLINE", [])
+    if skyline:
+        out.append('')
+        out.append('    <!-- ===== 窗景 B 层：120–600 m 的实体塔楼（真视差 + 真遮挡）===== -->')
+        for name, x, y, sx, sy, top, mat in skyline:
+            # top 是楼顶相对本层地面的标高；楼从脚下的地面板一直长上来
+            base = -L.ELEV
+            h = top - base
+            out.append(_box(f"sky_{name}", (x, y, base + h / 2.0), (sx, sy, h),
+                            (1, 1, 1, 1), mat=mat, extra=_DECOR))
+    tower = getattr(L, "HOST_TOWER", [])
+    if tower:
+        out.append('')
+        out.append('    <!-- ===== 窗景 D 层：本楼自己的外皮（否则这套房子是飘在天上的）===== -->')
+        for t in tower:
+            out.append(_box(t["name"], t["pos"], t["size"], t.get("rgba", (1, 1, 1, 1)),
+                            mat=t.get("mat", ""), extra=_DECOR))
+    return out
+
+
+def _glazing() -> list[str]:
+    """落地窗的玻璃 —— ⛔ **必须参与碰撞**，这不是装饰。
+
+    ⚠️ 血的道理：`walkthrough.PROBE_H = 1.0` 在胸高打横射线来挡人，落地窗洞口打不到东西，
+       人物就直接走出去了。在 house1 那是下 5 cm 台阶到草地；在 house3 是**232 米自由落体**，
+       而且机器人有同样的自由——窗洞在老场景里本来就没有碰撞几何。
+       那里现实中就是有玻璃，补上它既是物理事实，也修好了 walkthrough 自检第 2 项。
+    """
+    if not getattr(L, "GLASS_RGBA", None):
+        return []
+    out = ['    <!-- ===== 落地窗玻璃（⛔ 参与碰撞：没有它机器人会从 232 米走出去）===== -->']
+    t = L.WALL_THICK
+    for i, w in enumerate(L.WINDOWS):
+        if not w.get("glass"):
+            continue
+        x0, y0, x1, y1 = L.ROOMS[w["room"]]["rect"]
+        sill = w.get("sill", L.WINDOW_SILL_H)
+        top = w.get("top", L.WINDOW_TOP_H)
+        zc, hh = (sill + top) / 2.0 + _zbase(w["room"]), top - sill
+        c, ww = w["center"], w["width"]
+        fixed = {"n": y1 - t / 2.0, "s": y0 + t / 2.0,
+                 "e": x1 - t / 2.0, "w": x0 + t / 2.0}[w["side"]]
+        if w["side"] in ("n", "s"):
+            pos, size = (c, fixed, zc), (ww, L.GLASS_THICK, hh)
+        else:
+            pos, size = (fixed, c, zc), (L.GLASS_THICK, ww, hh)
+        out.append(_box(f"glass{i}", pos, size, L.GLASS_RGBA))
+    return out
+
+
+# ---------------------------------------------------------------- 装饰网格
+# 每张装饰网格都是**纯视觉外衣**，碰撞仍然由它所装饰的那个 box 承担。
+#
+# ⭐ **包含性不变式**：网格缩放到完全装进碰撞盒里 → 任何会打到网格的射线一定先打到盒子
+#    → **所有射线结果和没装饰时逐位相同**。
+# ⛔ 为什么必须这样而不是简单设 contype=0：**`mj_ray` 根本不看 contype/conaffinity**。
+#    check_scene.py 四处射线 + walkthrough.py 两处射线全传 `geomgroup=None`，
+#    一张探出碰撞盒的装饰网格照样会被打中。house2 有现成伤疤（楼梯平台放盆栽，射线打到叶子）。
+# ⭐ 而且这一对属性还有个**实测的**好处：`contype=0` **且** `conaffinity=0` 时
+#    MuJoCo **完全跳过 qhull**（`nmeshgraph = 0`），任何一个非零就要算全套凸包。
+#    20 张 9.3 万面的视觉网格编译只要 0.23 秒——⚠️ 这是整件事便宜的唯一原因，
+#    所以每张网格都必须真的带上这两个属性。
+_FIT_EPS = 0.88        # ⭐ 网格相对碰撞盒的**统一安全余量**。看着大，但每一分都是实测逼出来的：
+                       #   ① XML 里 `%g` 只写 6 位有效数字，位置和缩放都被截断；
+                       #   ② `decor/calibrate.py` 反算出的包围盒取自**编译后的顶点**，
+                       #      和摆位用的重心之间还有几何分布带来的残差；
+                       #   ③ 带 yaw 的件按"旋转后 AABB"估外廓，凸包不规则时会低估
+                       #      （实测餐椅转 −90° 后横跨 25.8 cm，估的是 23.0 cm）。
+                       # ⛔ 判据只有 `check_scene.py` 的 **⭐⭐ 装饰网格没改变任何射线读数**。
+                       #    别用"放大碰撞盒"去补——`_fit_scale` 会把网格按比例一起撑大，
+                       #    超出量原封不动（这条我白转了六轮）。
+# ⚠️ 多部件资产额外留余量：MuJoCo 编译时把每张 mesh 按**自身重心**重定位，
+#    而我们记的是**包围盒中心**——两者对不闭合的网格差得不小，差值随部件而异。
+#    ⛔ 这个差用"放大碰撞盒"补不了：`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
+#       只能**压缩缩放系数**。0.86 是试出来能让现有多部件资产全部装进去的值。
+_FIT_EPS_MULTI = 0.98
+
+
+def _decor_prefix(robot_key: str) -> str:
+    """`<mesh file>` 要爬几层 `../` 才回到仓根。
+
+    ⛔ `<compiler meshdir>` 是**整个编译模型全局**的，而且它来自 `<include>` 进来的
+       机器人 XML（`robots/g1/g1.xml` 写着 `meshdir="robots/g1/meshes"`，相对**主模型文件**解析）。
+       所以直接写 `<mesh file="decor/x.obj">` 会被找成 `robots/g1/meshes/decor/x.obj`。
+       在 include 之后再写一个 compiler 会把机器人自己的网格弄丢；写在前面则被覆盖。
+    ⚠️ 而 `<texture file>` 走的是 `texturedir`（没设 → 相对主模型目录），**两者解析规则不同**，
+       所以贴图**不带**这个前缀。别照抄隔壁那一行。
+    ✅ `..` 本身可用，已实测（载入 8738 顶点的机器人网格验证过）。
+    """
+    md = ROBOTS.get(robot_key)["meshdir"].strip("/")
+    if os.path.isabs(md) or ".." in md.split("/"):
+        raise ValueError(f"{robot_key} 的 meshdir={md!r} 不是干净的相对路径，算不出 ../ 前缀")
+    return "../" * len(md.split("/"))
+
+
+def _multi_margin(key) -> float:
+    """多部件资产的额外安全余量。单部件资产返回 1.0（不收）。
+
+    ⚠️ 为什么单部件不需要而多部件需要：`decor/convert.py` 记的是每个部件的**包围盒中心**，
+       MuJoCo 编译时却按**重心**重定位顶点。`decor/calibrate.py` 已经把实测重心写回 lock
+       补掉了主要部分，但布料/软包这类非闭合网格上仍有残差，几件部件的残差还会互相叠加。
+       单部件资产没有"部件间相对位置"这回事，所以不受影响。
+    ⛔ 别改成"放大碰撞盒"补——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
+       判据只有 `check_scene.py` 的 **⭐⭐ 装饰网格没改变任何射线读数** 那一条。
+    """
+    from decor import lock
+    return _FIT_EPS_MULTI if len(lock.parts(key)) > 1 else 1.0
+
+
+def _asset_span(key):
+    """资产**装配之后**的真实跨度：返回 (全长 xyz, 跨度中心 xyz)。
+
+    ⛔ 不能直接用 lock 里的整件包围盒：多部件资产在 MuJoCo 里是**逐个 mesh 摆放**的，
+       真实外廓要按各部件的 `offset ± half` 求并集。
+    ⚠️ 还必须把**跨度中心**一起返回：资产往往是偏心的（抱枕那件偏 9 cm），
+       若按"关于原点对称"来算，偏心那一侧就会探出碰撞盒。
+    ⚠️ 用整件包围盒的后果很隐蔽：网格会**恒定比例地**探出碰撞盒，而且
+       **放大碰撞盒完全没用**——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
+       我在这上面白转了六轮才想明白。
+    """
+    from decor import lock
+    ps = lock.parts(key)
+    if not ps or "half" not in ps[0]:
+        return lock.size(key), (0.0, 0.0, 0.0)      # 老 lock 没记部件信息就退回整件包围盒
+    lo = [min(float(p["offset"][k]) - float(p["half"][k]) for p in ps) for k in range(3)]
+    hi = [max(float(p["offset"][k]) + float(p["half"][k]) for p in ps) for k in range(3)]
+    return (tuple(h - l for h, l in zip(hi, lo)),
+            tuple((h + l) / 2.0 for h, l in zip(hi, lo)))
+
+
+def _fit_scale(item: dict, asset_size) -> float:
+    """算出让网格**完全装进**碰撞盒的均匀缩放系数。装不进就直接报错。"""
+    sx, sy, sz = item["size"]
+    yaw = float(item.get("mesh", {}).get("yaw", 0.0))
+    a = math.radians(yaw)
+    ex, ey, ez = asset_size
+    # 转过 yaw 之后的保守外接尺寸
+    rx = abs(ex * math.cos(a)) + abs(ey * math.sin(a))
+    ry = abs(ex * math.sin(a)) + abs(ey * math.cos(a))
+    if min(rx, ry, ez) <= 0:
+        raise ValueError(f"装饰 {item['name']!r} 的资产包围盒是 {asset_size}，无效")
+    return _FIT_EPS * min(sx / rx, sy / ry, sz / ez)
+
+
+def _decor_items() -> list[dict]:
+    """当前场景里所有"要穿外衣"的家具，且资产字节确实在磁盘上。"""
+    try:
+        from decor import lock
+    except ImportError:
+        return []
+    out = []
+    for item in L.FURNITURE:
+        spec = item.get("mesh")
+        if not spec:
+            continue
+        key = spec["id"]
+        if not lock.has(key):
+            print(f"   ⚠️ 装饰 {item['name']}：资产 {key} 不在 decor.lock.json 里，跳过")
+            continue
+        if not lock.bytes_present(key):
+            print(f"   ⚠️ 装饰 {item['name']}：{key} 的字节不在本机，跳过"
+                  f"（跑 python -m decor.fetch --only {key}）")
+            continue
+        out.append(item)
+    return out
+
+
+def _mesh_assets(robot_key: str) -> list[str]:
+    """装饰网格的 <mesh>/<texture>/<material> 声明。"""
+    items = _decor_items()
+    if not items:
+        return []
+    from decor import lock
+    pre = _decor_prefix(robot_key)
+    out = ['', '    <!-- ===== 装饰网格资产（decor/manifest.py 登记，decor.lock.json 落账）===== -->']
+    # ⚠️ 两套去重，**粒度不同**，别合成一套：
+    #    - <mesh> 按 (资产, 部件, **缩放**) —— scale 是 <mesh> 的属性不是 <geom> 的，
+    #      同一资产装进不同大小的盒子必须各自一份；
+    #    - <texture>/<material> 按 (资产, 部件) —— 和缩放无关，八把共用同一张贴图的餐椅
+    #      如果跟着 mesh 一起去重，就会重复声明八次，MuJoCo 直接
+    #      "repeated name 'dt_dining_chair_0' in texture" 拒绝编译。
+    seen_mesh, seen_tex = set(), set()
+    for item in items:
+        key = item["mesh"]["id"]
+        span, ctr = _asset_span(key)
+        scale = (_fit_scale(item, span) * _multi_margin(key)
+                 * float(item.get("mesh", {}).get("shrink", 1.0)))
+        for i, p in enumerate(lock.parts(key)):
+            tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
+            if tag not in seen_mesh:
+                seen_mesh.add(tag)
+                out.append(f'    <mesh name="dm_{tag}" file="{pre}{lock.rel_path(key, p["obj"])}" '
+                           f'scale="{scale:g} {scale:g} {scale:g}"/>')
+            if p.get("png") and (key, i) not in seen_tex:
+                seen_tex.add((key, i))
+                out.append(f'    <texture type="2d" name="dt_{key}_{i}" '
+                           f'file="{lock.rel_path(key, p["png"])}" colorspace="sRGB"/>')
+                out.append(f'    <material name="dmat_{key}_{i}" texture="dt_{key}_{i}" '
+                           f'specular="0.15" shininess="0.25" reflectance="0.02"/>')
+    return out
+
+
+def _decor_geoms() -> list[str]:
+    """装饰网格几何。整体收在一个 body 里，方便自检做 bodyexclude 的 A/B 对照。"""
+    items = _decor_items()
+    if not items:
+        return []
+    from decor import lock
+    out = ['    <!-- ===== 装饰网格（纯视觉外衣；碰撞仍由下面那些 box 承担）=====',
+           '         ⚠️ mj_ray 不看 contype——射线安全靠的是"包含性不变式"：',
+           '            每张网格都缩放进它的碰撞盒里，所以盒子永远先被打中。 -->',
+           '    <body name="decor_visual">']
+    for item in items:
+        spec = item["mesh"]
+        key = spec["id"]
+        span, ctr = _asset_span(key)
+        scale = (_fit_scale(item, span) * _multi_margin(key)
+                 * float(item.get("mesh", {}).get("shrink", 1.0)))
+        yaw = float(spec.get("yaw", 0.0))
+        q = yaw_quat(yaw)
+        px, py, pz = item["pos"]
+        ox, oy, oz = spec.get("offset", (0.0, 0.0, 0.0))
+        z = pz + _zbase(item["room"]) + oz
+        ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+        for i, p in enumerate(lock.parts(key)):
+            tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
+            look = (f'material="dmat_{key}_{i}"' if p.get("png")
+                    else f'rgba="{_rgba(item["rgba"])}"')
+            # ⚠️ 部件偏移必须**跟着 yaw 一起转**，再乘缩放，否则转过的多部件家具会错位。
+            # ⭐ 减掉跨度中心 `ctr`：把整件摆正到碰撞盒中心，偏心资产才不会探出一侧。
+            fx, fy, fz = (v - c for v, c in zip(lock.part_offset(key, i), ctr))
+            dx = (fx * ca - fy * sa) * scale
+            dy = (fx * sa + fy * ca) * scale
+            out.append(f'      <geom name="dg_{item["name"]}_{i}" type="mesh" mesh="dm_{tag}" '
+                       f'{look} pos="{px + ox + dx:g} {py + oy + dy:g} {z + fz * scale:g}"'
+                       f'{_rot_attr(quat=q)} contype="0" conaffinity="0" density="0"/>')
+    out.append('    </body>')
     return out
 
 
@@ -508,26 +924,46 @@ def build(robot_key: str) -> str:
     # 加了 60m 草地和几十米高的远楼，包围盒被撑到几十米 → 近裁剪面(znear ∝ extent)跟着变大，
     # **把狗脚边的地板裁没了**（实测症状：第一视角画面底部地板下方露出天空）。
     # 把 extent 钉在屋子尺度上，近处几何才不会被裁掉。
-    parts.append('  <statistic center="0 -1 1" extent="6"/>')
+    _stat = getattr(L, "STATISTIC", {"center": "0 -1 1", "extent": 6})
+    parts.append(f'  <statistic center="{_stat["center"]}" extent="{_stat["extent"]:g}"/>')
     parts.append('')
+    # 场景可以覆盖这几项。house3 必须覆盖 zfar（默认 60×extent 6 = 360 m，脚下 1200 m 的
+    # 地面板会被裁掉一半，看起来像大气雾霾、其实是裁剪 bug）和 shadowclip（默认 1×extent = 6 m
+    # 的阴影体，装不下 23×15 m 的公寓，大半个屋子根本没影子——这就是"MuJoCo 阴影不行"的误解来源）。
+    V = getattr(L, "VISUAL", {})
     parts.append('  <visual>')
-    parts.append('    <map znear="0.02" zfar="60"/>')
-    parts.append('    <headlight diffuse="0.45 0.45 0.45" ambient="0.34 0.34 0.34" specular="0.1 0.1 0.1"/>')
-    parts.append('    <quality shadowsize="4096"/>')
+    _map = f'    <map znear="{V.get("znear", 0.02):g}" zfar="{V.get("zfar", 60):g}"'
+    if "shadowclip" in V:
+        _map += f' shadowclip="{V["shadowclip"]:g}"'
+    parts.append(_map + '/>')
+    parts.append(f'    <headlight diffuse="{V.get("headlight_diffuse", "0.45 0.45 0.45")}" '
+                 f'ambient="{V.get("headlight_ambient", "0.34 0.34 0.34")}" '
+                 f'specular="{V.get("headlight_specular", "0.1 0.1 0.1")}"/>')
+    parts.append(f'    <quality shadowsize="{V.get("shadowsize", 4096)}"/>')
     # 离屏缓冲尺寸：MuJoCo 默认只有 640×480，超出就直接报错。放宽到 1080p，
     # 好出高清写真/报告媒体；世界服务给大脑的画面仍按 config 的 CAM_W/CAM_H（小图省 token）。
     parts.append(f'    <global azimuth="120" elevation="-20" offwidth="{OFFSCREEN_W}" offheight="{OFFSCREEN_H}"/>')
     parts.append('  </visual>')
     parts.append('')
-    parts.extend(_assets())
+    parts.extend(_assets(robot_key))
     parts.append('')
     parts.append('  <worldbody>')
     parts.extend(_lights())
     parts.append('')
-    parts.extend(_outdoor())
-    parts.append('')
-    parts.extend(_city_backdrop())
-    parts.append('')
+    # ⛔⛔ 发射顺序：**室内在前，窗外在后**。这不是风格问题，是安全阀。
+    #
+    #    MuJoCo 渲染时按 geom 在模型里的**先后顺序**填 `mjvScene` 的缓冲，**不按距离**；
+    #    缓冲满了只打一条 warning（"Pre-allocated visual geom buffer is full"），
+    #    **不报错**，多出来的直接不画。而 `maxgeom` **不能在 MJCF 里声明**
+    #    （`<visual><global maxgeom>` 是 schema violation），它是调用方参数：
+    #    `mujoco.Renderer` 默认 10000、`walkthrough.py` 设了 20000、消费方各写各的。
+    #    **场景文件保护不了自己。**
+    #
+    #    2026-08-06 实测（12200 个 geom）：窗景排在前面时，一旦溢出，
+    #    **近处 200 件家具一个都进不去**（0/200），远处的楼反而占满缓冲。
+    #    也就是说最坏情况是"公寓凭空消失、窗外风景完好"。
+    #    倒过来之后，最坏情况降级成"远处少几栋楼"——同样的溢出，后果天差地别。
+    #    ⛔ 别为了"先画背景再画前景"这种直觉把顺序改回去。
     for key in L.ROOMS:
         parts.append(f'    <!-- ===== {L.ROOMS[key]["label"]} ===== -->')
         parts.extend(_floor_geom(key))
@@ -539,6 +975,18 @@ def build(robot_key: str) -> str:
             if item["room"] == key:
                 parts.append(_furniture_geom(item))
         parts.append('')
+    decor = _decor_geoms()               # 装饰网格外衣（阶段 E；没资产就是空的）
+    if decor:
+        parts.extend(decor)
+        parts.append('')
+    art_geoms = _wall_arts()             # 声明了挂画才出；house2 没声明就是空的
+    if art_geoms:
+        parts.extend(art_geoms)
+        parts.append('')
+    glass = _glazing()                   # ⛔ 落地窗的玻璃，参与碰撞
+    if glass:
+        parts.extend(glass)
+        parts.append('')
     # 入户门（玄关南外墙上的门板 + 把手，纯视觉；狗在屋里活动、不出门）
     stair_geoms = _stairs()
     if stair_geoms:                      # 单层场景没有楼梯，连分隔空行都不该多出来
@@ -549,6 +997,17 @@ def build(robot_key: str) -> str:
     parts.append(_box("front_door_handle", L.FRONT_DOOR_HANDLE["pos"],
                       L.FRONT_DOOR_HANDLE["size"], L.FRONT_DOOR_HANDLE["rgba"]))
     parts.append('')
+    # ── 窗外的一切放在最后发射（理由见上面那段 ⛔）────────────────────────
+    parts.extend(_outdoor())
+    parts.append('')
+    backdrop = _city_backdrop()
+    if backdrop:
+        parts.extend(backdrop)
+        parts.append('')
+    view = _view()                       # 高层窗景四层（house3 用；老场景没声明就是空的）
+    if view:
+        parts.extend(view)
+        parts.append('')
     parts.append('  </worldbody>')
     parts.append('</mujoco>')
     return "\n".join(parts) + "\n"

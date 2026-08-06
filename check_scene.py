@@ -254,6 +254,335 @@ def check_doors(key: str, layout) -> list[str]:
     return errs
 
 
+# layout 里"声明了就该在产物里看得见"的清单：名字 → 产物里对应 geom 名字的前缀。
+# ⛔ 为什么要这条检查（2026-08-05 加）：`_wall_arts()` 从写出来那天起就没被 build() 调用过，
+#    house1 声明的 11 幅挂画一幅都没进过产物，而**生成器不会报错、截图也看不出少了什么**。
+#    这类"声明了但没接线"的腐化，只有拿声明去比产物才抓得到。
+#    新增一类会进产物的东西时，在这里登记一行。
+DECLARED_TO_GEOM = {
+    "FURNITURE": "furn_",
+    "WALL_ARTS": "art",
+    "TREES": "tree",
+    "BUILDINGS": "bldg",
+}
+
+
+def check_wellformed(key: str, layout) -> list[str]:
+    """产物是不是合法 XML —— 不需要 mujoco，生成器一坏立刻红。"""
+    import xml.etree.ElementTree as ET
+    errs: list[str] = []
+    for robot in ROBOT_CLEARANCE:
+        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        if not os.path.exists(path):
+            continue
+        try:
+            ET.parse(path)
+        except ET.ParseError as exc:
+            _fail(errs, f"{os.path.basename(path)} 不是合法 XML：{exc}")
+    return errs
+
+
+def check_assets(key: str, layout) -> list[str]:
+    """⭐ 引用的东西必须真的存在 —— 纯 Python，不需要 mujoco。
+
+    ⛔ CHANGELOG [0.6] 记着一个真出过的 bug：材质名 `mat_concrete` 根本不存在。
+       那次是靠 MuJoCo 编译报错发现的，但编译要装 mujoco；这条检查不用。
+    """
+    import xml.etree.ElementTree as ET
+    errs: list[str] = []
+    for robot in ROBOT_CLEARANCE:
+        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        if not os.path.exists(path):
+            continue
+        root = ET.parse(path).getroot()
+        asset = root.find("asset")
+        if asset is None:
+            continue
+        defined = {m.get("name") for m in asset.findall("material")}
+        for geom in root.iter("geom"):
+            mat = geom.get("material")
+            if mat and mat not in defined:
+                _fail(errs, f"{os.path.basename(path)}：geom {geom.get('name')!r} "
+                            f"引用了未定义的材质 {mat!r}")
+        for tex in asset.findall("texture"):
+            for attr, v in tex.items():
+                if not attr.startswith("file") or not v:
+                    continue
+                if not os.path.exists(os.path.join(HERE, v)):
+                    _fail(errs, f"{os.path.basename(path)}：贴图文件不存在 {v}")
+        # ⛔ 天空盒有且只能有一个：两个是编译错误，零个是一片黑虚空
+        skies = [t for t in asset.findall("texture") if t.get("type") == "skybox"]
+        if len(skies) != 1:
+            _fail(errs, f"{os.path.basename(path)}：天空盒有 {len(skies)} 个，必须正好 1 个")
+    return errs
+
+
+# ⛔ 最严的消费方默认值。`mujoco.Renderer(max_geom=10000)`；walkthrough.py 自己设了 20000，
+#    但按最严的算才安全——而且 maxgeom **不能在 MJCF 里声明**，场景文件保护不了自己。
+RENDER_GEOM_BUDGET = 10000
+
+
+def check_geom_budget(key: str, layout) -> list[str]:
+    """⛔⛔ geom 数不能超过渲染缓冲 —— 这是那条**静默**陷阱唯一的防线。
+
+    2026-08-06 实测：缓冲满了 MuJoCo **只打一条 warning、不报错**，而且是按 geom 在模型里的
+    **先后顺序**填、不按距离。窗景排在前面时溢出，**近处 200 件家具一个都进不去（0/200）**。
+    生成器现在把室内排在窗景之前（见 make_house.build 里那段 ⛔），最坏后果降级成
+    "远处少几栋楼"；但根本上还是不能超。
+    """
+    try:
+        import mujoco
+    except ImportError:
+        return ["(跳过) 没装 mujoco"]
+    errs: list[str] = []
+    for robot in ROBOT_CLEARANCE:
+        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        if not os.path.exists(path):
+            continue
+        n = mujoco.MjModel.from_xml_path(path).ngeom
+        if n > RENDER_GEOM_BUDGET:
+            _fail(errs, f"{os.path.basename(path)} 有 {n} 个 geom，超过渲染缓冲 "
+                        f"{RENDER_GEOM_BUDGET}——超出的部分**不报错、直接不画**")
+    return errs
+
+
+def check_void(key: str, layout) -> list[str]:
+    """⛔ 每个朝外的房间，往外都必须撞到实体 —— 否则机器人从 232 米走出去。
+
+    ⚠️ 必须检查命中的 geom 的 `contype != 0`：`mj_ray` 不看 contype，打到一根纯装饰的
+       竖挺也会返回距离，那是**假通过**。
+    """
+    if not getattr(layout, "GLASS_RGBA", None):
+        return []                       # 没有落地窗的场景不适用
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    if not os.path.exists(path):
+        return []
+    m = mujoco.MjModel.from_xml_path(path)
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    gid = np.zeros(1, np.int32)
+    errs: list[str] = []
+    outward = {"n": (0, 1), "s": (0, -1), "e": (1, 0), "w": (-1, 0)}
+    sides = {}
+    for w in layout.WINDOWS:
+        sides.setdefault(w["room"], set()).add(w["side"])
+    for room, ss in sides.items():
+        x0, y0, x1, y1 = layout.ROOMS[room]["rect"]
+        cx, cy = (x0 + x1) / 2.0, (y0 + y1) / 2.0
+        for side in ss:
+            vx, vy = outward[side]
+            for z in (0.30, 1.00, 1.60):
+                origin = np.array([cx, cy, z])
+                vec = np.array([float(vx), float(vy), 0.0])
+                # ⚠️ 必须**穿过非碰撞体继续走**，不能只看第一个命中：
+                #    `mj_ray` 不看 contype，装饰网格、纯视觉挂画都会挡在前面；
+                #    而且射线起点常常就在某件家具的盒子里（房间中心往往有茶几）。
+                #    只判第一次命中会得到假红——这一条我自己第一版就写错了。
+                ok, hits, o = False, [], origin.copy()
+                for _ in range(24):
+                    dist = mujoco.mj_ray(m, d, o, vec, None, 1, -1, gid)
+                    if dist < 0 or int(gid[0]) < 0:
+                        break
+                    g = int(gid[0])
+                    if m.geom_contype[g] != 0:
+                        ok = True
+                        break
+                    hits.append(mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or "?")
+                    o = o + vec * (dist + 0.01)
+                if not ok:
+                    _fail(errs, f"{room} 的 {side} 侧、高 {z:.2f} m 往外打，"
+                                f"一路没撞到**可碰撞**的东西（穿过了 {hits[:4] or '空'}）"
+                                f"——机器人会直接走出去")
+    return errs
+
+
+def check_decor_ray_invariance(key: str, layout) -> list[str]:
+    """⭐⭐ 装饰网格不许改变**任何**射线读数 —— 这是"包含性不变式"的正面证明。
+
+    ⛔ 为什么需要它：**`mj_ray` 根本不看 contype**（check_scene 四处 + walkthrough 两处射线
+       全传 `geomgroup=None`）。所以"装饰是纯视觉的"这句话对射线**不成立**。
+       house2 有现成伤疤：楼梯平台上放了盆栽，射线打到叶子，落差 +0.80 m。
+
+    做法不是去**藏**装饰，而是**证明它不影响射线**：同一批采样点打两遍，
+    一遍正常、一遍 `bodyexclude=decor_visual`，要求两者逐位相同。
+    ⭐ 这比"目测网格有没有露出来"强得多——它是可证的。
+    """
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    if not os.path.exists(path):
+        return []
+    m = mujoco.MjModel.from_xml_path(path)
+    body = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "decor_visual")
+    if body < 0:
+        return []                        # 这个场景没有装饰网格
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    g1, g2 = np.zeros(1, np.int32), np.zeros(1, np.int32)
+    errs: list[str] = []
+    # 采样：每间屋中心 + 每件家具中心，各在两个机器人的雷达高度打一圈 36 条
+    origins = []
+    for r in layout.ROOMS.values():
+        x0, y0, x1, y1 = r["rect"]
+        origins.append(((x0 + x1) / 2.0, (y0 + y1) / 2.0))
+    for it in layout.FURNITURE:
+        origins.append((it["pos"][0], it["pos"][1]))
+    # ⚠️ **只采样自由空间里的点。** "碰撞盒先被打中"只对**从外面来的**射线成立——
+    #    射线起点如果就在某件家具的盒子里，先碰到的自然是网格的内表面
+    #    （圆桌网格半径 0.66 < 方盒半宽 0.675，是几何必然，不是缺陷）。
+    #    而机器人不可能站在茶几内部，所以那种起点在物理上没有意义。
+    #    这一条我第一版没想清楚，是被这个检查自己揪出来的。
+    solid = [i for i in range(m.ngeom)
+             if m.geom_contype[i] != 0 and m.geom_type[i] == mujoco.mjtGeom.mjGEOM_BOX]
+
+    def _inside(p) -> bool:
+        for i in solid:
+            c, s = m.geom_pos[i], m.geom_size[i]
+            if all(abs(p[k] - c[k]) <= s[k] + 0.02 for k in range(3)):
+                return True
+        return False
+
+    # ⭐ 关键是**从家具外面朝它打**：绕每件装饰件一圈取起点，射向它的中心。
+    #    这才是物理上会发生的情形（机器人在屋里走、雷达扫到家具），
+    #    也是"碰撞盒必须先被打中"真正成立的情形。
+    #    ⚠️ 只在房间中心撒点是不够的——那些射线未必经过装饰件，
+    #       把 _FIT_EPS 调到 1.25（网格强行放大 25%）都测不出来，我第一版就是这样。
+    shots = []
+    for it in layout.FURNITURE:
+        if not it.get("mesh"):
+            continue
+        cx, cy, cz = it["pos"]
+        sx, sy, sz = it["size"]
+        r = math.hypot(sx, sy) / 2.0 + 0.6          # 站在盒子外面一点
+        for k in range(24):
+            a = k * math.pi / 12.0
+            for zf in (0.25, 0.55, 0.85):
+                z = cz - sz / 2.0 + sz * zf
+                o = np.array([cx + r * math.cos(a), cy + r * math.sin(a), z])
+                if _inside(o):
+                    continue
+                v = np.array([-math.cos(a), -math.sin(a), 0.0])
+                shots.append((o, v, it["name"]))
+    # 再补一圈房间中心的水平扫描（雷达的常态）
+    for ox, oy in origins:
+        for z in (0.30, 0.90):
+            o = np.array([ox, oy, z])
+            if _inside(o):
+                continue
+            for k in range(36):
+                a = k * math.pi / 18.0
+                shots.append((o, np.array([math.cos(a), math.sin(a), 0.0]), "room"))
+
+    bad = 0
+    for o, v, who in shots:
+        da = mujoco.mj_ray(m, d, o, v, None, 1, -1, g1)
+        db = mujoco.mj_ray(m, d, o, v, None, 1, body, g2)
+        if abs(da - db) > 1e-9:
+            bad += 1
+            if bad <= 3:
+                nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, int(g1[0])) or "?"
+                _fail(errs, f"装饰改变了射线读数（{who}）：从 "
+                            f"({o[0]:.2f},{o[1]:.2f},{o[2]:.2f})，带装饰 {da:.4f} m / "
+                            f"不带 {db:.4f} m（挡路的是 {nm}）——它探出了碰撞盒")
+    if bad > 3:
+        _fail(errs, f"…另有 {bad - 3} 条射线同样被改变")
+    return errs
+
+
+def check_park_sightline(key: str, layout) -> list[str]:
+    """本楼和公园之间不许有东西挡着；`zfar × extent` 必须够远。
+
+    ⛔ 两条都实际踩过（2026-08-05 house3）：
+       1. 把 220 CPS 放到了公园里（y=+45），它正杵在大客厅和公园中间，挡死左半边视野。
+       2. `zfar=500 × extent 6 = 3000 m` 而公园伸到 4230 m，远半截被裁掉——
+          而画面上**读起来像大气雾霾**，根本想不到是裁剪 bug。
+       两条都是"渲染出来才发现"，而且第二条连渲染出来都容易看错原因。
+    """
+    errs: list[str] = []
+    slabs = getattr(layout, "GROUND_SLABS", None)
+    if not slabs:
+        return []
+    park_wall = getattr(layout, "PARK_WALL_Y", None)
+    near = getattr(layout, "PARK_NEAR_Y", None)
+    half_w = getattr(layout, "PARK_W", 0.0) / 2.0
+    # 1) 本楼观景墙 → 公园近边这一段，横向 ±半个公园宽的范围内不许有塔楼
+    if park_wall is not None and near is not None:
+        for name, x, y, sx, sy, _top, _mat in getattr(layout, "SKYLINE", []):
+            if park_wall < y - sy / 2.0 < near and abs(x) < half_w:
+                _fail(errs, f"塔楼 {name}（x={x:g}, y={y:g}）落在本楼与公园之间"
+                            f"（{park_wall:g} < y < {near:g}，|x| < {half_w:g}）"
+                            f"——会挡住观景墙望出去的视线")
+    # 2) zfar × extent 必须盖得住最远的视景几何
+    V = getattr(layout, "VISUAL", {})
+    stat = getattr(layout, "STATISTIC", {})
+    reach = V.get("zfar", 60) * stat.get("extent", 6)
+    far = 0.0
+    for s in slabs:
+        far = max(far, abs(s["pos"][1]) + s["size"][1] / 2.0, abs(s["pos"][0]) + s["size"][0] / 2.0)
+    if reach < far:
+        _fail(errs, f"zfar×extent = {reach:g} m 盖不住最远的视景几何 {far:g} m"
+                    f"——远端会被裁掉，而画面上看起来只是「有点雾」")
+    return errs
+
+
+def check_art_clear(key: str, layout) -> list[str]:
+    """挂画不许压在门洞或窗洞上。
+
+    ⛔ 为什么要这条（2026-08-05 house3 实际踩到）：一幅画挂到了贯通轴线的门洞正中间，
+       渲染出来是一块大黑板把整条视线堵死。而**代码上完全看不出来**——
+       画和门是两份互不相干的声明，生成器照单全收，自检也全绿。
+       这类"两份声明各自合法、凑在一起才错"的问题，只能靠算重叠来抓。
+    """
+    errs: list[str] = []
+    for i, a in enumerate(getattr(layout, "WALL_ARTS", []) or []):
+        x0, y0, x1, y1 = layout.ROOMS[a["room"]]["rect"]
+        horizontal = a["side"] in ("n", "s")
+        want = "h" if horizontal else "v"
+        fixed = {"n": y1, "s": y0, "e": x1, "w": x0}[a["side"]]
+        lo, hi = (x0, x1) if horizontal else (y0, y1)
+        aa, ab = a["center"] - a["w"] / 2.0, a["center"] + a["w"] / 2.0
+        # 这面墙上的所有洞口：门按走向+坐标匹配，窗按房间+朝向匹配
+        gaps = [(d["center"], d["width"], d.get("note", "门"))
+                for d in layout.DOORS
+                if d["orient"] == want and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
+        gaps += [(w["center"], w["width"], "窗")
+                 for w in layout.WINDOWS
+                 if w["room"] == a["room"] and w["side"] == a["side"]]
+        for c, wd, note in gaps:
+            if aa < c + wd / 2.0 and ab > c - wd / 2.0:
+                _fail(errs, f"挂画 art{i}（{a['room']} {a['side']} 墙，{aa:.2f}…{ab:.2f}）"
+                            f"压在洞口「{note}」（{c - wd / 2:.2f}…{c + wd / 2:.2f}）上"
+                            f"——会变成一块悬在过道中间的板子")
+    return errs
+
+
+def check_no_dead_declarations(key: str, layout) -> list[str]:
+    """layout 里声明了东西，产物里就必须找得到 —— 抓"死代码把声明吃掉"这一类 bug。"""
+    errs: list[str] = []
+    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    if not os.path.exists(path):
+        return []
+    xml = open(path, encoding="utf-8").read()
+    for name, prefix in DECLARED_TO_GEOM.items():
+        declared = getattr(layout, name, None)
+        if not declared:
+            continue                     # 没声明就不该有，跳过
+        found = xml.count(f'name="{prefix}')
+        if found == 0:
+            _fail(errs, f"layout 声明了 {len(declared)} 条 {name}，"
+                        f"但产物里一个 name=\"{prefix}…\" 的 geom 都没有"
+                        f"——生成器里对应的那段是不是没被 build() 调用？")
+    return errs
+
+
 def check_route(key: str, layout) -> list[str]:
     """⭐⭐ 沿**整条上楼路线**逐点往下打射线 —— 这个文件里最值钱的一项。
 
@@ -482,10 +811,18 @@ def check_headroom(key: str, layout) -> list[str]:
 
 CHECKS = [
     ("layout 契约完整", check_contract),
+    ("产物是合法 XML", check_wellformed),
+    ("⭐ 引用的材质/贴图都真的存在", check_assets),
+    ("⛔ geom 数没超渲染缓冲", check_geom_budget),
     ("产物能被 MuJoCo 加载", check_loads),
     ("楼梯爬满一层 + 尺寸合规", check_stairs),
     ("⭐ 四个接头闭合（梯段 ↔ 平台）", check_joints),
     ("门宽够机器人过", check_doors),
+    ("⭐ 声明的东西都真的进了产物", check_no_dead_declarations),
+    ("挂画没压在门窗洞口上", check_art_clear),
+    ("⭐ 望公园的视线没被挡 + 远景没被裁", check_park_sightline),
+    ("⛔ 朝外的房间往外都撞得到实体", check_void),
+    ("⭐⭐ 装饰网格没改变任何射线读数", check_decor_ray_invariance),
     ("⭐ 整条上楼路线实测走通", check_route),
     ("楼梯头顶净空", check_headroom),
     ("楼层平台没有没拦住的洞", check_no_open_drop),

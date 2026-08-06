@@ -573,15 +573,19 @@ FURNITURE += (
 # 让 ANIMA 必须靠**真正的房间特征**（床/灶台/马桶/沙发）判断在哪间屋，
 # 而不是"墙上有东西"就乱猜。每项 = dict(room, side 贴哪面墙 n/s/e/w,
 #   center 沿墙方向中心, z 画心高度, w 画宽, h 画高, tex 用第几张画 art0..art3)
+# ⚠️ 2026-08-05 修：其中 4 幅原本压在窗洞/门洞上。
+#    这个错误此前**看不见**——`_wall_arts()` 从没被 build() 调用过（死代码），
+#    所以挂画一幅都没进过产物，压没压在洞上自然也没人发现。接上之后才暴露出来。
+#    现在 `check_scene.check_art_clear` 会算重叠并报错，位置不用再靠肉眼摆。
 WALL_ARTS: list[dict] = [
-    {"room": "living_room", "side": "n", "center": 6.5, "z": 1.75, "w": 1.6, "h": 1.1, "tex": "art0"},
+    {"room": "living_room", "side": "n", "center": 8.9, "z": 1.75, "w": 1.1, "h": 0.8, "tex": "art0"},
     {"room": "living_room", "side": "e", "center": 3.2, "z": 1.70, "w": 1.2, "h": 0.9, "tex": "art3"},
     {"room": "dining_room", "side": "w", "center": 2.5, "z": 1.70, "w": 1.4, "h": 1.0, "tex": "art2"},
-    {"room": "dining_room", "side": "n", "center": 1.8, "z": 1.75, "w": 1.3, "h": 0.95, "tex": "art1"},
-    {"room": "corridor", "side": "w", "center": -3.0, "z": 1.80, "w": 1.5, "h": 1.05, "tex": "art1"},
+    {"room": "dining_room", "side": "n", "center": 3.5, "z": 1.75, "w": 0.9, "h": 0.7, "tex": "art1"},
+    {"room": "corridor", "side": "w", "center": -1.1, "z": 1.80, "w": 1.5, "h": 1.05, "tex": "art1"},
     {"room": "corridor", "side": "e", "center": 1.0, "z": 1.75, "w": 1.2, "h": 0.9, "tex": "art0"},
     {"room": "master_bedroom", "side": "e", "center": 6.5, "z": 1.75, "w": 1.4, "h": 1.0, "tex": "art3"},
-    {"room": "entry", "side": "w", "center": -1.0, "z": 1.70, "w": 1.1, "h": 0.85, "tex": "art2"},
+    {"room": "entry", "side": "w", "center": 1.4, "z": 1.70, "w": 1.1, "h": 0.85, "tex": "art2"},
     {"room": "second_bedroom", "side": "e", "center": -8.0, "z": 1.65, "w": 0.9, "h": 0.7, "tex": "art0"},
     {"room": "kid_bedroom", "side": "e", "center": -6.5, "z": 1.55, "w": 1.0, "h": 0.8, "tex": "art2"},
     {"room": "chinese_kitchen", "side": "e", "center": -8.5, "z": 1.70, "w": 1.0, "h": 0.75, "tex": "art3"},

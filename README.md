@@ -2,7 +2,7 @@
 
 # alice-house · A House for Robots to Live In
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.6-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.8-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
 > what this repo is, where each fact lives, the entry commands, and the red lines.
@@ -16,9 +16,10 @@ come out of one layout definition per place (`scenes/<name>/layout.py`). Change 
 its layout and re-running the generator; the scene and whatever consumes it read the same source of
 truth, so coordinates can never disagree in two places.
 
-There are **two places** so far — a single-floor apartment and a three-storey house with stairs —
-and one robot can be dropped into either. Scenes and robots are two independent registries that get
-crossed at generation time.
+There are **three places** so far — a single-floor apartment, a three-storey house with stairs, and
+a 62nd-floor Manhattan apartment whose windows look out over Central Park — and one robot can be
+dropped into any of them. Scenes and robots are two independent registries that get crossed at
+generation time.
 
 It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their trained **locomotion policies** — so they really take steps, they don't teleport.
 
@@ -30,7 +31,8 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 ## Table of Contents
 
 - [What's Inside](#whats-inside) · [Robots](#robots) · [Floor Plan & Screenshots](#floor-plan)
-- [Design Principles](#design-principles)
+- [house3 — 232 Metres Up, Facing Central Park](#house3--232-metres-up-facing-central-park)
+- [Design Principles](#design-principles) · [Real Meshes as Clothing](#real-meshes-as-clothing)
 - [Project Structure](#project-structure)
 - [Quick Start](#quick-start)
 - [One Scene per Robot](#one-scene-per-robot)
@@ -46,6 +48,7 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 |---|---|---|---|
 | **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
 | **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 381 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
+| **house3** | Full-floor Manhattan apartment, **62nd storey** — foyer / gallery / great room / dining / kitchen / primary suite / guest rooms | 13 spaces / 345 m² | Built for **what's outside**. Floor-to-ceiling glass on three sides, 232 m of air below, and a real aerial of Central Park in front. Tests perception where the visual signal is overwhelmingly out of reach |
 
 ### Robots
 
@@ -142,6 +145,78 @@ A top-down view only catches the topmost storey (the three floor plans overlap),
 
 ![Three-storey plan](docs/images/house2/A1-三层楼-顶视.png)
 
+### house3 — 232 Metres Up, Facing Central Park
+
+![Manhattan apartment, ceiling hidden](docs/images/house3/A1-户型俯视图.png)
+
+house1 tests flat navigation, house2 tests climbing. **house3 tests the window.** Three sides are
+floor-to-ceiling glass, the floor slab sits 232.5 m above the street, and everything a camera sees
+through that glass is unreachable — no amount of walking changes it.
+
+| The whole view wall, great room | Down the 15 m sight line, from the front door |
+|---|---|
+| ![View wall](docs/images/house3/V2-大客厅-整面观景墙.png) | ![Enfilade](docs/images/house3/V1-贯通轴线-从入户门望公园.png) |
+
+**None of that view is a matte painting.** It is built in four layers, and where each layer takes
+over was decided by parallax arithmetic — move 8 m sideways and a building 120 m away shifts 61
+pixels, one at 600 m shifts 12, one at 3 km shifts 2.4. Below ~600 m it has to be real geometry:
+
+| Layer | What it is | Source |
+|---|---|---|
+| Sky | Real photographed sky, as six cube faces | [Poly Haven](https://polyhaven.com) HDRI (CC0) |
+| 120–600 m | 12 named towers at their real heights (Central Park Tower 472.4 m, 111 W57 435.3 m…) | NYC Open Data |
+| 0.6–4 km | **2716 real Manhattan buildings**, massing only | NYC Open Data building footprints |
+| Ground | Real USGS aerial photography of Central Park, rotated 29.05° onto the street grid | USGS NAIP (public domain) |
+
+⚠️ The building data must be filtered with `last_status_type` **including `'Merged'`** — 111 West
+57th Street inherits the 1924 Steinway Hall record and is otherwise silently dropped, taking one of
+the three needles that define the current Billionaires' Row silhouette with it.
+
+#### Proving it isn't a backdrop
+
+Two shots, same heading, camera moved 6 m east. Watch the near window mullions travel against the
+park behind them: **near and far move by different amounts**, which a painted backdrop cannot do.
+This is the whole reason the mid-ground is real geometry instead of a photograph.
+
+| Camera 3 m west of centre | Same heading, 6 m east |
+|---|---|
+| ![Parallax left](docs/images/house3/P1-视差对照-左.png) | ![Parallax right](docs/images/house3/P2-视差对照-右.png) |
+
+#### The building itself, and what it stands next to
+
+The host tower is modelled too — you are inside a real massing, not a floating box. It sits **34 m
+from the park's south edge** (the width of Central Park South), because the self-check caught the
+first attempt: originally placed 120 m out — around 57th Street — with an entire row of real
+buildings standing between the apartment and the park.
+
+| The host tower from outside | Over the window frame, straight down | Central Park, full width |
+|---|---|---|
+| ![Host tower](docs/images/house3/X1-本楼外景.png) | ![Looking down](docs/images/house3/X2-越过窗框俯瞰公园.png) | ![Park panorama](docs/images/house3/X3-公园全景.png) |
+
+#### Inside
+
+The plan is an enfilade: front door → gallery → great room line up on one axis, giving a 15 m
+sight line that ends on the park. The gallery is a 12 m hanging wall; the great room opens to
+dining and kitchen.
+
+![Great room, dining and kitchen](docs/images/house3/A2-客厅餐厅厨房.png)
+
+| Gallery — 12 m of hanging wall | Dining room | Kitchen island |
+|---|---|---|
+| ![Gallery](docs/images/house3/V3-画廊-12米展线.png) | ![Dining](docs/images/house3/V4-餐厅望公园.png) | ![Kitchen](docs/images/house3/V8-厨房中岛.png) |
+
+| Primary bedroom, corner window | Guest room, facing Midtown | Spawn point, quadruped's eye height |
+|---|---|---|
+| ![Primary bedroom](docs/images/house3/V5-主卧转角窗.png) | ![Guest room](docs/images/house3/V6-客卧望中城.png) | ![Dog view](docs/images/house3/V7-狗视角-玄关出生点.png) |
+
+That last one is the point of the whole scene: at 0.38 m the quadruped sees mostly floor, skirting
+and the underside of furniture — and a band of sky it can never reach. The same room through the
+humanoid's 1.25 m camera is a different room.
+
+Indoors, house3 is the first place dressed with **real furniture meshes** rather than assembled
+primitives. See [Real Meshes as Clothing](#real-meshes-as-clothing) for how they are attached
+without changing a single collision.
+
 ### Through the Robot's Eyes
 
 What this scene ultimately serves is a robot's camera. The shots below are from the
@@ -204,7 +279,41 @@ See `furniture.py`.
 geom group so it can be switched off in one line for top-down renders.
 
 **There's a world outside the windows.** Near trees and grass → mid-ground buildings → a distant
-city skyline backdrop (matte-painting style).
+city skyline backdrop. In house3 that backdrop is replaced by real data all the way out.
+
+### Real Meshes as Clothing
+
+house1 and house2 build every piece of furniture out of primitives. house3 keeps doing that — and
+then puts a **downloaded mesh on top as clothing**. The box underneath is still the collision
+truth; the mesh is purely visual (`contype="0" conaffinity="0"`).
+
+The rule that makes this safe is a **containment invariant**: every mesh is scaled to fit
+completely *inside* the box it dresses, so any ray that could hit the mesh hits the box first, and
+**every ray reading is bit-for-bit what it was before the furniture got dressed**. This matters
+because `mj_ray` does **not** honour `contype` — "it's only visual" is true for physics and false
+for ray casting, and every consumer's lidar and navigation probe goes through `mj_ray`.
+
+That invariant is enforced by a self-check, not by good intentions: `check_decor_ray_invariance`
+fires rays from outside every dressed piece and requires the readings with and without the meshes
+to match exactly.
+
+Two traps found the hard way, both of which compile clean and render fine:
+
+- ⛔ **Hiding the collision box with `rgba` alpha = 0 deletes it from `mj_ray`.** The box still
+  collides, so physics looks right, while navigation and lidar quietly see straight through the
+  furniture. Use `group="3"` instead — that controls drawing only; rays are unaffected.
+- ⛔ **Making the box bigger does not fix a mesh that pokes out**, because the fit scale grows the
+  mesh proportionally and the overshoot stays. The real causes were that MuJoCo re-centres each
+  mesh by its **centre of mass** while the pipeline recorded the **bounding-box centre** (up to
+  3.1 m apart), and that the recorded bounds came from before export rather than from the compiled
+  vertices. `decor/calibrate.py` measures both from a compiled probe model and writes the truth
+  back into the lock file.
+
+Asset bytes are **not** stored in this repository. `decor/manifest.py` lists what to fetch,
+`decor/fetch.py` downloads it behind an **executable licence gate** — anything whose upstream
+licence is outside the allow-list is refused, not merely warned about — and `decor.lock.json`
+records a SHA-256 per part. A bare clone still generates every scene; the pieces simply stay
+undressed.
 
 ---
 
@@ -218,12 +327,24 @@ scenes/
   house2/layout.py  three-storey house: storeys, flights, landings, well wall, parapet
   house2/shots.py
   house2/楼梯设计.md ⭐ how the stair dimensions are derived, which code clauses, what got built wrong
+  house3/layout.py  62nd-floor Manhattan apartment: glazing, the four view layers, real furniture
+  house3/shots.py
+  house3/nyc_massing.py  ⭐ 2716 real Manhattan buildings (generated by make_view.py --nyc; committed)
+decor/              ⭐ real furniture meshes — scripts committed, asset bytes never
+  manifest.py       what to fetch + the executable licence allow-list
+  fetch.py          download → convert → decimate → write decor.lock.json + ATTRIBUTION.md
+  convert.py        glTF/GLB → one-mesh-per-material OBJ + PNG (needs trimesh; the generator never imports it)
+  calibrate.py      ⛔ measures each mesh's real centre of mass and bounds from a compiled probe model
+  robocasa.py       RoboCasa kitchen appliances → decor parts (strips joints/actuators/option)
+  assets/           gitignored — the bytes live here after fetching
 robots/
   manifest.py       ⭐ single source of truth for robots (model / spawn height / camera / policy / how torque is applied)
   go2/              Unitree Go2 model (with head camera)
   g1/               Unitree G1 humanoid, 29 dof (imported from Menagerie by import_from_menagerie.py)
 furniture.py        parametric furniture part library (chairs / tables / lamps / vases / plants…)
 make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
+make_view.py        house3's window view: --sky (HDRI → cube faces) · --nyc (building footprints) · --naip (aerial) · --calib
+fetch_assets.py     downloads the CC0 interior materials (ambientCG), with SHA-256 bookkeeping and --verify
 make_house.py       layout + robot → <scene>-<robot>.xml (MJCF)
 check_scene.py      ⭐ scene self-check: verifies the product, not the claim. Run it after generating
 walkthrough.py      first-person walkthrough for eyeballing a scene (WASD + mouse, collision + gravity)
@@ -243,8 +364,9 @@ pip install mujoco numpy pillow
 # Take a look at the house (scenes are already generated — just open them)
 python -m mujoco.viewer --mjcf=house1-go2.xml    # single-floor apartment, with the quadruped
 python -m mujoco.viewer --mjcf=house2-g1.xml     # three-storey house with stairs, with the humanoid
+python -m mujoco.viewer --mjcf=house3-g1.xml     # 62nd floor over Central Park, with the humanoid
 
-python walkthrough.py --scene house2             # or walk in yourself (first person)
+python walkthrough.py --scene house3             # or walk in yourself (first person)
 ```
 
 Re-generate after changing the house:
@@ -256,6 +378,26 @@ python make_house.py --scene house2 --robot g1 # just the three-storey house, hu
 python check_scene.py                          # ⭐ always run this after generating
 ALICE_SCENE=house2 python make_docs_images.py  # re-render the screenshots
 ```
+
+Optional. house3's textures and its 2716 buildings are **already committed**, so it compiles
+straight from a clone; the commands below only need re-running if you want to change them. The
+furniture meshes are the exception — their bytes are never stored, so on a fresh clone house3's
+furniture stays as plain boxes until you fetch them:
+
+```bash
+pip install trimesh fast-simplification           # only needed by the fetch/convert side
+
+python fetch_assets.py                            # CC0 interior materials (ambientCG)
+python make_view.py --all                         # sky cube faces · Central Park aerial · 2716 buildings
+python -m decor.fetch                             # furniture meshes (Poly Haven CC0 + Objaverse CC-BY)
+python -m decor.robocasa                          # kitchen appliances (RoboCasa, CC-BY)
+python -m decor.calibrate                         # ⛔ always run after either of the two above
+python make_house.py && python check_scene.py     # regenerate and verify
+```
+
+⛔ `decor/calibrate.py` is not optional after fetching. It measures each mesh's real centre of
+mass and bounds from a compiled probe model; without it the meshes sit slightly wrong and poke out
+of their collision boxes, which the ray-invariance check will reject.
 
 `check_scene.py` is not a formality. It compiles every product in MuJoCo, then **ray-probes the
 whole climb** — floor landing → up flight → half-landing → return flight → the storey above →
@@ -322,17 +464,62 @@ went unnoticed until a ball-roll test. Two more rules learned the hard way: **a 
 
 ## Versioning
 
-See [CHANGELOG.md](CHANGELOG.md). Currently **v0.6**.
+See [CHANGELOG.md](CHANGELOG.md). Currently **v0.8**.
 
 ## License
 
-The scene generator, furniture and texture libraries, robot manifest, locomotion policies and
-documentation in this repository are **MIT** licensed (see [LICENSE](LICENSE)).
+Code and assets are licensed separately. Four tiers:
 
-Third-party assets bundled here keep their own licenses: the Unitree Go2 and G1 models come from
-[MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) under BSD-3-Clause — see
-`robots/go2/GO2_MODEL_LICENSE` and `robots/g1/G1_MODEL_LICENSE`. What we changed in the G1 model
-and why is written up in `robots/g1/G1_MODEL_UPSTREAM.md`.
+**1 · Code — MIT** (see [LICENSE](LICENSE)). The scene generator (`make_house.py`,
+`make_textures.py`, `check_scene.py`, `walkthrough.py`, `make_docs_images.py`), the furniture
+library, the scene layouts, and the manifests.
+
+**2 · Assets authored here — MIT.** The procedurally generated textures in `textures/`, the
+generated `<scene>-<robot>.xml` products, and the locomotion policies in `policies/`. These are
+produced by code in this repository from no external source material.
+
+**3 · Third-party assets bundled here — each keeps its own license.** They are *not* covered by
+the MIT license above. Every such asset ships in its own directory with its own license file:
+
+| Path | Source | License |
+|---|---|---|
+| `robots/go2/` | [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) — Unitree Robotics | BSD-3-Clause — see `robots/go2/GO2_MODEL_LICENSE` |
+| `robots/g1/` | [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie) — Unitree Robotics | BSD-3-Clause — see `robots/g1/G1_MODEL_LICENSE` |
+
+What we changed in the G1 model and why is written up in `robots/g1/G1_MODEL_UPSTREAM.md`.
+
+house3's window view is built from **data**, not bytes copied out of someone's dataset. Two sources
+are redistributed here (the derived coordinate tables in `scenes/house3/nyc_massing.py`); the rest
+is fetched on your machine:
+
+| What | Source | Terms |
+|---|---|---|
+| 2716 building footprints (bounding boxes only) | NYC Open Data `5zhs-2jue` | Local Law 11 of 2012, Admin Code §23-502(d): no registration, no licence, no restriction on use — **and no share-alike**. Attribution kept in `textures/house3/ATTRIBUTION.md` |
+| Central Park aerial photography | USGS NAIP | **Public domain** (US federal work) |
+| Sky cube faces, interior materials | Poly Haven · ambientCG | **CC0-1.0** — the derived PNGs *are* committed (`textures/house3/`), since house3 will not compile without them |
+| Furniture meshes | Poly Haven | **CC0-1.0** — fetched, not stored |
+| Bed and nightstand meshes | Objaverse (@elba) | **CC-BY-4.0**, verified per object — fetched, not stored |
+| Kitchen appliances | RoboCasa via NVIDIA's HuggingFace mirror | **CC-BY-4.0** — fetched, not stored |
+
+⛔ **OpenStreetMap is deliberately not the source** for the building data. Coverage is comparable —
+it was largely imported *from* this same city dataset — but committing a 2716-row coordinate table
+derived from OSM would constitute a "Derivative Database" under ODbL, attaching share-alike to that
+file inside an MIT repository.
+
+**4 · Third-party datasets this repository does NOT redistribute.** Some scenes can be dressed
+with meshes and textures from external datasets. Their owners license them on their own terms,
+and in several cases forbid redistribution outright, so **none of their bytes are stored here** —
+fetch scripts download them into gitignored directories on your machine, under the terms you
+accept directly from the upstream provider. Nothing in this repository grants you any rights to
+them.
+
+> **A note on why this repo stays MIT.** Relicensing to non-commercial would not unlock the
+> datasets people usually ask about: 3D-FRONT/3D-FUTURE and PartNet-Mobility forbid public
+> redistribution as a *contract* term, and BEHAVIOR-1K ships its assets encrypted. A license
+> *you* adopt cannot enlarge rights *someone else* granted you. Meanwhile NonCommercial would
+> propagate to rendered images — including this README's figures. Keeping code permissive and
+> fetching restricted data at runtime is the same pattern Habitat, RoboCasa, ManiSkill and
+> BEHAVIOR-1K all use.
 
 ## Acknowledgments
 
