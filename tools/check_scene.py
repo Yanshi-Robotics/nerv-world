@@ -60,7 +60,7 @@ REQUIRED_NAMES = [
     "WALL_HEIGHT", "WALL_THICK", "DOOR_HEIGHT", "FLOOR_THICK", "CEILING_THICK",
     "CEILING_GROUP", "CEILING_RGBA", "WINDOW_SILL_H", "WINDOW_TOP_H",
     "DOOR_FRAME_THICK", "DOOR_FRAME_RGBA", "WINDOW_FRAME_T", "WINDOW_FRAME_RGBA",
-    "ART_FRAME_T", "ART_FRAME_RGBA", "FRONT_DOOR", "FRONT_DOOR_HANDLE",
+    "ART_FRAME_T", "ART_FRAME_RGBA", "FRONT_DOOR",   # ⚠️ FRONT_DOOR_HANDLE 2026-08-08 并进 FRONT_DOOR
     "ROOMS", "DOORS", "WINDOWS", "FURNITURE", "WALL_ARTS",
     "START_POS_XY", "START_YAW",
     # ⭐ 停机位（「保姆间」）。⛔ 和 START_POS_XY 是两个量，别合并——那是任务出生点。
@@ -473,6 +473,165 @@ def _furn_floor(layout, it: dict) -> int:
     rooms = getattr(layout, "ROOMS", {})
     return rooms.get(it.get("room", ""), {}).get("floor", 0)
 
+
+
+
+# 贴墙判据：家具边离墙内表面小于这个值就算"贴着墙摆的"，才需要管它正面朝哪。
+FACE_WALL_NEAR_M = 0.35
+# 正面前方至少要有这么多净空，否则就是"脸冲着墙"。
+FACE_CLEAR_M = 0.50
+
+
+
+def check_mesh_has_uv(key: str, layout) -> list[str]:
+    """⭐⭐ 产物里每一张装饰网格都必须**带 UV**（`mesh_texcoordnum > 0`）。
+
+    ⛔ 为什么必须有它（2026-08-08，Jeff 走进屋里才发现，此前活了整整两版）：
+       `decor/convert.py` 的 `export_obj` 把 `include_texture` 写成了 False。
+       那个开关的名字有迷惑性——它管的**不是"要不要打包贴图"**，而是**要不要写 `vt` 行**。
+       于是 16 件资产、39 张网格的 OBJ 一行 UV 都没有，而 MuJoCo 拿不到 UV 就把整张网格
+       按 **uv=(0,0) 采一个像素**涂满：木柜那个像素恰好是 (49,31,17) 近黑棕 → "柜子发黑"；
+       床和床头柜是 (192,191,187) 灰白 → "门洞里一个怪箱子""床头一个没渲染的盒子"。
+       ⚠️ **编译不报错、渲染不报错、26 项自检全绿**，只有肉眼看图才发现"上了真家具还是一堆盒子"。
+
+    ⭐ 这是"同一个东西在两处各存了一份、没人逼它们对账"的又一次现形——
+       lock 里明明记着每件资产的贴图 PNG，产物里也明明引用了那些贴图，
+       **却从来没有人问过"网格到底能不能用上它"**。和 [0.9] 的 `check_lock_reconciles` 同族。
+
+    ⚠️ 只查带贴图的那些：少数部件（如床头柜的拉手）本来就没有 PNG、只有纯色 rgba，
+       那种没有 UV 是正常的，不该判红。判据取"这张网格对应的 material 引用了 texture"。
+    """
+    try:
+        import mujoco
+    except ImportError:
+        return ["(跳过) 没装 mujoco"]
+    errs: list[str] = []
+    m = mujoco.MjModel.from_xml_path(_scene_path(key, "g1"))
+    for g in range(m.ngeom):
+        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or ""
+        if not nm.startswith("dg_") or m.geom_type[g] != mujoco.mjtGeom.mjGEOM_MESH:
+            continue
+        mid = int(m.geom_matid[g])
+        if mid < 0 or int(m.mat_texid[mid][mujoco.mjtTextureRole.mjTEXROLE_RGB]) < 0:
+            continue                      # 纯色部件，本来就不需要 UV
+        mesh = int(m.geom_dataid[g])
+        if int(m.mesh_texcoordnum[mesh]) == 0:
+            mname = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_MESH, mesh) or "?"
+            _fail(errs, f"装饰网格 {mname!r}（geom {nm}）**没有 UV**，但它的材质引用了贴图——"
+                        f"MuJoCo 会按 uv=(0,0) 采一个像素涂满整件，看起来就是个单色盒子。"
+                        f"根因通常在 decor/convert.py 的 export_obj（`include_texture` 必须为 True），"
+                        f"改完要重跑 `python -m decor.fetch --force` 与 `python -m decor.calibrate`")
+    return errs
+
+def check_mesh_faces_room(key: str, layout) -> list[str]:
+    """⭐ 贴墙摆的家具，正面不许朝着墙。
+
+    ⛔ 为什么要它（2026-08-08）：三只同款木柜里，靠**东**墙那只 `gr_console` 抄了另两只
+       靠**西**墙的 `yaw=90`，于是正面顶着墙、屋里只看得到那块没有任何门缝的背板。
+       Jeff 报的"柜子发黑、结构像穿透"有一半是这个。
+       26 项自检里**没有一项管过朝向**——位置、碰撞、通行、包围盒包含性全查了，
+       唯独没查"这东西是不是背对着人"。
+
+    ⚠️ 只检查在 `decor/manifest.py` 里**显式声明了 `front`** 的资产。
+       ⛔ 别去自动推断正面：同一套启发式对油烟机就会判错（它的小部件是烟道，本来朝墙）。
+       宁可只守住实测过的那几件，也不要制造假阳性——假阳性会让人开始无视这项检查。
+    """
+    errs: list[str] = []
+    try:
+        from decor import manifest as DM
+    except ImportError:
+        return []
+    rooms = getattr(layout, "ROOMS", {})
+    t = layout.WALL_THICK
+    for it in getattr(layout, "FURNITURE", []):
+        spec = it.get("mesh") or {}
+        akey = spec.get("id", "")
+        front = (DM.ASSETS.get(akey) or {}).get("front")
+        if not front:
+            continue
+        r = rooms.get(it.get("room", ""))
+        if not r:
+            continue
+        sign = -1.0 if front.startswith("-") else 1.0
+        axis = front[-1]
+        fx, fy = (sign, 0.0) if axis == "x" else (0.0, sign)
+        q = it.get("quat")
+        yaw = 2.0 * math.atan2(q[3], q[0]) if q else 0.0
+        ca, sa = math.cos(yaw), math.sin(yaw)
+        wx, wy = fx * ca - fy * sa, fx * sa + fy * ca          # 正面在世界系的方向
+        px, py = it["pos"][0], it["pos"][1]
+        x0, y0, x1, y1 = r["rect"]
+        # 家具贴着哪面墙？（四面各算一次边到墙内表面的距离）
+        # ⛔ 必须用**转过 yaw 的世界 AABB**，不能用 `it["size"]`——那是**局部**边长。
+        #    第一版就栽在这儿：2.44 长的条案转 90° 后世界占地只有 0.52 宽，拿局部的 2.44 去量
+        #    离墙距离得到 0.94 m，于是被当成"不是贴墙摆的"直接跳过，故障注入一次都没抓到。
+        #    `_yaw_aabb()` 就是仓里干这件事的现成帮手。
+        ax0, ax1, ay0, ay1 = _yaw_aabb(it)
+        near = min(abs((x0 + t) - ax0), abs((x1 - t) - ax1),
+                   abs((y0 + t) - ay0), abs((y1 - t) - ay1))
+        if near > FACE_WALL_NEAR_M:
+            continue                                            # 不是贴墙摆的，正面朝哪随意
+        # 正面方向上到墙的净空
+        dx = ((x1 - t) - px) / wx if wx > 0.1 else (((x0 + t) - px) / wx if wx < -0.1 else 1e9)
+        dy = ((y1 - t) - py) / wy if wy > 0.1 else (((y0 + t) - py) / wy if wy < -0.1 else 1e9)
+        clear = min(dx, dy)
+        if clear < FACE_CLEAR_M:
+            _fail(errs, f"家具 {it['name']}（{akey}）**正面朝着墙**：正面方向只有 "
+                        f"{clear:.2f} m 就到墙了（要 {FACE_CLEAR_M} m）。"
+                        f"该资产的正面是局部 {front}，现在 yaw={math.degrees(yaw):.0f}° —— "
+                        f"靠西墙用 +90、靠东墙用 −90，别抄错")
+    return errs
+
+def check_front_door_visible(key: str, layout) -> list[str]:
+    """⭐ 入户门从**屋里**看得见 —— 射线打过去第一个命中必须是门扇，不能是墙。
+
+    ⛔ 为什么要这一项（2026-08-08，Jeff 走进玄关才发现）：三个场景里有 **两个半** 把门
+       画进了墙体内部。生成器的墙是**从房间矩形的边往屋内长满一个墙厚**，而三个 layout
+       都把门心放在矩形边上、又让门比墙薄：
+         · apt1  门 y∈[−7.51,−7.45] vs 南墙 y∈[−7.50,−7.36] → 整块埋在墙里，两面都看不见
+         · house1 同病；house2 只贴在室外面，屋里看不见
+       屏幕上就是一面白墙，**完全不知道哪儿是门**。而 26 项自检没有一项管过它——
+       `check_no_dead_declarations` 只问"声明的东西进没进产物"，门确实在产物里，
+       只是被墙挡住了。**"在产物里"不等于"看得见"。**
+    ⭐ 这也是门厚改成由生成器从 `WALL_THICK` 推的原因（layout 不再有机会填错）。
+    """
+    d = getattr(layout, "FRONT_DOOR", None)
+    if not d:
+        return []
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+    errs: list[str] = []
+    t = layout.WALL_THICK
+    x0, y0, x1, y1 = layout.ROOMS[d["room"]]["rect"]
+    fixed = {"n": y1 - t / 2.0, "s": y0 + t / 2.0,
+             "e": x1 - t / 2.0, "w": x0 + t / 2.0}[d["side"]]
+    inward = {"n": -1.0, "s": 1.0, "e": -1.0, "w": 1.0}[d["side"]]
+    horiz = d["side"] in ("n", "s")
+    zb = _zbase_of(layout, d["room"])
+    m = mujoco.MjModel.from_xml_path(_scene_path(key, "g1"))
+    data = mujoco.MjData(m)
+    mujoco.mj_forward(m, data)
+    for frac in (0.25, 0.5, 0.85):           # 门下段/中段/上段各打一条
+        z = zb + d["height"] * frac
+        o = ([d["center"], fixed + inward * 0.6, z] if horiz
+             else [fixed + inward * 0.6, d["center"], z])
+        v = [0.0, -inward, 0.0] if horiz else [-inward, 0.0, 0.0]
+        gid = np.zeros(1, dtype=np.int32)
+        mujoco.mj_ray(m, data, np.array(o, float), np.array(v, float), None, 1, -1, gid)
+        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, int(gid[0])) or "(没打到东西)"
+        if not nm.startswith("front_door"):
+            _fail(errs, f"入户门在 z={z:.2f} 处从屋里看不见——射线先打到了 {nm!r}。"
+                        f"门被墙挡住了（门厚必须 > WALL_THICK，见 make_house._front_door）")
+    return errs
+
+
+def _zbase_of(layout, room: str) -> float:
+    fz = getattr(layout, "FLOOR_Z", None)
+    fl = layout.ROOMS[room].get("floor", 0)
+    return float(fz(fl)) if fz else 0.0
 
 def check_reachability(key: str, layout) -> list[str]:
     """⭐⭐ 机器人到底走不走得到每间屋 —— 整层的可通行区域必须**只有一个连通块**。
@@ -1393,9 +1552,12 @@ CHECKS = [
     ("⭐⭐ 每间屋机器人都走得进去（可通行性）", check_reachability),
     ("⭐ 家具没有捅穿墙伸进隔壁", check_furniture_not_through_wall),
     ("⭐ 声明的东西都真的进了产物", check_no_dead_declarations),
+    ("⭐ 入户门从屋里看得见", check_front_door_visible),
+    ("⭐ 贴墙家具的正面没朝着墙", check_mesh_faces_room),
     ("挂画没压在门窗洞口上", check_art_clear),
     ("⭐ 望公园的视线没被挡 + 远景没被裁", check_park_sightline),
     ("⛔ 朝外的房间往外都撞得到实体", check_void),
+    ("⭐⭐ 装饰网格都带 UV（不是单色块）", check_mesh_has_uv),
     ("⭐⭐ 装饰网格整个装在碰撞盒里", check_decor_inside_box),
     ("⭐⭐ 装饰网格没改变任何射线读数", check_decor_ray_invariance),
     ("⭐ 整条上楼路线实测走通", check_route),

@@ -165,10 +165,14 @@ DOOR_FRAME_THICK = 0.10
 DOOR_FRAME_RGBA = (0.40, 0.29, 0.20, 1.0)
 
 # 入户门（玄关东外墙，纯视觉、不开洞——狗在屋里活动，不出门）
-FRONT_DOOR = {"pos": (9.42, -0.6, 1.18), "size": (0.08, 1.40, 2.35),
-              "rgba": (0.30, 0.21, 0.14, 1.0)}
-FRONT_DOOR_HANDLE = {"pos": (9.35, -1.15, 1.10), "size": (0.06, 0.06, 0.26),
-                     "rgba": (0.78, 0.72, 0.45, 1.0)}
+# ⛔ 不写厚度、不写 pos —— 门厚由生成器从 WALL_THICK 推（见 make_house._front_door 的注释）。
+#    写法和 WINDOWS 一致：开在哪间屋的哪面墙、沿墙哪个位置、多宽多高。
+FRONT_DOOR = {
+    "room": "entry", "side": "e", "center": -0.6, "width": 1.40, "height": 2.35,
+    "mat": "mat_wood", "rgba": (0.30, 0.21, 0.14, 1.0),
+    "casing_rgba": (0.55, 0.45, 0.32, 1.0),
+    "handle_rgba": (0.78, 0.72, 0.45, 1.0), "handle_side": -1,
+}
 
 # ---------------------------------------------------------------- 窗
 WINDOWS: list[dict] = [

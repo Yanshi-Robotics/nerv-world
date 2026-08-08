@@ -20,21 +20,16 @@
 | 床头柜 Tumb Astrid（@elba） | objaverse / `02c6fbe74d9d4d33b2c17c942fe99344` | Эльба Мебель | **CC-BY-4.0** | 7284 |
 | 抱枕 | polyhaven / `throw_pillows_01` | Serhii Khromov | **CC0-1.0** | 6362 |
 | 盆栽 | polyhaven / `potted_plant_01` | Rico Cilliers | **CC0-1.0** | 41295 |
-| 发财树 | polyhaven / `pachira_aquatica_01` | Rob Tuytel, Rico Cilliers | **CC0-1.0** | 63516 |
+| 发财树（⚠️ 一包 4 棵，用 parts= 取一棵） | polyhaven / `pachira_aquatica_01` | Rob Tuytel, Rico Cilliers | **CC0-1.0** | 63516 |
+| 对开门冰箱 | robocasa / `fridges/Refrigerator031` | — | **CC-BY-4.0** | 16370 |
+| 抽油烟机 | robocasa / `hoods/RangeHood002` | — | **CC-BY-4.0** | 2808 |
+| 水槽 + 龙头 | robocasa / `sinks/Sink001` | — | **CC-BY-4.0** | 5324 |
+| 四眼灶 + 烤箱 | robocasa / `stoves/Stove001` | — | **CC-BY-4.0** | 29344 |
 | 白瓷高瓶（现代） | polyhaven / `ceramic_vase_01` | James Ray Cock | **CC0-1.0** | 4000 |
 | 彩绘陶瓶 | polyhaven / `ceramic_vase_02` | James Ray Cock | **CC0-1.0** | 3999 |
 | 现代壶形瓶 | polyhaven / `ceramic_vase_04` | James Ray Cock | **CC0-1.0** | 4000 |
 
-## 厨房电器（RoboCasa / NVIDIA 镜像）
+## 厨房电器的出处（RoboCasa / NVIDIA 镜像）
 
-来源：HuggingFace 数据集 `nvidia/PhysicalAI-Robotics-Manipulation-Objects-Kitchen-MJCF`
-（`fixtures_lightwheel/` 目录，**CC-BY-4.0**）。
-移植器 `decor/robocasa.py` **只取视觉网格与贴图**，不引入任何 `<joint>` / `<actuator>` / `<option>`
-——实测移植前后 `nu=29 nq=36 nv=35` 逐位不变。
-
-| 资产 | 型号 | 许可 | 网格数 |
-|---|---|---|---|
-| 对开门冰箱 | `fridges/Refrigerator031` | **CC-BY-4.0** | 9 |
-| 四眼灶 + 烤箱 | `stoves/Stove001` | **CC-BY-4.0** | 10 |
-| 水槽 + 龙头 | `sinks/Sink001` | **CC-BY-4.0** | 3 |
-| 抽油烟机 | `hoods/RangeHood002` | **CC-BY-4.0** | 6 |
+来源：HuggingFace 数据集 `nvidia/PhysicalAI-Robotics-Manipulation-Objects-Kitchen-MJCF` 的 `fixtures_lightwheel/` 目录，**CC-BY-4.0**。
+移植器 `decor/robocasa.py` **只取视觉网格与贴图**，不引入任何 `<joint>` / `<actuator>` / `<option>`——实测移植前后 `nu=29 nq=36 nv=35` 逐位不变。

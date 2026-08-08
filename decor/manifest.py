@@ -62,8 +62,14 @@ ASSETS: dict[str, dict] = {
                  "res": "2k", "max_tris": 9000, "label": "现代单椅"},
     "coffee_table": {"source": "polyhaven", "source_id": "coffee_table_round_01",
                      "license": "CC0-1.0", "res": "2k", "max_tris": 5000, "label": "圆形大理石茶几"},
+    # ⭐ `front` = 这件资产的**正面朝局部哪个轴**。只给**实测确认过**的资产写，
+    #    没写的 `check_mesh_faces_room` 直接跳过 —— ⛔ 宁可少管，不要瞎猜。
+    #    console 用两种独立办法验过：① 柜门/抽屉面板 p0/p1 的外表面贴在 y=−0.250
+    #    （紧邻 −y 极值 −0.260），柜体 p2 在 +y 是一整块背板；② 小部件重心相对中心偏 −y 38%。
+    #    ⚠️ 同一套启发式对油烟机会给出**错的**答案（它的小部件是烟道，本来就朝墙），
+    #    所以别拿那个偏移量当通用判据。
     "console": {"source": "polyhaven", "source_id": "modern_wooden_cabinet", "license": "CC0-1.0",
-                "res": "2k", "max_tris": 12000, "label": "现代木柜（条案）"},
+                "res": "2k", "max_tris": 12000, "label": "现代木柜（条案）", "front": "-y"},
     "floor_lamp": {"source": "polyhaven", "source_id": "modern_ceiling_lamp_01",
                    "license": "CC0-1.0", "res": "2k", "max_tris": 6000, "label": "现代灯具"},
 

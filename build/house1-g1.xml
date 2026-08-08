@@ -710,9 +710,12 @@
     <geom name="artframe10" type="box" size="0.56 0.435 0.02" pos="3.848 -8.5 1.7" quat="0.5 0.5 0.5 0.5" rgba="0.22 0.18 0.15 1" contype="0" conaffinity="0"/>
     <geom name="art10" type="box" size="0.5 0.375 0.015" pos="3.84 -8.5 1.7" quat="0.5 0.5 0.5 0.5" material="mat_art3" contype="0" conaffinity="0"/>
 
-    <!-- 入户门（视觉件） -->
-    <geom name="front_door" type="box" size="0.04 0.7 1.175" pos="9.42 -0.6 1.18" rgba="0.3 0.21 0.14 1"/>
-    <geom name="front_door_handle" type="box" size="0.03 0.03 0.13" pos="9.35 -1.15 1.1" rgba="0.78 0.72 0.45 1"/>
+    <!-- 入户门（视觉件：门扇 + 门套 + 长拉手）-->
+    <geom name="front_door_casing_l" type="box" size="0.12 0.045 1.175" pos="9.43 -1.345 1.175" rgba="0.55 0.45 0.32 1"/>
+    <geom name="front_door_casing_r" type="box" size="0.12 0.045 1.175" pos="9.43 0.145 1.175" rgba="0.55 0.45 0.32 1"/>
+    <geom name="front_door_casing_t" type="box" size="0.12 0.79 0.045" pos="9.43 -0.6 2.395" rgba="0.55 0.45 0.32 1"/>
+    <geom name="front_door" type="box" size="0.09 0.7 1.175" pos="9.43 -0.6 1.175" material="mat_wood"/>
+    <geom name="front_door_handle" type="box" size="0.0225 0.0225 0.55" pos="9.3175 -1.19 1.05" rgba="0.78 0.72 0.45 1"/>
 
     <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->
     <geom name="outdoor_ground" type="box" size="60 60 0.05" pos="0 0 -0.06" rgba="0.42 0.55 0.3 1" contype="0" conaffinity="0"/>

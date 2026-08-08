@@ -116,9 +116,23 @@ def parts(sc, max_tris: int) -> tuple[list[tuple[object, bytes | None]], tuple[f
 
 
 def export_obj(mesh) -> bytes:
-    """导出单张网格的 OBJ（带 vt）。⛔ 一个文件一张网格，见坑 2。"""
+    """导出单张网格的 OBJ（**带 vt**）。⛔ 一个文件一张网格，见坑 2。
+
+    ⛔⛔ `include_texture` 必须是 True（2026-08-08 之前写的是 False，整整两版）。
+       名字有迷惑性：它管的**不是"要不要把贴图打包进去"**（那是 `write_texture`），
+       而是**要不要写 `vt` 行**。写成 False 的后果是导出的 OBJ 一行 UV 都没有，而
+       MuJoCo 拿不到 UV 就把整张网格按 **uv=(0,0) 采样一个像素**涂满——
+       于是 39 张装饰网格全变成单色块：木柜那个像素恰好是 (49,31,17) 近黑棕，
+       床和床头柜是 (192,191,187) 灰白。
+       ⚠️ 编译不报错、渲染不报错、26 项自检全绿，只有肉眼看图才发现"上了真家具还是一堆盒子"。
+       Jeff 2026-08-08 走进屋里报的"柜子发黑""门洞里一个怪箱子""床头一个没渲染的盒子"，
+       全部是这一行。
+    ⭐ `write_texture=False` 是**有意保留**的：贴图我们自己按部件另存 PNG（见 to_parts），
+       不需要 trimesh 再写一份 .mtl + 图片。两个开关管的是两件事，别一起改。
+    ✅ 实证（trimesh 4.5.1）：include_texture=True → 有 vt；False → 0 行 vt。
+    """
     from trimesh.exchange.obj import export_obj as _eo
-    txt = _eo(mesh, include_texture=False, write_texture=False)
+    txt = _eo(mesh, include_texture=True, write_texture=False)
     return txt.encode("utf-8")
 
 

@@ -468,9 +468,12 @@
     <geom name="stair_well_wall" type="box" size="0.06 1.2 4.245" pos="4.6 3.34 4.245" material="mat_wall"/>
     <geom name="stair_top_guard" type="box" size="0.6 0.06 0.525" pos="3.94 2.2 6.285" material="mat_wall"/>
 
-    <!-- 入户门（视觉件） -->
-    <geom name="front_door" type="box" size="0.04 0.6 1.05" pos="-6.04 -3.4 1.05" rgba="0.38 0.27 0.18 1"/>
-    <geom name="front_door_handle" type="box" size="0.03 0.03 0.12" pos="-5.97 -2.95 1" rgba="0.72 0.7 0.66 1"/>
+    <!-- 入户门（视觉件：门扇 + 门套 + 长拉手）-->
+    <geom name="front_door_casing_l" type="box" size="0.12 0.045 1.05" pos="-5.93 -4.045 1.05" rgba="0.52 0.5 0.47 1"/>
+    <geom name="front_door_casing_r" type="box" size="0.12 0.045 1.05" pos="-5.93 -2.755 1.05" rgba="0.52 0.5 0.47 1"/>
+    <geom name="front_door_casing_t" type="box" size="0.12 0.69 0.045" pos="-5.93 -3.4 2.145" rgba="0.52 0.5 0.47 1"/>
+    <geom name="front_door" type="box" size="0.09 0.6 1.05" pos="-5.93 -3.4 1.05" material="mat_wood"/>
+    <geom name="front_door_handle" type="box" size="0.0225 0.0225 0.55" pos="-5.8175 -2.91 1.05" rgba="0.72 0.7 0.66 1"/>
 
     <!-- ===== 屋外景色（纯装饰，不参与碰撞）===== -->
     <geom name="outdoor_ground" type="box" size="60 60 0.05" pos="0 0 -0.06" rgba="0.36 0.46 0.3 1" contype="0" conaffinity="0"/>

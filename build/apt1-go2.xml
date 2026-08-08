@@ -428,7 +428,7 @@
     <geom name="furn_gr_ch1" type="box" size="0.45 0.53 0.55" pos="4.6 6 0.55" quat="-0.173648 0 0 0.984808" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_gr_ch2" type="box" size="0.45 0.53 0.55" pos="-0.4 6.2 0.55" quat="0.984808 0 0 -0.173648" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_gr_pillows" type="box" size="0.51 0.26 0.25" pos="1.2 3.25 0.72" quat="0.997564 0 0 0.0697565" rgba="0.62 0.6 0.58 1" group="4"/>
-    <geom name="furn_gr_console" type="box" size="1.22 0.26 0.34" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" material="mat_h3_oak_dark" group="4"/>
+    <geom name="furn_gr_console" type="box" size="1.22 0.26 0.34" pos="5.78 4.6 0.34" quat="0.707107 0 0 -0.707107" material="mat_h3_oak_dark" group="4"/>
     <geom name="furn_gr_plant" type="box" size="0.33 0.35 0.69" pos="5.7 6.6 0.69" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_gr_lamp" type="box" size="0.23 0.23 0.49" pos="-1.23 3 0.49" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_gr_vase" type="box" size="0.1 0.1 0.18" pos="5.8 4.6 0.86" quat="0.976296 0 0 0.21644" rgba="0.62 0.6 0.58 1" group="4"/>
@@ -650,8 +650,8 @@
     <geom name="foyer_ww0" type="box" size="3.15 1.65 0.07" pos="0.47 -4.35 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="foyer_we0" type="box" size="3.15 1.65 0.07" pos="4.13 -4.35 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="furn_fy_console" type="box" size="1.22 0.26 0.34" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" rgba="0.52 0.4 0.28 1" group="4"/>
-    <geom name="furn_fy_lift_l" type="box" size="0.45 0.025 1.15" pos="1.15 -7.45 1.15" material="mat_steel"/>
-    <geom name="furn_fy_lift_r" type="box" size="0.45 0.025 1.15" pos="3.45 -7.45 1.15" material="mat_steel"/>
+    <geom name="furn_fy_lift_l" type="box" size="0.45 0.025 1.15" pos="1.15 -7.34 1.15" material="mat_steel"/>
+    <geom name="furn_fy_lift_r" type="box" size="0.45 0.025 1.15" pos="3.45 -7.34 1.15" material="mat_steel"/>
     <geom name="furn_fy_runner" type="box" size="0.55 2.3 0.008" pos="2.3 -4 0.008" rgba="0.44 0.4 0.36 1"/>
     <geom name="furn_fy_vase" type="box" size="0.12 0.12 0.165" pos="0.8 -4.2 0.845" rgba="0.62 0.6 0.58 1" group="4"/>
 
@@ -740,9 +740,9 @@
       <geom name="dg_gr_ch2_1" type="mesh" mesh="dm_armchair_1_1_0637" material="dmat_armchair_1" pos="-0.4 6.2 0.55" quat="0.984808 0 0 -0.173648" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_gr_pillows_0" type="mesh" mesh="dm_pillows_0_1_0742" material="dmat_pillows_0" pos="1.2 3.25 0.72" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_gr_pillows_1" type="mesh" mesh="dm_pillows_1_1_0742" material="dmat_pillows_1" pos="1.2 3.25 0.72" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_console_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_console_1" type="mesh" mesh="dm_console_1_0_9898" material="dmat_console_1" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_console_2" type="mesh" mesh="dm_console_2_0_9898" material="dmat_console_2" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="5.78 4.6 0.34" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_1" type="mesh" mesh="dm_console_1_0_9898" material="dmat_console_1" pos="5.78 4.6 0.34" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_2" type="mesh" mesh="dm_console_2_0_9898" material="dmat_console_2" pos="5.78 4.6 0.34" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_gr_plant_0" type="mesh" mesh="dm_plant_a_0_1_0119" material="dmat_plant_a_0" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_gr_plant_1" type="mesh" mesh="dm_plant_a_1_1_0119" material="dmat_plant_a_1" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_gr_plant_2" type="mesh" mesh="dm_plant_a_2_1_0119" material="dmat_plant_a_2" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
@@ -859,9 +859,12 @@
     <geom name="glass15" type="box" size="1.03 0.015 1.565" pos="7.65 -7.43 1.615" rgba="0.8 0.88 0.94 0.07"/>
     <geom name="glass16" type="box" size="1.03 0.015 1.565" pos="10.05 -7.43 1.615" rgba="0.8 0.88 0.94 0.07"/>
 
-    <!-- 入户门（视觉件） -->
-    <geom name="front_door" type="box" size="0.65 0.03 1.2" pos="2.3 -7.48 1.2" rgba="0.22 0.2 0.18 1"/>
-    <geom name="front_door_handle" type="box" size="0.02 0.02 0.17" pos="2.82 -7.42 1.1" rgba="0.72 0.68 0.58 1"/>
+    <!-- 入户门（视觉件：门扇 + 门套 + 长拉手）-->
+    <geom name="front_door_casing_l" type="box" size="0.045 0.12 1.225" pos="1.605 -7.43 1.225" rgba="0.62 0.52 0.32 1"/>
+    <geom name="front_door_casing_r" type="box" size="0.045 0.12 1.225" pos="2.995 -7.43 1.225" rgba="0.62 0.52 0.32 1"/>
+    <geom name="front_door_casing_t" type="box" size="0.74 0.12 0.045" pos="2.3 -7.43 2.495" rgba="0.62 0.52 0.32 1"/>
+    <geom name="front_door" type="box" size="0.65 0.09 1.225" pos="2.3 -7.43 1.225" material="mat_h3_oak_dark"/>
+    <geom name="front_door_handle" type="box" size="0.0225 0.0225 0.55" pos="2.84 -7.3175 1.05" rgba="0.72 0.63 0.4 1"/>
 
 
     <!-- ===== 窗景 C 层：脚下的地面（水平板，贴图投影唯一正确的朝向）===== -->

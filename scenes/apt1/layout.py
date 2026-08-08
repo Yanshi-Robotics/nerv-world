@@ -212,10 +212,15 @@ WINDOWS = (
 )
 
 # 入户门：玄关南墙上的门板（纯视觉）。门外就是核心筒，永远看不到。
-FRONT_DOOR = {"pos": (ENFILADE_X, Y0 + 0.02, 1.20), "size": (1.30, 0.06, 2.40),
-              "rgba": (0.22, 0.20, 0.18, 1.0)}
-FRONT_DOOR_HANDLE = {"pos": (ENFILADE_X + 0.52, Y0 + 0.08, 1.10), "size": (0.04, 0.04, 0.34),
-                     "rgba": (0.72, 0.68, 0.58, 1.0)}
+# ⛔ 不写厚度、不写 pos —— 门厚由生成器从 WALL_THICK 推（见 make_house._front_door 的注释）。
+#    写法和 WINDOWS 一致：开在哪间屋的哪面墙、沿墙哪个位置、多宽多高。
+# 曼哈顿满层一户的入户门：深色木饰面门扇 + 一圈黄铜门套 + 竖向长拉手。
+FRONT_DOOR = {
+    "room": "foyer", "side": "s", "center": ENFILADE_X, "width": 1.30, "height": 2.45,
+    "mat": "mat_h3_oak_dark", "rgba": (0.22, 0.20, 0.18, 1.0),
+    "casing_rgba": (0.62, 0.52, 0.32, 1.0),      # 黄铜
+    "handle_rgba": (0.72, 0.63, 0.40, 1.0), "handle_side": 1,
+}
 
 # ---------------------------------------------------------------- 出生点
 # ⚠️ 站在入户门内侧，正对贯通轴线朝北——一开局就是那张 15 米穿透三个房间的画面。
@@ -631,7 +636,12 @@ FURNITURE += F.mesh_piece("gr_pillows", "great_room", 1.20, 3.25, z=0.72, yaw=8,
 #    ⚠️ 碰撞盒一律按网格自己的比例写 `_CREDENZA`，再用 yaw 转到该靠的那面墙上——
 #    缩放是均匀的、按三轴最紧的一比取值，盒子比例偏了就会白缩一大截。
 #    （旧值 0.38×1.40×0.84 的玄关条案实测只能填到网格的 57%。）
-FURNITURE += F.mesh_piece("gr_console", "great_room", 5.80, 4.60, yaw=90,
+# ⛔ yaw=-90 不是笔误：这只柜子靠**东**墙，另两只靠**西**墙。网格的正面是**局部 −y**
+#    （实测：柜门/抽屉面板 p0/p1 的外表面贴在 y=−0.250，而柜体 p2 在 +y 是一整块背板），
+#    yaw=90 会把正面转向世界 +x = 顶着东墙，屋里只看得到那块没有任何门缝的背板——
+#    Jeff 2026-08-08 报的"柜子发黑、结构像穿透"有一半是这个。⭐ 靠西墙用 +90，靠东墙用 −90。
+# ⚠️ x 从 5.80 挪到 5.78：原来柜子边离东墙内表面只有 2.7 mm，太紧（现在 2.3 cm）。
+FURNITURE += F.mesh_piece("gr_console", "great_room", 5.78, 4.60, yaw=-90,
                           size=_CREDENZA, mesh="console", rgba=_OAK, mat="mat_h3_oak_dark")
 FURNITURE += F.mesh_piece("gr_plant", "great_room", 5.70, 6.60,
                           size=(0.66, 0.70, 1.38), mesh="plant_a")
@@ -749,9 +759,12 @@ FURNITURE += F.mesh_piece("gl_bust", "gallery", 5.40, 1.50, z=1.28,
 FURNITURE += F.mesh_piece("fy_console", "foyer", 0.80, -4.20, yaw=90,
                           size=_CREDENZA, mesh="console", rgba=_OAK)
 FURNITURE += [
-    _p("fy_lift_l", "foyer", "box", (ENFILADE_X - 1.15, Y0 + 0.05, 1.15), (0.90, 0.05, 2.30),
+    # ⚠️ y 从 Y0+0.05 挪到 Y0+0.16（2026-08-08）：两扇电梯门原来和入户门一样**整块埋在南墙里**
+    #    （门 y∈[−7.475,−7.425]，而南墙 y∈[−7.50,−7.36]，室内可见面在 −7.36），屋里根本看不见。
+    #    ⭐ 现在门面 y=−7.315，比墙面凸出 4.5 cm，像真的电梯厅门套那样。
+    _p("fy_lift_l", "foyer", "box", (ENFILADE_X - 1.15, Y0 + 0.16, 1.15), (0.90, 0.05, 2.30),
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
-    _p("fy_lift_r", "foyer", "box", (ENFILADE_X + 1.15, Y0 + 0.05, 1.15), (0.90, 0.05, 2.30),
+    _p("fy_lift_r", "foyer", "box", (ENFILADE_X + 1.15, Y0 + 0.16, 1.15), (0.90, 0.05, 2.30),
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
     # ⚠️ y 从 -4.40 北移到 -4.00（2026-08-08）：旧位置的南端在 -6.70，而 START_POS_XY 是
     #    (2.30, -6.60)——出生点整只脚都在毯子上，正好违反上面那条「⛔ 不许踩在地毯上」。

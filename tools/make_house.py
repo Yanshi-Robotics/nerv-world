@@ -751,6 +751,72 @@ def _glazing() -> list[str]:
     return out
 
 
+
+# ---------------------------------------------------------------- 入户门
+# ⭐ 门厚由生成器从 `WALL_THICK` 推，**layout 不许自己填厚度**。
+#    ⛔ 这条是 2026-08-08 血的教训：三个 layout 各自手填了一个"比墙薄"的厚度，
+#    又把门心放在房间矩形的边上——而墙是**从 rect 边往房间内侧长满一个墙厚**的
+#    （见 `_walls()` 里那句 `fixed + inward * _half(t)`）。结果：
+#      · apt1  门 y∈[−7.51,−7.45]，南墙 y∈[−7.50,−7.36] → **整块埋在墙里，两面都看不见**
+#      · house1 同病（x∈[9.38,9.46] 对墙 [9.36,9.50]）
+#      · house2 只贴在**室外**面，屋里同样看不见
+#    Jeff 走进玄关看到的就是一面白墙，完全不知道哪儿是门。
+#    → 现在门**比墙厚**，两面各凸出 `_DOOR_PROUD`，屋里屋外都看得见，而且**不可能再填错**。
+_DOOR_PROUD = 0.02      # 门扇比墙面凸出多少（两面各这么多）
+_CASING_W = 0.09        # 门套宽度（贴脸的可见宽度）
+_CASING_PROUD = 0.03    # 门套再比门扇凸出多少 —— 这一圈凸边就是"一眼认出是门"的关键
+_HANDLE_LEN = 1.10      # 竖向长拉手。公寓入户门用的是这种，不是把小圆球
+_HANDLE_T = 0.045
+
+
+def _front_door() -> list[str]:
+    """入户门：门扇 + 三面门套 + 竖向长拉手。⛔ 纯视觉件，碰撞由墙承担。
+
+    layout 只声明「开在哪间屋的哪面墙、沿墙哪个位置、多宽多高、什么材质」——
+    和 `WINDOWS` 用的是同一套 `room` / `side` / `center` / `width` 写法，⛔ 别再发明第二种。
+    """
+    d = getattr(L, "FRONT_DOOR", None)
+    if not d:
+        return []
+    t = L.WALL_THICK
+    x0, y0, x1, y1 = L.ROOMS[d["room"]]["rect"]
+    # 墙心：和 `_walls()` / 玻璃窗用的是同一个公式，⛔ 别在这儿另算一份
+    fixed = {"n": y1 - t / 2.0, "s": y0 + t / 2.0,
+             "e": x1 - t / 2.0, "w": x0 + t / 2.0}[d["side"]]
+    horiz = d["side"] in ("n", "s")
+    c, w, h = d["center"], d["width"], d["height"]
+    zb = _zbase(d["room"])
+    zc = zb + h / 2.0
+    leaf_t = t + 2 * _DOOR_PROUD
+    case_t = leaf_t + 2 * _CASING_PROUD
+    mat = d.get("mat", "")
+    cmat = d.get("casing_mat", "")
+    out = ["    <!-- 入户门（视觉件：门扇 + 门套 + 长拉手）-->"]
+
+    def _put(name, along_c, along_w, z, zh, thick, m, rgba):
+        pos = (along_c, fixed, z) if horiz else (fixed, along_c, z)
+        size = (along_w, thick, zh) if horiz else (thick, along_w, zh)
+        out.append(_box(name, pos, size, rgba, mat=m))
+
+    # 门套：左右两条 + 上面一条（把门框出来）
+    cw = w + 2 * _CASING_W
+    _put("front_door_casing_l", c - (w + _CASING_W) / 2.0, _CASING_W, zb + h / 2.0, h, case_t,
+         cmat, d["casing_rgba"])
+    _put("front_door_casing_r", c + (w + _CASING_W) / 2.0, _CASING_W, zb + h / 2.0, h, case_t,
+         cmat, d["casing_rgba"])
+    _put("front_door_casing_t", c, cw, zb + h + _CASING_W / 2.0, _CASING_W, case_t,
+         cmat, d["casing_rgba"])
+    # 门扇
+    _put("front_door", c, w, zc, h, leaf_t, mat, d["rgba"])
+    # 竖向长拉手：贴在门扇**室内**那一面（凸出来一点，不然又埋进门里）
+    hx = c + d.get("handle_side", 1) * (w / 2.0 - 0.11)
+    inward = {"n": -1.0, "s": 1.0, "e": -1.0, "w": 1.0}[d["side"]]
+    hf = fixed + inward * (leaf_t / 2.0 + _HANDLE_T / 2.0)
+    hpos = (hx, hf, zb + 1.05) if horiz else (hf, hx, zb + 1.05)
+    hsize = (_HANDLE_T, _HANDLE_T, _HANDLE_LEN) if horiz else (_HANDLE_T, _HANDLE_T, _HANDLE_LEN)
+    out.append(_box("front_door_handle", hpos, hsize, d["handle_rgba"], mat=d.get("handle_mat", "")))
+    return out
+
 # ---------------------------------------------------------------- 装饰网格
 # 每张装饰网格都是**纯视觉外衣**，碰撞仍然由它所装饰的那个 box 承担。
 #
@@ -1100,10 +1166,7 @@ def build(robot_key: str) -> str:
     if stair_geoms:                      # 单层场景没有楼梯，连分隔空行都不该多出来
         parts.extend(stair_geoms)
         parts.append('')
-    parts.append('    <!-- 入户门（视觉件） -->')
-    parts.append(_box("front_door", L.FRONT_DOOR["pos"], L.FRONT_DOOR["size"], L.FRONT_DOOR["rgba"]))
-    parts.append(_box("front_door_handle", L.FRONT_DOOR_HANDLE["pos"],
-                      L.FRONT_DOOR_HANDLE["size"], L.FRONT_DOOR_HANDLE["rgba"]))
+    parts.extend(_front_door())
     parts.append('')
     # ── 窗外的一切放在最后发射（理由见上面那段 ⛔）────────────────────────
     parts.extend(_outdoor())

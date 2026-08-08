@@ -223,6 +223,21 @@ def main() -> None:
     print(f"清单 {LOCK}（{len(lock)} 项）；署名 {ATTRIB}")
 
 
+_RC_REPO = "nvidia/PhysicalAI-Robotics-Manipulation-Objects-Kitchen-MJCF"
+
+
+def _count_tris(key: str, rec: dict) -> int:
+    """从落盘的 OBJ 数面数。给 lock 里没有 `tris` 字段的资产（RoboCasa 那几件）用。"""
+    import os
+    n = 0
+    for part in rec.get("parts", []):
+        path = os.path.join(ASSET_DIR, key, part["obj"])
+        if os.path.exists(path):
+            with open(path, encoding="utf-8", errors="ignore") as f:
+                n += sum(1 for ln in f if ln.startswith("f "))
+    return n
+
+
 def _write_attribution(lock: dict) -> None:
     lines = ["# 装饰网格的来源与许可\n",
              "⛔ 本文件由 `python -m decor.fetch` 自动生成，请勿手改。\n",
@@ -231,8 +246,24 @@ def _write_attribution(lock: dict) -> None:
              "| 资产 | 来源 | 作者 | 许可 | 面数 |", "|---|---|---|---|---|"]
     for k in sorted(lock):
         r = lock[k]
+        # ⚠️ `author` / `tris` 只有走本文件这条管线的资产才有。RoboCasa 的电器是
+        #    `decor/robocasa.py` **直接写进 lock 的**（绕过 manifest 与本文件），没有这两个字段。
+        #    ⛔ 2026-08-08 之前这里无条件取 `r['author']`，于是每次 `python -m decor.fetch`
+        #    都在**写完 lock 之后**崩在 KeyError 上——lock 是对的，署名表却一直没更新，
+        #    而且屏幕上先打完一整张成功汇总表才抛异常，很容易被当成"跑完了"。
+        author = r.get("author") or "—"
+        tris = r.get("tris") or _count_tris(k, r)
         lines.append(f"| {r['label']} | {r['source']} / `{r['source_id']}` | "
-                     f"{r['author']} | **{r['license']}** | {r['tris']} |")
+                     f"{author} | **{r['license']}** | {tris} |")
+    # ⭐ RoboCasa 那几件的**出处与移植口径**也由这里生成。
+    #    ⛔ 2026-08-08 之前这一段是手写贴在文件末尾的，而文件头就写着"自动生成，请勿手改"——
+    #    等哪天 fetch 真的跑通（在此之前它每次都崩在 KeyError 上），这段就会被整段抹掉，
+    #    而它承载的是 **CC-BY 要求的署名**。手写内容放在自动生成的文件里，迟早会丢。
+    if any(r.get("source") == "robocasa" for r in lock.values()):
+        lines += ["", "## 厨房电器的出处（RoboCasa / NVIDIA 镜像）", "",
+                  f"来源：HuggingFace 数据集 `{_RC_REPO}` 的 `fixtures_lightwheel/` 目录，**CC-BY-4.0**。",
+                  "移植器 `decor/robocasa.py` **只取视觉网格与贴图**，不引入任何 "
+                  "`<joint>` / `<actuator>` / `<option>`——实测移植前后 `nu=29 nq=36 nv=35` 逐位不变。"]
     open(ATTRIB, "w", encoding="utf-8").write("\n".join(lines) + "\n")
 
 
