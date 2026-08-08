@@ -268,8 +268,11 @@ FURNITURE: list[dict] = [
     # ═══════ ④入户玄关：鞋柜 / 换鞋凳 / 挂衣 / 地垫 / 端景台 ═══════
     {"name": "entry_mat", "room": "entry", "type": "box",
      "pos": (8.7, -0.6, 0.005), "size": (0.90, 1.60, 0.01), "rgba": (0.33, 0.31, 0.30, 1)},
+    # 这只 2.2 m 高的鞋柜原来**两面都穿出去了**：北墙 10 cm、东墙 2.5 cm，
+    # 在隔壁墙面上凭空长出半截柜子。x 9.30→9.19、y 1.20→1.09
+    # （2026-08-07 由 check_furniture_not_through_wall 抓到）
     {"name": "shoe_cabinet", "room": "entry", "type": "box",
-     "pos": (9.30, 1.20, 1.10), "size": (0.45, 1.80, 2.20), "rgba": (0.72, 0.63, 0.52, 1)},
+     "pos": (9.19, 1.09, 1.10), "size": (0.45, 1.80, 2.20), "rgba": (0.72, 0.63, 0.52, 1)},
     {"name": "shoe_cab_handle", "room": "entry", "type": "box",
      "pos": (9.05, 0.75, 1.05), "size": (0.05, 0.05, 0.28), "rgba": (0.55, 0.56, 0.58, 1)},
     {"name": "bench", "room": "entry", "type": "box",
@@ -304,7 +307,7 @@ FURNITURE: list[dict] = [
     {"name": "ck_counter", "room": "chinese_kitchen", "type": "box",
      "pos": (-0.175, -4.80, 0.45), "size": (0.65, 4.40, 0.90), "rgba": (0.84, 0.84, 0.80, 1)},
     {"name": "ck_counter_top", "room": "chinese_kitchen", "type": "box",
-     "pos": (-0.16, -4.80, 0.93), "size": (0.72, 4.50, 0.07), "rgba": (0.22, 0.22, 0.25, 1), "mat": "mat_marble_dark"},
+     "pos": (-0.13, -4.80, 0.93), "size": (0.72, 4.50, 0.07), "rgba": (0.22, 0.22, 0.25, 1), "mat": "mat_marble_dark"},
     # 洗碗机：嵌在台面下（真实厨房就是这么装的），正面朝东——站在房间里一眼能看到
     {"name": "ck_dishwasher", "room": "chinese_kitchen", "type": "box",
      "pos": (-0.17, -3.00, 0.44), "size": (0.62, 0.60, 0.80), "rgba": (0.88, 0.89, 0.91, 1), "mat": "mat_steel"},
@@ -327,7 +330,7 @@ FURNITURE: list[dict] = [
     {"name": "ck_burner_b", "room": "chinese_kitchen", "type": "cylinder",
      "pos": (-0.19, -5.52, 1.01), "size": (0.26, 0.26, 0.03), "rgba": (0.45, 0.12, 0.10, 1)},
     {"name": "ck_hood", "room": "chinese_kitchen", "type": "box",            # 抽油烟机在灶台正上方（真实高度）
-     "pos": (-0.24, -5.30, 1.80), "size": (0.55, 1.00, 0.36), "rgba": (0.70, 0.72, 0.74, 1), "mat": "mat_steel"},
+     "pos": (-0.22, -5.30, 1.80), "size": (0.55, 1.00, 0.36), "rgba": (0.70, 0.72, 0.74, 1), "mat": "mat_steel"},
     # 烤箱：嵌在台面下，黑玻璃门 + 控制面板 + 横把手——厨房里最好认的一件
     {"name": "ck_oven", "room": "chinese_kitchen", "type": "box",
      "pos": (-0.17, -6.40, 0.42), "size": (0.62, 0.62, 0.76), "rgba": (0.30, 0.31, 0.33, 1), "mat": "mat_steel"},
@@ -369,18 +372,22 @@ FURNITURE: list[dict] = [
      "pos": (-0.15, -8.5, 0.85), "size": (0.35, 1.60, 1.70), "rgba": (0.72, 0.72, 0.70, 1)},
 
     # ═══════ ⑧洗衣房：洗衣机 + 烘干机 + 水槽 + 置物架 ═══════
+    # ⛔ 这一排整体东移 0.45 m（2026-08-07）。原来贴着西墙排，正好堵在
+    #    「中厨-洗衣房」那道门（x=4.0 竖墙、y∈[-5.55, -4.45]）前面，
+    #    门口净通行宽只剩 0.30 m，机器人（要 0.60 m）进不来。
+    #    和 cl_e、house3 的 dr_closet_e 是同一个物种，由 check_door_passable 一起抓出来。
     {"name": "washer", "room": "laundry", "type": "box",
-     "pos": (4.60, -6.30, 0.45), "size": (0.68, 0.70, 0.90), "rgba": (0.92, 0.92, 0.94, 1), "mat": "mat_steel"},
+     "pos": (5.05, -6.30, 0.45), "size": (0.68, 0.70, 0.90), "rgba": (0.92, 0.92, 0.94, 1), "mat": "mat_steel"},
     {"name": "washer_door", "room": "laundry", "type": "cylinder",
-     "pos": (4.95, -6.30, 0.55), "size": (0.44, 0.44, 0.04), "rgba": (0.30, 0.34, 0.40, 1), "mat": "mat_steel"},
+     "pos": (5.40, -6.30, 0.55), "size": (0.44, 0.44, 0.04), "rgba": (0.30, 0.34, 0.40, 1), "mat": "mat_steel"},
     {"name": "dryer", "room": "laundry", "type": "box",
-     "pos": (4.60, -5.50, 0.45), "size": (0.68, 0.70, 0.90), "rgba": (0.92, 0.92, 0.94, 1), "mat": "mat_steel"},
+     "pos": (5.05, -5.50, 0.45), "size": (0.68, 0.70, 0.90), "rgba": (0.92, 0.92, 0.94, 1), "mat": "mat_steel"},
     {"name": "dryer_door", "room": "laundry", "type": "cylinder",
-     "pos": (4.95, -5.50, 0.55), "size": (0.44, 0.44, 0.04), "rgba": (0.30, 0.34, 0.40, 1), "mat": "mat_steel"},
+     "pos": (5.40, -5.50, 0.55), "size": (0.44, 0.44, 0.04), "rgba": (0.30, 0.34, 0.40, 1), "mat": "mat_steel"},
     {"name": "laundry_counter", "room": "laundry", "type": "box",
-     "pos": (4.70, -5.90, 0.94), "size": (0.90, 2.00, 0.06), "rgba": (0.60, 0.55, 0.48, 1), "mat": "mat_marble_dark"},
+     "pos": (5.15, -5.90, 0.94), "size": (0.90, 2.00, 0.06), "rgba": (0.60, 0.55, 0.48, 1), "mat": "mat_marble_dark"},
     {"name": "laundry_sink", "room": "laundry", "type": "box",
-     "pos": (4.70, -4.30, 0.90), "size": (0.70, 0.60, 0.30), "rgba": (0.90, 0.91, 0.92, 1), "mat": "mat_porcelain"},
+     "pos": (5.15, -4.30, 0.90), "size": (0.70, 0.60, 0.30), "rgba": (0.90, 0.91, 0.92, 1), "mat": "mat_porcelain"},
     {"name": "laundry_shelf", "room": "laundry", "type": "box",
      "pos": (9.25, -5.20, 1.05), "size": (0.45, 2.60, 2.10), "rgba": (0.72, 0.70, 0.66, 1)},
     {"name": "laundry_basket", "room": "laundry", "type": "cylinder",
@@ -489,14 +496,19 @@ FURNITURE: list[dict] = [
     # ═══════ ⑱衣帽间：两侧衣柜 + 中央岛柜 + 挂衣杆 ═══════
     {"name": "cl_w", "room": "closet", "type": "box",
      "pos": (-9.20, 2.75, 1.15), "size": (0.58, 3.20, 2.30), "rgba": (0.72, 0.63, 0.52, 1)},
+    # ⛔ 东墙这排柜子只占门北边那一段。原来是 y∈[1.15, 4.35] 的通柜，而「过道-衣帽间」
+    #    的门开在 x=-5.5 竖墙、y∈[1.45, 2.55] —— 柜子把门**整个封死**，衣帽间进不去，
+    #    而当时全部自检都是绿的（没有任何一项拿门和家具对过账）。
+    #    2026-08-07 由新增的 check_door_passable 抓出来，和 house3 的 dr_closet_e 是同一个物种。
     {"name": "cl_e", "room": "closet", "type": "box",
-     "pos": (-5.80, 2.75, 1.15), "size": (0.58, 3.20, 2.30), "rgba": (0.72, 0.63, 0.52, 1)},
+     "pos": (-5.80, 3.55, 1.15), "size": (0.58, 1.60, 2.30), "rgba": (0.72, 0.63, 0.52, 1)},
     {"name": "cl_rail_w", "room": "closet", "type": "box",
      "pos": (-8.88, 2.75, 1.12), "size": (0.05, 3.00, 0.05), "rgba": (0.60, 0.60, 0.62, 1)},
     {"name": "cl_clothes_w", "room": "closet", "type": "box",
      "pos": (-8.88, 2.75, 0.70), "size": (0.24, 2.80, 0.80), "rgba": (0.42, 0.45, 0.55, 1)},
+    # 挂衣跟着 cl_e 一起退到门北边（挂杆是柜子的一部分，不能悬在门口）
     {"name": "cl_clothes_e", "room": "closet", "type": "box",
-     "pos": (-6.12, 2.75, 0.70), "size": (0.24, 2.80, 0.80), "rgba": (0.56, 0.48, 0.44, 1)},
+     "pos": (-6.12, 3.55, 0.70), "size": (0.24, 1.40, 0.80), "rgba": (0.56, 0.48, 0.44, 1)},
     {"name": "cl_island", "room": "closet", "type": "box",
      "pos": (-7.50, 2.75, 0.44), "size": (1.30, 0.80, 0.88), "rgba": (0.55, 0.45, 0.34, 1)},
 

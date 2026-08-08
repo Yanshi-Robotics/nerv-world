@@ -560,6 +560,14 @@ _LINEN = (0.78, 0.75, 0.70, 1.0)
 _CHAR = (0.28, 0.28, 0.30, 1.0)
 _BRASS = (0.72, 0.62, 0.38, 1.0)
 _STONE = (0.86, 0.85, 0.82, 1.0)
+_CLOSET = (0.40, 0.37, 0.34, 1.0)       # 衣帽间通柜的深色柜门
+
+# ⭐ 条案/餐边柜的碰撞盒尺寸 = `console` 网格（Poly Haven modern_wooden_cabinet）
+#    在 decor.lock.json 里的真实跨度 2.44 × 0.52 × 0.68 m（长 × 深 × 高）。
+#    ⚠️ 写成一个常量而不是三处各填一遍：缩放按三轴最紧的一比取值，比例一偏就白缩，
+#    所以这三处必须同步。资产换了就改这一行，别去各处凑数。
+#    ⛔ 别拿它当"美术尺寸"随手调小——那会让网格填不满盒子，盒子里空一大截。
+_CREDENZA = (2.44, 0.52, 0.68)
 
 
 def _p(name, room, typ, pos, size, rgba, mat="", yaw=0.0):
@@ -596,14 +604,12 @@ FURNITURE += F.mesh_piece("gr_ch2", "great_room", -0.40, 6.20, yaw=-20,
 FURNITURE += F.mesh_piece("gr_pillows", "great_room", 1.20, 3.05, z=0.72, yaw=8,
                           size=(1.02, 0.52, 0.50), mesh="pillows")
 # 大客厅其余真网格
-# ⛔ gr_console 暂不上真网格：Poly Haven 的 modern_wooden_cabinet 是 3 个材质组，
-#    其中一组在 MuJoCo 里的实际外廓和 lock 记的对不上（多半是那张 mesh 自身不闭合，
-#    MuJoCo 的重心重定位和 trimesh 的包围盒中心差得较多）。
-#    射线不变性自检一直判它探出碰撞盒 —— **判它不过就不放行**，先用盒子。
-#    ⚠️ 要复活它，得先搞清 MuJoCo 对非闭合网格的重定位规则，别直接把盒子改大：
-#       `_fit_scale` 会把网格按比例一起撑大，超出量原封不动（这一条我白转了六轮才明白）。
-FURNITURE += [_p("gr_console", "great_room", "box", (5.80, 4.60, 0.35),
-                 (0.50, 2.40, 0.70), _OAK, mat="mat_h3_oak_dark")]
+# ⭐ 三处条案/餐边柜（这里、餐厅 dn_sideboard、玄关 fy_console）共用同一件真木柜网格。
+#    ⚠️ 碰撞盒一律按网格自己的比例写 `_CREDENZA`，再用 yaw 转到该靠的那面墙上——
+#    缩放是均匀的、按三轴最紧的一比取值，盒子比例偏了就会白缩一大截。
+#    （旧值 0.38×1.40×0.84 的玄关条案实测只能填到网格的 57%。）
+FURNITURE += F.mesh_piece("gr_console", "great_room", 5.80, 4.60, yaw=90,
+                          size=_CREDENZA, mesh="console", rgba=_OAK, mat="mat_h3_oak_dark")
 FURNITURE += F.mesh_piece("gr_plant", "great_room", 5.70, 6.60,
                           size=(0.66, 0.70, 1.38), mesh="plant_a")
 FURNITURE += F.mesh_piece("gr_lamp", "great_room", -0.90, 3.00,
@@ -623,11 +629,12 @@ FURNITURE += F.mesh_piece("dn_w", "dining", -5.25, 5.00, yaw=0,
                           size=(0.46, 0.60, 1.00), mesh="dining_chair")
 FURNITURE += F.mesh_piece("dn_chand", "dining", -4.00, 5.00, z=2.72,
                           size=(0.70, 0.66, 0.88), mesh="chandelier")
-FURNITURE += [
-    _p("dn_sideboard", "dining", "box", (-6.05, 5.00, 0.44), (0.44, 2.00, 0.88), _OAK),
-]
+# ⭐ 餐边柜：同一件真木柜网格，贴餐厅西墙（净空 x ≥ -6.26），yaw=90 转成南北向
+FURNITURE += F.mesh_piece("dn_sideboard", "dining", -6.00, 5.00, yaw=90,
+                          size=_CREDENZA, mesh="console", rgba=_OAK)
 # ⭐ 全屋花瓶摆件换成真网格（Poly Haven CC0，约 4k 面，Jeff 点名要真的）
-FURNITURE += F.mesh_piece("dn_vase", "dining", -6.05, 5.00, z=1.09,
+# ⚠️ z 是**柜面高**（_CREDENZA[2] = 0.68）加上花瓶自身半高，改柜子要连着改这里
+FURNITURE += F.mesh_piece("dn_vase", "dining", -6.00, 5.00, z=0.89,
                           size=(0.22, 0.22, 0.42), mesh="vase_a")
 
 # ── 厨房：中岛 + 沿墙操作台 ──────────────────────────────────────
@@ -638,16 +645,15 @@ FURNITURE += [
     _p("kt_counter_top", "kitchen", "box", (8.85, 7.10, 0.945), (5.10, 0.74, 0.05), _STONE, mat="mat_h3_marble_blk"),
     _p("kt_upper", "kitchen", "box", (8.85, 7.28, 2.05), (5.00, 0.34, 0.80), (0.90, 0.89, 0.87, 1.0)),
 ]
-# 冰箱额外收缩系数：它是 9 个材质组的资产，各组"重心 vs 包围盒中心"的残差互相叠加，
-# 统一余量还差约 3 cm。0.85 是实测能让射线不变性自检转绿的值。
-_FRIDGE_SHRINK = 0.85
-
 # ⭐ 四件电器换成 RoboCasa 的真网格（NVIDIA HuggingFace 镜像，CC-BY-4.0）。
 #    走的还是普通 `mesh_piece`——碰撞真相仍是这里的盒子，网格只是外衣，
 #    所以包含性缩放 / calibrate 标定 / 射线不变性自检全部照常生效。
 #    ⚠️ 只搬了视觉网格：门和抽屉打不开，灶具的 `<site>` 也没搬（见 decor/robocasa.py 的说明）。
+# ⛔ 冰箱这里曾有一个 `_FRIDGE_SHRINK = 0.85` 的额外收缩系数，2026-08-07 删除。
+#    它的理由（"9 个材质组的残差互相叠加"）是假的：真因是标定漏转了一次旋转 +
+#    摆位多加了一份重心，修完之后冰箱一点都不用收。别照那个理由把它加回来。
 FURNITURE += F.mesh_piece("kt_fridge", "kitchen", 11.05, 3.10,
-                          size=(0.94, 0.88, 1.90), shrink=_FRIDGE_SHRINK, mesh="rc_fridge", yaw=-90)
+                          size=(0.94, 0.88, 1.90), mesh="rc_fridge", yaw=-90)
 FURNITURE += F.mesh_piece("kt_range", "kitchen", 7.20, 7.10,
                           size=(0.78, 0.72, 1.14), mesh="rc_stove", yaw=180)
 FURNITURE += F.mesh_piece("kt_sink", "kitchen", 10.10, 7.10, z=1.06,
@@ -664,17 +670,17 @@ FURNITURE += [
 # ⭐ 主卧大床换成 Objaverse @elba 的软包床（CC-BY，逐件核过许可）
 FURNITURE += F.mesh_piece("pb_bed", "primary_bed", -8.95, 4.40,
                           size=(1.74, 2.10, 0.82), mesh="bed")
-# ⛔ 床头柜暂不上真网格（@elba Tumb Astrid）：它是 5 个材质组，各组"重心 vs 包围盒中心"的
-#    残差互相叠加，`_FIT_EPS_MULTI` 收到 0.78 仍有一组探出碰撞盒（实测 dg_pb_nsL_2）。
-#    再往下收就把柜子缩得不像话了。**自检判它不过就不放行**，先用盒子。
-#    ⚠️ 要复活它：先在 Blender 里把那 5 组合成闭合网格再重拓，别去动碰撞盒尺寸——
-#       `_fit_scale` 会把网格按比例一起撑大，放大盒子完全没用（这条我白转了六轮）。
+# ⭐ 床头柜（@elba Tumb Astrid，CC-BY）2026-08-07 复活。
+#    ⚠️ 它当年被撤的理由（"5 个材质组的残差互相叠加，收到 0.78 仍有一组探出"）是**假的**：
+#    真因是摆位时给每个部件又加了一份它自己的重心（MuJoCo 早已补偿过），
+#    于是 5 组各往外飞自己的重心那么远。修完之后它一点都不用收。
+#    盒子按网格真实跨度 0.500 × 0.516 × 0.721 写。
 FURNITURE += F.mesh_piece("pb_nsL", "primary_bed", -10.40, 3.55,
-                          size=(0.52, 0.54, 0.74), mesh="")
+                          size=(0.50, 0.52, 0.72), mesh="nightstand")
 FURNITURE += F.mesh_piece("pb_nsR", "primary_bed", -7.50, 3.55,
-                          size=(0.52, 0.54, 0.74), mesh="")
-FURNITURE += F.table_lamp("pb_lampL", "primary_bed", -10.40, 3.55, 0.74, shade_d=0.30)
-FURNITURE += F.table_lamp("pb_lampR", "primary_bed", -7.50, 3.55, 0.74, shade_d=0.30)
+                          size=(0.50, 0.52, 0.72), mesh="nightstand")
+FURNITURE += F.table_lamp("pb_lampL", "primary_bed", -10.40, 3.55, 0.72, shade_d=0.30)
+FURNITURE += F.table_lamp("pb_lampR", "primary_bed", -7.50, 3.55, 0.72, shade_d=0.30)
 
 # ── 主卫：独立浴缸摆在西窗前 + 双台盆 ─────────────────────────────
 FURNITURE += [
@@ -688,7 +694,14 @@ FURNITURE += [
 ]
 
 # ── 画廊：只放两件落地摆件，其余留白（展线要干净）────────────────────
-FURNITURE += F.potted_plant("gl_plant1", "gallery", -5.60, 1.60, pot_d=0.44, h=1.15)
+# ⭐ 画廊绿植：真发财树网格（Poly Haven pachira_aquatica_01，CC0）。
+#    ⚠️ 那个资产一个文件里装了四棵并排的树，`parts=(3, 7)` 取的是 x≈-3.06 那棵
+#    （冠 + 盆，跨度 0.744 × 0.647 × 1.302 m）——尺度正好配画廊，比原来那株
+#    "三个绿球拼的" `potted_plant()` 像样得多。选哪棵见 decor/manifest.py 的对照表。
+#    ⚠️ y 往北挪到 1.62：门「画廊→衣帽间」在 x=X1 竖墙、y∈[-0.10, 1.10]，
+#    这里必须让开门前 0.6 m 的净空区（判据是 check_door_passable）。
+FURNITURE += F.mesh_piece("gl_plant1", "gallery", -5.72, 1.62,
+                          size=(0.75, 0.65, 1.31), mesh="plant_b", parts=(3, 7))
 FURNITURE += [
     _p("gl_bench", "gallery", "box", (0.00, 0.10, 0.22), (1.60, 0.42, 0.44), _OAK),
     _p("gl_pedestal", "gallery", "box", (5.40, 1.50, 0.50), (0.36, 0.36, 1.00), (0.92, 0.91, 0.89, 1.0)),
@@ -697,23 +710,25 @@ FURNITURE += F.mesh_piece("gl_bust", "gallery", 5.40, 1.50, z=1.28,
                           size=(0.30, 0.32, 0.55), mesh="bust")
 
 # ── 玄关：条案 + 两扇私人电梯门（当家具做，纯视觉）────────────────────
+# ⭐ 玄关条案：同一件真木柜网格，贴玄关西墙（净空 x ≥ 0.54）
+FURNITURE += F.mesh_piece("fy_console", "foyer", 0.80, -4.20, yaw=90,
+                          size=_CREDENZA, mesh="console", rgba=_OAK)
 FURNITURE += [
-    _p("fy_console", "foyer", "box", (0.72, -4.20, 0.42), (0.38, 1.40, 0.84), _OAK),
     _p("fy_lift_l", "foyer", "box", (ENFILADE_X - 1.15, Y0 + 0.05, 1.15), (0.90, 0.05, 2.30),
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
     _p("fy_lift_r", "foyer", "box", (ENFILADE_X + 1.15, Y0 + 0.05, 1.15), (0.90, 0.05, 2.30),
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
     _p("fy_runner", "foyer", "box", (ENFILADE_X, -4.40, 0.008), (1.10, 4.60, 0.016), (0.44, 0.40, 0.36, 1.0)),
 ]
-FURNITURE += F.mesh_piece("fy_vase", "foyer", 0.72, -4.20, z=1.02,
+FURNITURE += F.mesh_piece("fy_vase", "foyer", 0.80, -4.20, z=0.845,
                           size=(0.24, 0.24, 0.33), mesh="vase_b")
-FURNITURE += F.mesh_piece("gr_vase", "great_room", 5.80, 4.60, z=0.99,
+FURNITURE += F.mesh_piece("gr_vase", "great_room", 5.80, 4.60, z=0.86,
                           size=(0.20, 0.20, 0.36), mesh="vase_c", yaw=25)
-# ⚠️ 木碗的碰撞盒收窄到接近网格本身的尺寸。原来是 0.34×0.34×0.11 的"托盘位"，
-#    网格只占中间一小块，射线自检判它改变了读数。收窄之后网格几乎填满盒子，
-#    包含关系才成立。判据同上：**⭐⭐ 装饰网格没改变任何射线读数** 那条。
-FURNITURE += F.mesh_piece("gr_bowl", "great_room", 2.30, 4.90, z=0.56,
-                          size=(0.20, 0.20, 0.11), mesh="bowl")
+# ⭐ 木碗的碰撞盒按网格自己的真实尺寸写（0.313 × 0.309 × 0.093，见 decor.lock.json）。
+#    ⚠️ 这里曾经是 0.20×0.20×0.11 —— 那是为了迁就旧的缩放 bug 收窄的，
+#    结果碗只有真尺寸的三分之一。盒子比例贴合网格，缩放才不会白缩。
+FURNITURE += F.mesh_piece("gr_bowl", "great_room", 2.30, 4.90, z=0.55,
+                          size=(0.32, 0.32, 0.10), mesh="bowl")
 
 # ── 客卧 ────────────────────────────────────────────────────────
 FURNITURE += [
@@ -736,8 +751,17 @@ FURNITURE += F.books_stack("st_books", "study", 8.85, -3.40, 0.75)
 
 # ── 衣帽间 / 客卫 / 洗衣房 / 东过厅：功能件，简单摆到位 ──────────────
 FURNITURE += [
-    _p("dr_closet_w", "dressing", "box", (-11.20, 0.50, 1.10), (0.56, 3.00, 2.20), (0.40, 0.37, 0.34, 1.0)),
-    _p("dr_closet_e", "dressing", "box", (-6.70, 0.50, 1.10), (0.56, 3.00, 2.20), (0.40, 0.37, 0.34, 1.0)),
+    # ⛔ 东墙这排柜子 2026-08-07 拆成门两侧两段。原来是一只 y∈[-1.00, 2.00] 的通柜，
+    #    而「画廊→衣帽间」的门开在 x=X1 竖墙、y∈[-0.10, 1.10] —— 柜子把门**整个封死**，
+    #    衣帽间/主卧/主卫整个西翼从画廊走不进来，而当时 48 项自检全绿
+    #    （没有任何一项拿门和家具对过账，现在有了：check_door_passable）。
+    # ⚠️ 三只柜子都从墙面内缩 1 cm：原来 dr_closet_w/e 各**穿墙 12 cm**。
+    #    衣帽间净空 x∈[-11.36, -6.54]、y∈[-1.06, 2.06]（rect 内缩一个 WALL_THICK）。
+    _p("dr_closet_w", "dressing", "box", (-11.05, 0.50, 1.10), (0.60, 3.10, 2.20), _CLOSET),
+    _p("dr_closet_en", "dressing", "box", (-6.84, 1.66, 1.10), (0.58, 0.76, 2.20), _CLOSET),
+    _p("dr_closet_es", "dressing", "box", (-6.84, -0.66, 1.10), (0.58, 0.76, 2.20), _CLOSET),
+    # 北墙东段补一节，把东墙让出去的储物量找回来（避开主卧门 x∈[-9.60, -8.40]）
+    _p("dr_closet_n", "dressing", "box", (-7.75, 1.75, 1.10), (1.00, 0.58, 2.20), _CLOSET),
     _p("dr_island", "dressing", "box", (-9.00, 0.50, 0.44), (1.20, 0.70, 0.88), _OAK),
     _p("gt_vanity", "guest_bath", "box", (-0.60, -7.10, 0.42), (1.60, 0.52, 0.84), _STONE, mat="mat_marble_grey"),
     _p("gt_mirror", "guest_bath", "box", (-0.60, -7.36, 1.70), (1.40, 0.03, 1.10), (0.80, 0.86, 0.90, 1.0), mat="mat_mirror"),

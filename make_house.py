@@ -731,20 +731,22 @@ def _glazing() -> list[str]:
 #    MuJoCo **完全跳过 qhull**（`nmeshgraph = 0`），任何一个非零就要算全套凸包。
 #    20 张 9.3 万面的视觉网格编译只要 0.23 秒——⚠️ 这是整件事便宜的唯一原因，
 #    所以每张网格都必须真的带上这两个属性。
-_FIT_EPS = 0.88        # ⭐ 网格相对碰撞盒的**统一安全余量**。看着大，但每一分都是实测逼出来的：
-                       #   ① XML 里 `%g` 只写 6 位有效数字，位置和缩放都被截断；
-                       #   ② `decor/calibrate.py` 反算出的包围盒取自**编译后的顶点**，
-                       #      和摆位用的重心之间还有几何分布带来的残差；
-                       #   ③ 带 yaw 的件按"旋转后 AABB"估外廓，凸包不规则时会低估
-                       #      （实测餐椅转 −90° 后横跨 25.8 cm，估的是 23.0 cm）。
-                       # ⛔ 判据只有 `check_scene.py` 的 **⭐⭐ 装饰网格没改变任何射线读数**。
-                       #    别用"放大碰撞盒"去补——`_fit_scale` 会把网格按比例一起撑大，
-                       #    超出量原封不动（这条我白转了六轮）。
-# ⚠️ 多部件资产额外留余量：MuJoCo 编译时把每张 mesh 按**自身重心**重定位，
-#    而我们记的是**包围盒中心**——两者对不闭合的网格差得不小，差值随部件而异。
-#    ⛔ 这个差用"放大碰撞盒"补不了：`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
-#       只能**压缩缩放系数**。0.86 是试出来能让现有多部件资产全部装进去的值。
-_FIT_EPS_MULTI = 0.98
+# ⭐ 网格相对碰撞盒的**统一安全余量** = 每轴留 1%。
+#    2026-08-07 实测定标（EPS 设成 1.0 重新生成，量每张网格顶点在盒子局部系里的超出量）：
+#    全场 25 件装饰的最坏超出是 **+4.84 µm**（吊灯），也就是恰好相切。
+#    那点残量的唯一来源是 XML 里 `%g` 只写 6 位有效数字，位置和缩放都被截断——
+#    是**数值**问题，不是几何问题。
+#    0.99 给最薄的那件（木碗，盒子半长 5 cm）留 **0.50 mm** 净空，是截断误差的 100 倍。
+# ⛔ 这个值以前是 0.88，理由写着三条，修完之后**三条全部不成立**（2026-08-07）：
+#    ① `%g` 截断 —— 真的，但那是 µm 级，用不着 12%；
+#    ② "标定的包围盒和摆位用的重心之间有残差" —— 不存在，摆位根本不该用重心
+#       （MuJoCo 自己补偿了，见 `_decor_geoms` 里那段 ⛔⛔）；
+#    ③ "带 yaw 的件按旋转后 AABB 估外廓会低估" —— 数学上不可能低估，
+#       而且 yaw 根本不该在 `_fit_scale` 里算（见那个函数的 ⛔）。
+# ⛔ 网格探出盒子时**别调这个值，也别放大碰撞盒**（缩放会把网格按比例一起撑大）。
+#    判据是 `check_scene.py` 的 **⭐⭐ 装饰网格整个装在碰撞盒里**——它直接量顶点，
+#    报出探出多少毫米；探出说明 `_asset_span` 或 `_decor_geoms` 坏了，去修那里。
+_FIT_EPS = 0.99
 
 
 def _decor_prefix(robot_key: str) -> str:
@@ -764,33 +766,38 @@ def _decor_prefix(robot_key: str) -> str:
     return "../" * len(md.split("/"))
 
 
-def _multi_margin(key) -> float:
-    """多部件资产的额外安全余量。单部件资产返回 1.0（不收）。
+def _selected_parts(key, parts=None):
+    """该资产要用的部件（含原始下标）：`[(i, part_dict), ...]`。
 
-    ⚠️ 为什么单部件不需要而多部件需要：`decor/convert.py` 记的是每个部件的**包围盒中心**，
-       MuJoCo 编译时却按**重心**重定位顶点。`decor/calibrate.py` 已经把实测重心写回 lock
-       补掉了主要部分，但布料/软包这类非闭合网格上仍有残差，几件部件的残差还会互相叠加。
-       单部件资产没有"部件间相对位置"这回事，所以不受影响。
-    ⛔ 别改成"放大碰撞盒"补——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
-       判据只有 `check_scene.py` 的 **⭐⭐ 装饰网格没改变任何射线读数** 那一条。
+    ⭐ `parts` 是可选的**部件白名单**，用来从"一个文件里装了好几件东西"的上游资产里
+       只取一件。目前唯一的用户是 `plant_b`（Poly Haven 把四棵发财树并排摆在一个文件里，
+       见 `decor/manifest.py` 那条注释）。`parts=None` 时行为和以前逐字节一致。
+    ⚠️ 返回的**下标是原始下标**，不是重新编号的。mesh 名与贴图去重都按它走，
+       所以"只取一棵树"不会让别处的 `dm_<key>_<i>` 改名。
     """
     from decor import lock
-    return _FIT_EPS_MULTI if len(lock.parts(key)) > 1 else 1.0
+    ps = list(enumerate(lock.parts(key)))
+    if parts is None:
+        return ps
+    want = set(int(i) for i in parts)
+    bad = want - {i for i, _ in ps}
+    if bad:
+        raise ValueError(f"资产 {key!r} 没有第 {sorted(bad)} 个部件（共 {len(ps)} 个）")
+    return [(i, p) for i, p in ps if i in want]
 
 
-def _asset_span(key):
+def _asset_span(key, parts=None):
     """资产**装配之后**的真实跨度：返回 (全长 xyz, 跨度中心 xyz)。
 
-    ⛔ 不能直接用 lock 里的整件包围盒：多部件资产在 MuJoCo 里是**逐个 mesh 摆放**的，
-       真实外廓要按各部件的 `offset ± half` 求并集。
-    ⚠️ 还必须把**跨度中心**一起返回：资产往往是偏心的（抱枕那件偏 9 cm），
+    ⛔ 不能直接用 lock 里的整件 `size`：`parts` 选出子集时它就不对了，而且它取自
+       fetch 期的 trimesh 对象、和落盘 OBJ 差着导出取舍。这里按各部件的
+       `offset ± half`（`decor/calibrate.py` 从编译后顶点实测）求并集才是真值。
+    ⚠️ 必须把**跨度中心**一起返回并在摆位时减掉：资产往往是偏心的，
        若按"关于原点对称"来算，偏心那一侧就会探出碰撞盒。
-    ⚠️ 用整件包围盒的后果很隐蔽：网格会**恒定比例地**探出碰撞盒，而且
-       **放大碰撞盒完全没用**——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
-       我在这上面白转了六轮才想明白。
+       ⭐ 这也是 `parts` 子集能自动归正的原因——中心是按子集算的。
     """
     from decor import lock
-    ps = lock.parts(key)
+    ps = [p for _i, p in _selected_parts(key, parts)]
     if not ps or "half" not in ps[0]:
         return lock.size(key), (0.0, 0.0, 0.0)      # 老 lock 没记部件信息就退回整件包围盒
     lo = [min(float(p["offset"][k]) - float(p["half"][k]) for p in ps) for k in range(3)]
@@ -800,17 +807,21 @@ def _asset_span(key):
 
 
 def _fit_scale(item: dict, asset_size) -> float:
-    """算出让网格**完全装进**碰撞盒的均匀缩放系数。装不进就直接报错。"""
+    """算出让网格**完全装进**碰撞盒的均匀缩放系数。装不进就直接报错。
+
+    ⛔ **不要在这里把 yaw 再转一遍**（2026-08-07 删掉的一段）：`item["size"]` 写的是
+       碰撞盒**自己局部系**里的边长，而那个盒子本身就带着同一个 yaw 的 quat
+       （产物实证：`<geom name="furn_dn_n0" size="0.23 0.3 0.5" quat="...-0.707107">`）。
+       网格用同一个 quat 转，所以盒子和网格**一起转**，比例关系与 yaw 无关。
+       老代码额外按"旋转后 AABB"估外廓，等于把 yaw 算了两遍，餐椅因此白缩 23%。
+       ⚠️ 当年写下的依据"旋转后 AABB 会低估"也是假的——`ex|cos|+ey|sin|` 是旋转 AABB
+       的数学上界，不可能低估；那个"低估"是错跨度（见 `decor/calibrate.py`）的产物。
+    """
     sx, sy, sz = item["size"]
-    yaw = float(item.get("mesh", {}).get("yaw", 0.0))
-    a = math.radians(yaw)
     ex, ey, ez = asset_size
-    # 转过 yaw 之后的保守外接尺寸
-    rx = abs(ex * math.cos(a)) + abs(ey * math.sin(a))
-    ry = abs(ex * math.sin(a)) + abs(ey * math.cos(a))
-    if min(rx, ry, ez) <= 0:
+    if min(ex, ey, ez) <= 0:
         raise ValueError(f"装饰 {item['name']!r} 的资产包围盒是 {asset_size}，无效")
-    return _FIT_EPS * min(sx / rx, sy / ry, sz / ez)
+    return _FIT_EPS * min(sx / ex, sy / ey, sz / ez)
 
 
 def _decor_items() -> list[dict]:
@@ -853,10 +864,10 @@ def _mesh_assets(robot_key: str) -> list[str]:
     seen_mesh, seen_tex = set(), set()
     for item in items:
         key = item["mesh"]["id"]
-        span, ctr = _asset_span(key)
-        scale = (_fit_scale(item, span) * _multi_margin(key)
-                 * float(item.get("mesh", {}).get("shrink", 1.0)))
-        for i, p in enumerate(lock.parts(key)):
+        sel = item["mesh"].get("parts")
+        span, ctr = _asset_span(key, sel)
+        scale = _fit_scale(item, span)
+        for i, p in _selected_parts(key, sel):
             tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
             if tag not in seen_mesh:
                 seen_mesh.add(tag)
@@ -876,7 +887,6 @@ def _decor_geoms() -> list[str]:
     items = _decor_items()
     if not items:
         return []
-    from decor import lock
     out = ['    <!-- ===== 装饰网格（纯视觉外衣；碰撞仍由下面那些 box 承担）=====',
            '         ⚠️ mj_ray 不看 contype——射线安全靠的是"包含性不变式"：',
            '            每张网格都缩放进它的碰撞盒里，所以盒子永远先被打中。 -->',
@@ -884,22 +894,30 @@ def _decor_geoms() -> list[str]:
     for item in items:
         spec = item["mesh"]
         key = spec["id"]
-        span, ctr = _asset_span(key)
-        scale = (_fit_scale(item, span) * _multi_margin(key)
-                 * float(item.get("mesh", {}).get("shrink", 1.0)))
+        sel = spec.get("parts")
+        span, ctr = _asset_span(key, sel)
+        scale = _fit_scale(item, span)
         yaw = float(spec.get("yaw", 0.0))
         q = yaw_quat(yaw)
         px, py, pz = item["pos"]
         ox, oy, oz = spec.get("offset", (0.0, 0.0, 0.0))
         z = pz + _zbase(item["room"]) + oz
         ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
-        for i, p in enumerate(lock.parts(key)):
+        for i, p in _selected_parts(key, sel):
             tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
             look = (f'material="dmat_{key}_{i}"' if p.get("png")
                     else f'rgba="{_rgba(item["rgba"])}"')
-            # ⚠️ 部件偏移必须**跟着 yaw 一起转**，再乘缩放，否则转过的多部件家具会错位。
-            # ⭐ 减掉跨度中心 `ctr`：把整件摆正到碰撞盒中心，偏心资产才不会探出一侧。
-            fx, fy, fz = (v - c for v, c in zip(lock.part_offset(key, i), ctr))
+            # ⭐ 所有部件共用同一个偏移 `-ctr`：把整件摆正到碰撞盒中心，
+            #    偏心资产（以及 `parts` 选出的子集）才不会探出一侧。
+            # ⛔⛔ 这里**绝不能再加每个部件自己的重心/包围盒中心**（2026-08-07 删掉的一段）。
+            #    部件之间的相对位置**已经烘在 OBJ 文件坐标里**了（`decor/convert.py` 是按
+            #    整件包围盒中心统一居中的），而 MuJoCo 编译 <mesh> 时虽然把顶点搬进了惯性系，
+            #    却把那个重定位量**抄进 geom_pos/geom_quat 自己补偿掉了**——
+            #    实测 `<geom type="mesh" pos="0 0 0">` 的世界 bbox 与 OBJ 文件 bbox 逐位相同。
+            #    老代码用 `lock.part_offset()` 又加了一遍，等于把每个部件往外推了自己的重心那么远
+            #    （条案两条柜腿各飞 ±0.49 m），这才是 console / nightstand 当年被自检判红的真因。
+            # ⚠️ 偏移仍要**跟着 yaw 一起转**再乘缩放。
+            fx, fy, fz = (-c for c in ctr)
             dx = (fx * ca - fy * sa) * scale
             dy = (fx * sa + fy * ca) * scale
             out.append(f'      <geom name="dg_{item["name"]}_{i}" type="mesh" mesh="dm_{tag}" '

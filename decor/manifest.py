@@ -43,9 +43,17 @@ ASSETS: dict[str, dict] = {
              "res": "2k", "max_tris": 12000, "label": "大理石胸像（画廊基座）"},
     "plant_a": {"source": "polyhaven", "source_id": "potted_plant_01", "license": "CC0-1.0",
                 "res": "2k", "max_tris": 14000, "label": "盆栽"},
-    # ⛔ plant_b（pachira_aquatica_01）已撤：拓下来的包围盒是 6.87×1.00×1.90 m——
-    #    一棵盆栽不可能宽 6.9 米，那个资产里带了多余几何（多半是并排的 LOD 实例）。
-    #    ⚠️ 留着这条注释是为了别再有人把它加回来。要用得先在 Blender 里清一遍。
+    # ⭐ 2026-08-07 复活。它的包围盒确实宽 6.87 m，但**那不是脏几何**：
+    #    上游把**四棵不同大小的发财树并排摆在一个文件里**，每棵是"冠 + 盆"两个材质组。
+    #        p0+p4 → x≈+2.91，高 1.90 m（最大）      p1+p5 → x≈+0.98，高 1.15 m
+    #        p2+p6 → x≈−1.11，高 0.74 m（最小）      p3+p7 → x≈−3.06，高 1.30 m
+    #    ⭐ 用法：`F.mesh_piece(..., mesh="plant_b", parts=(3, 7))` 只取一棵。
+    #       `_asset_span()` 按子集求并集并把跨度中心减掉，**摆位自动归正**，
+    #       不需要去 Blender 里切开，也不需要为每棵树各建一个 lock key。
+    #    ⚠️ 当年撤它的判断（"多余的 LOD 实例，要先在 Blender 清一遍"）是错的——
+    #       别再照那个结论把它撤第二次。
+    "plant_b": {"source": "polyhaven", "source_id": "pachira_aquatica_01", "license": "CC0-1.0",
+                "res": "2k", "max_tris": 14000, "label": "发财树（⚠️ 一包 4 棵，用 parts= 取一棵）"},
     "pillows": {"source": "polyhaven", "source_id": "throw_pillows_01", "license": "CC0-1.0",
                 "res": "2k", "max_tris": 6000, "label": "抱枕"},
 

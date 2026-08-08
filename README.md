@@ -303,11 +303,17 @@ Two traps found the hard way, both of which compile clean and render fine:
   collides, so physics looks right, while navigation and lidar quietly see straight through the
   furniture. Use `group="3"` instead — that controls drawing only; rays are unaffected.
 - ⛔ **Making the box bigger does not fix a mesh that pokes out**, because the fit scale grows the
-  mesh proportionally and the overshoot stays. The real causes were that MuJoCo re-centres each
-  mesh by its **centre of mass** while the pipeline recorded the **bounding-box centre** (up to
-  3.1 m apart), and that the recorded bounds came from before export rather than from the compiled
-  vertices. `decor/calibrate.py` measures both from a compiled probe model and writes the truth
-  back into the lock file.
+  mesh proportionally and the overshoot stays. The real cause is how MuJoCo compiles a `<mesh>`,
+  and it bites **twice**: it moves the vertices into the inertial frame — translating to the centre
+  of mass **and rotating to the principal axes** — so what you read back from `mesh_vert` is
+  neither file coordinates nor merely translated file coordinates; and it then **compensates for
+  that move itself** (copying it into `geom_pos`/`geom_quat`), so placement must **not** apply it
+  again. Miss the rotation and the recorded bounds come out with their axes permuted (the bed was
+  recorded as 0.66 × 2.21 × 2.15 against a true 1.69 × 2.06 × 0.78); apply the translation twice
+  and every part of a multi-part asset flies outward by its own centre of mass.
+  `decor/calibrate.py` measures the true bounds from a compiled probe model and writes them back
+  into the lock file, and two checks in `check_scene.py` — lock self-reconciliation, and measuring
+  the mesh vertices directly — keep both mistakes from coming back.
 
 Asset bytes are **not** stored in this repository. `decor/manifest.py` lists what to fetch,
 `decor/fetch.py` downloads it behind an **executable licence gate** — anything whose upstream

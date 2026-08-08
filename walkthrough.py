@@ -52,14 +52,27 @@ MOUSE_SENS = 0.12       # 度/像素
 PITCH_LIMIT = 89.0
 
 BODY_RADIUS = 0.28      # 玩家"胖"多少：撞墙判定用的水平半径
-# ⭐ 撞墙探测的射线高度，相对**脚底**固定 1.0 m（胸口）。两个都试错过：
-#    取膝盖（脚+0.35）→ 在楼梯上那条水平射线必然打到前面两级台阶，走两步卡死；
-#    取眼睛 → 站到半层高的休息平台上时眼睛正好齐墙顶，射线从墙上掠过去，
-#             人直接走进墙里再掉下楼。
-#    固定 1.0 m 两头都躲开：台阶在 0.32 m 内最多升一个踢面、够不着它，
-#    而墙从各自楼层的地面起算有 2.7 m 高，1.0 m 一定在墙身里。
-PROBE_H = 1.0
 STEP_UP_MAX = 0.30      # 能自动迈上去的台阶高度上限（house2 踢面 0.16，够）
+
+# ⭐ 撞墙探测的射线高度（相对**脚底**）。三根，**任一根命中就不让走**。
+#    两端的边界是**算出来的**，不是试出来的——selftest 里有一条断言在守着：
+#
+#    · 下界 0.35 —— 一帧最远探到 `BODY_RADIUS + WALK_SPEED*RUN_MULT/60 = 0.368 m`，
+#      在 house2 的楼梯上（踏面 STEP_RUN=0.30）这段距离里地面最多升**两级**
+#      = 2 × STEP_RISE(0.16) = 0.32 m。射线低于它就会打到前面第二级台阶，走两步卡死。
+#      ⚠️ 实测 0.31 就已经卡在 (3.94, 4.54) 上不去了，余量只有 3 cm，别再往下调。
+#      它同时 > STEP_UP_MAX(0.30)，语义上也自洽：能自动迈上去的东西不该被当成墙。
+#    · 上界 1.00 —— 站在半层中间平台上时脚底在 STOREY_H/2 = 1.44 m，
+#      而这一层的墙顶只到 WALL_HEIGHT = 2.73 m。射线高于 1.29 m 就从墙顶掠过去，
+#      人会直接走进墙里再掉下楼（"取眼睛高度"当年踩的就是这个）。
+#    · 中间 0.70 —— ⭐ 2026-08-07 加的第三根，为的是让**矮家具真的挡人**：
+#      茶几 0.50 / 长凳 0.44 / 餐桌 0.75 / 床 0.82 / 台面 0.92 全都矮于 1.0 m，
+#      以前一根胸口射线从它们头顶掠过去，人直接穿桌而过——于是走一圈下来会误以为
+#      "这些柜子没有碰撞"。**场景的碰撞一直是对的**（家具全是 contype=1），
+#      错的是这个漫游工具的探路方式。
+#    ⚠️ 代价是可能被椅子腿卡住。那是真实情况，卡住按 F 飞过去即可。
+PROBE_HS = (0.35, 0.70, 1.00)
+PROBE_H = PROBE_HS[-1]  # 兼容旧引用；新代码一律用 PROBE_HS
 GRAVITY = 9.8
 JUMP_V = 3.2
 
@@ -149,16 +162,15 @@ class Player:
         self._settle_vertical(probe, dt)
 
     def _step_horizontal(self, probe, vx: float, vy: float, dist: float) -> None:
-        """先探路再走：正前方 BODY_RADIUS 内有东西就不动。
+        """先探路再走：**任一根**探针在 BODY_RADIUS 内撞到东西就不动。
 
-        探测高度见 PROBE_H 的注释——那两行是这个函数踩过的两个坑。
-        代价是矮家具（茶几、椅子）不挡人：对一个"进去看看"的工具反而更好，
-        免得卡在椅子腿上出不来。
+        ⚠️ 三根高度的取值依据见 PROBE_HS——上下界都是从 STEP_RUN/STEP_RISE 和
+           WALL_HEIGHT/STOREY_H 算出来的，改楼梯参数要回去重算（selftest 会当场判红）。
         """
-        origin = [self.feet[0], self.feet[1], self.feet[2] + PROBE_H]
-        hit = probe(origin, (vx, vy, 0.0))
-        if 0.0 <= hit < BODY_RADIUS + dist:
-            return
+        for h in PROBE_HS:
+            hit = probe([self.feet[0], self.feet[1], self.feet[2] + h], (vx, vy, 0.0))
+            if 0.0 <= hit < BODY_RADIUS + dist:
+                return
         self.feet[0] += vx * dist
         self.feet[1] += vy * dist
 
@@ -207,6 +219,21 @@ def selftest(scene_key: str, eye_h: float) -> int:
 
     ok = True
     p = Player(layout, eye_h)
+
+    # 0) 探针高度的两条边界 —— 纯算术，不打射线。
+    #    ⭐ 把 PROBE_HS 那段注释里的推导变成可证的：改了楼梯参数或走速，这里会当场变红，
+    #       而不是等到有人在楼梯上卡住、或者穿墙掉下楼才发现。
+    rise = float(getattr(layout, "STEP_RISE", 0.0))
+    run = float(getattr(layout, "STEP_RUN", 0.0))
+    reach = BODY_RADIUS + WALK_SPEED * RUN_MULT / 60.0
+    lo_need = math.ceil(reach / run) * rise if run > 0 else STEP_UP_MAX
+    multi = getattr(layout, "N_FLOORS", 1) > 1
+    hi_cap = (float(layout.WALL_HEIGHT) - float(layout.STOREY_H) / 2.0) if multi else float("inf")
+    good = PROBE_HS[0] > lo_need and PROBE_HS[-1] < hi_cap
+    print(f"  探针高度合法：最低 {PROBE_HS[0]:.2f} > 一帧内台阶最多升的 {lo_need:.2f} m、"
+          f"最高 {PROBE_HS[-1]:.2f} < 半层平台处的墙顶 "
+          f"{'∞' if hi_cap == float('inf') else f'{hi_cap:.2f}'} m {'✅' if good else '⛔'}")
+    ok &= good
 
     # 1) 前进方向 = 视线方向
     def ahead(pl):

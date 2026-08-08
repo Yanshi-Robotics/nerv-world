@@ -20,15 +20,23 @@
   一条路。查"存在一条路径"证明不了"这是一部楼梯"。`check_route` 与 `check_joints`
   就是补这个洞的：一个走完整条路线，一个逐个核接头。
 
-检查项（任一不过 → 退出码 1）：
-  1. layout 契约完整：生成器要读的名字一个不缺
-  2. 产物能被 MuJoCo 真正加载（不是"文件存在"）
-  3. 楼梯正好爬满一层，且尺寸合规（GB 50096-2011 §6.3）
-  4. ⭐ 四个接头闭合：上一段末级 ↔ 下一段起始平台，首尾相接 + 差一个踢面
-  5. 门宽够登记在册的机器人通过
-  6. ⭐ 整条路线走得通：楼层平台→上行跑→中间平台→回头跑→上一层→门口，逐点实测
-  7. 楼梯头顶净空 ≥ 规范值
-  8. 楼层平台四周不许有没拦住的洞
+- ⛔ **2026-08-07 最贵的一次**：真家具网格被系统性缩小 1.0–4.2 倍（床成了 0.56×0.68×0.26 m
+  的玩具床，还悬空 29 cm），而**当时全部自检都是绿的**。根因是 `decor/calibrate.py` 漏转了
+  一次旋转、摆位又多加了一份重心——两处都**编译不报错、渲染看着也正常**。
+  它能活一整版，是因为 `decor.lock.json` 里同一个尺寸存了两份（整件 `size` 与各部件
+  `offset±half`），而**从来没有一道闸门逼这两份对账**。`check_lock_reconciles` 就是补这个洞的。
+  同轮还发现：`check_decor_ray_invariance` 打的全是**水平**射线，网格往地板里钻它一条都测不出来
+  （`check_decor_inside_box` 补这个洞）；以及没有任何一项拿**门**和**家具**对过账，
+  于是"柜子沿墙一拉到底、正好压死那面墙上的门"这种错在三个场景里躺了很久
+  （`check_door_passable` 补这个洞）。
+  **教训：一个量在两个地方各存了一份，就必须有闸门逼它们对账；没对账的冗余不是冗余，是雷。**
+
+**检查项的权威清单是文件末尾的 `CHECKS`，别在这里再抄一份，也别在这里写项数**——
+抄两份必然对不上（这段注释在 0.8 那一版就一直写着"8 项"而实际有 16 项）。
+任一不过 → 退出码 1。
+
+⛔ **新加一项检查时的规矩：必须做故障注入验证**——把它该抓的那个 bug 注回去，
+它得**当场变红**；拔掉之后回绿。抓不到旧 bug 的新检查等于没加。
 """
 from __future__ import annotations
 
@@ -254,6 +262,137 @@ def check_doors(key: str, layout) -> list[str]:
     return errs
 
 
+# 门洞前后必须留出的净空进深。0.60 m ≈ 一个身位，够机器人转身进门。
+DOOR_CLEAR_M = 0.60
+# 比这矮的东西不算挡路：地毯、地垫、门槛。G1 抬脚约 0.25 m。
+DOOR_STEPOVER_M = 0.25
+
+
+def check_door_passable(key: str, layout) -> list[str]:
+    """⭐⭐ 门要**真的走得过去**：两侧都得是房间，且门前后 0.6 m 的净通行宽够机器人过。
+
+    ⛔ 为什么单开一项（2026-08-07 在 house3 抓到的）：`dr_closet_e` 是一只
+       0.56 × 3.00 × 2.20 的通柜，沿衣帽间东墙一拉到底，正好把「画廊→衣帽间」那道
+       1.2 m 的门**整个封死**——穿过门一步撞进实心柜子，衣帽间/主卧/主卫整个西翼
+       从画廊走不进来。当时全部自检都是绿的，因为 `check_doors` 只量门自己的净宽，
+       **从没有任何一项拿门和家具对过账**。
+
+    ⚠️ 判据是**净通行宽**，不是"有没有重叠"：真实住宅里家具本来就贴着洞口边站
+       （沙发背靠 4 m 的开口是正常设计），按"重叠即红"会得到一堆假阳性。
+       这里把门宽这一段沿墙切开，减掉每件挡路家具占的区间，看剩下最宽的一条够不够。
+    ⛔ `kind="open"` 的整段拆墙通道不参与——那是"两间屋打通"，不是门。
+    """
+    errs: list[str] = []
+    need = max(w for w, _f, _n in ROBOT_CLEARANCE.values())
+    t = layout.WALL_THICK
+    rooms = getattr(layout, "ROOMS", {})
+    floors = sorted({r.get("floor", 0) for r in rooms.values()})
+
+    def _room_at(x: float, y: float, floor: int):
+        for name, r in rooms.items():
+            if r.get("floor", 0) != floor:
+                continue
+            x0, y0, x1, y1 = r["rect"]
+            if x0 <= x <= x1 and y0 <= y <= y1:
+                return name
+        return None
+
+    # 每层的挡路家具 → 世界 AABB。带 yaw 的按旋转后的外接 AABB 取保守值。
+    blockers: dict[int, list] = {f: [] for f in floors}
+    for it in layout.FURNITURE:
+        if it.get("type") not in ("box", "cylinder"):
+            continue
+        _px, _py, pz = it["pos"]
+        sx, sy, sz = it["size"]
+        if pz + sz / 2.0 <= DOOR_STEPOVER_M:
+            continue                       # 地毯/地垫这类，跨得过去
+        q = it.get("quat")
+        if q:
+            yaw = 2.0 * math.atan2(q[3], q[0])
+            ca, sa = abs(math.cos(yaw)), abs(math.sin(yaw))
+            sx, sy = sx * ca + sy * sa, sx * sa + sy * ca
+        f = rooms.get(it["room"], {}).get("floor", 0)
+        blockers.setdefault(f, []).append(
+            (it["name"], it["pos"][0] - sx / 2, it["pos"][0] + sx / 2,
+             it["pos"][1] - sy / 2, it["pos"][1] + sy / 2))
+
+    for door in layout.DOORS:
+        if door.get("kind") == "open":
+            continue
+        c, w, co = door["center"], door["width"], door["coord"]
+        horiz = door["orient"] == "h"
+        note = door.get("note", "?")
+        for floor in floors:
+            for sgn, lbl in ((-1, "南/西"), (+1, "北/东")):
+                px, py = ((c, co + sgn * (t / 2 + 0.30)) if horiz
+                          else (co + sgn * (t / 2 + 0.30), c))
+                if _room_at(px, py, floor) is None:
+                    if floor == floors[0]:
+                        _fail(errs, f"门「{note}」{lbl}侧 0.30 m 处 ({px:.2f}, {py:.2f}) "
+                                    f"不在任何房间里 —— 这道门通向墙里或屋外")
+                    continue
+                # 门宽这一段沿墙切开，减掉每件挡路家具占的区间
+                lo_b, hi_b = sorted((co + sgn * t / 2, co + sgn * (t / 2 + DOOR_CLEAR_M)))
+                free = [(c - w / 2, c + w / 2)]
+                hit: list[str] = []
+                for nm, x0, x1, y0, y1 in blockers.get(floor, []):
+                    across, along = ((y0, y1), (x0, x1)) if horiz else ((x0, x1), (y0, y1))
+                    if not (across[0] < hi_b and across[1] > lo_b):
+                        continue           # 不在门前那 0.6 m 的进深里
+                    nxt = []
+                    for f0, f1 in free:
+                        for seg in ((f0, min(along[0], f1)), (max(along[1], f0), f1)):
+                            if seg[1] - seg[0] > 1e-9:
+                                nxt.append(seg)
+                    if nxt != free:
+                        hit.append(nm)
+                    free = nxt
+                widest = max((f1 - f0 for f0, f1 in free), default=0.0)
+                if widest < need - 1e-9:
+                    where = f"（{floor} 层）" if len(floors) > 1 else ""
+                    _fail(errs, f"门「{note}」{where}{lbl}侧 {DOOR_CLEAR_M} m 内净通行宽"
+                                f"只剩 {widest:.2f} m（要 {need:.2f} m）—— 挡路的是 {hit[:3]}")
+    return errs
+
+
+def _yaw_aabb(it: dict) -> tuple[float, float, float, float]:
+    """一件家具的世界 AABB（x0, x1, y0, y1）。带 yaw 的按旋转后的外接框取保守值。"""
+    px, py = it["pos"][0], it["pos"][1]
+    sx, sy = it["size"][0], it["size"][1]
+    q = it.get("quat")
+    if q:
+        yaw = 2.0 * math.atan2(q[3], q[0])
+        ca, sa = abs(math.cos(yaw)), abs(math.sin(yaw))
+        sx, sy = sx * ca + sy * sa, sx * sa + sy * ca
+    return (px - sx / 2, px + sx / 2, py - sy / 2, py + sy / 2)
+
+
+def check_furniture_not_through_wall(key: str, layout) -> list[str]:
+    """⭐ 家具不许**捅穿墙体伸进隔壁房间**。
+
+    ⚠️ 判据是"穿到墙的另一面"，**不是"碰到墙"**。这个仓的建模惯例就是把柜子、台面
+       画到房间矩形边上，让它和墙贴死不留缝——墙从 `rect` 往房间内侧长一个 `WALL_THICK`，
+       所以家具伸进墙体那 14 cm 是**有意的**（三个场景合计 56 件这样，碰撞和射线都无害，
+       视觉上藏在墙里）。按"碰到墙就红"会把这条惯例判成 56 个 bug。
+    ⛔ 真正的缺陷是穿过去：隔壁房间的墙面上会凭空长出半截柜子，
+       而且**渲染不报错、射线也照常**——只有走到隔壁抬头看才发现。
+       2026-08-07 首次上闸门时抓到 3 件（全在 house1，最深的鞋柜穿出 10 cm）。
+    """
+    errs: list[str] = []
+    t = layout.WALL_THICK
+    for it in layout.FURNITURE:
+        r = getattr(layout, "ROOMS", {}).get(it["room"])
+        if not r:
+            continue
+        x0, y0, x1, y1 = r["rect"]
+        fx0, fx1, fy0, fy1 = _yaw_aabb(it)
+        thru = max(x0 - fx0, fx1 - x1, y0 - fy0, fy1 - y1)
+        if thru > 1e-3:
+            _fail(errs, f"家具 {it['name']}（{it['room']}）捅穿墙体 {thru * 100:.1f} cm "
+                        f"伸进隔壁——墙厚只有 {t * 100:.0f} cm，隔壁墙面上会长出半截家具")
+    return errs
+
+
 # layout 里"声明了就该在产物里看得见"的清单：名字 → 产物里对应 geom 名字的前缀。
 # ⛔ 为什么要这条检查（2026-08-05 加）：`_wall_arts()` 从写出来那天起就没被 build() 调用过，
 #    house1 声明的 11 幅挂画一幅都没进过产物，而**生成器不会报错、截图也看不出少了什么**。
@@ -314,6 +453,55 @@ def check_assets(key: str, layout) -> list[str]:
         skies = [t for t in asset.findall("texture") if t.get("type") == "skybox"]
         if len(skies) != 1:
             _fail(errs, f"{os.path.basename(path)}：天空盒有 {len(skies)} 个，必须正好 1 个")
+    return errs
+
+
+# ⚠️ 不是 0：`size` 取自 fetch 期的 trimesh 对象，`offset/half` 取自落盘后的 OBJ，
+#    两者差着导出时的取舍（实测 plant_a 差 3.4 cm）。这是**已知的导出差异**，不是本条要抓的错。
+#    5 cm 足够放过它，又远小于真出事时的量级（床差 136 cm、条案差 176 cm）。
+LOCK_SPAN_TOL = 0.05
+
+
+def check_lock_reconciles(key: str, layout) -> list[str]:
+    """⭐⭐ decor.lock 自洽对账：各部件 `offset ± half` 的并集必须等于整件 `size`。
+
+    ⛔ 为什么必须有它（2026-08-07 血的教训）：`decor/calibrate.py` 曾经只把 `mesh_pos`
+       加回顶点、没把 `mesh_quat` 转回来——MuJoCo 编译 `<mesh>` 时不只把顶点平移到重心，
+       还会**旋转到惯性主轴系**。于是写进 lock 的 offset/half 是"轴被置换过"的：
+       床记成 0.66×2.21×2.15（真值 1.69×2.06×0.78），条案记成 1.31×0.81×2.44
+       （真值 2.44×0.52×0.68）。`_fit_scale` 据此把网格缩小了 1.0–4.2 倍——
+       **编译不报错、射线自检全绿、渲染看着也正常**，只有把这两个数摆在一起才看得出来。
+
+    ⭐ 这条只查 lock 自己：**不需要 mujoco，也不需要资产字节**，裸 clone 上照样能红。
+       同一份 lock 全仓共用，所以只在第一个场景跑一次，免得刷三遍屏。
+    """
+    if key != SCENES.keys()[0]:
+        return []
+    try:
+        from decor import lock
+    except ImportError:
+        return ["(跳过) 没有 decor 包"]
+    errs: list[str] = []
+    for k, rec in sorted(lock.load().items()):
+        ps = rec.get("parts") or []
+        if not ps or "half" not in ps[0]:
+            continue                      # 老 lock 没记部件信息，没什么可对的
+        lo = [min(float(p["offset"][j]) - float(p["half"][j]) for p in ps) for j in range(3)]
+        hi = [max(float(p["offset"][j]) + float(p["half"][j]) for p in ps) for j in range(3)]
+        span = [h - lv for h, lv in zip(hi, lo)]
+        want = [float(v) for v in (rec.get("size") or [0.0, 0.0, 0.0])]
+        gap = max(abs(a - b) for a, b in zip(span, want))
+        if gap > LOCK_SPAN_TOL:
+            _fail(errs, f"{k}：部件并集跨度 {[round(v, 3) for v in span]} 对不上 "
+                        f"size {[round(v, 3) for v in want]}（差 {gap * 100:.1f} cm）"
+                        f"—— ⛔ 十有八九是 decor/calibrate.py 没把 mesh_quat 转回文件坐标，"
+                        f"改完重跑 `python -m decor.calibrate`")
+        # convert.py 是按**整件包围盒中心**统一居中的，所以并集中心必须落在原点附近。
+        # 偏了说明有部件没跟着居中——那会让整件在碰撞盒里偏向一侧。
+        ctr = [(h + lv) / 2.0 for h, lv in zip(hi, lo)]
+        if max(abs(v) for v in ctr) > LOCK_SPAN_TOL:
+            _fail(errs, f"{k}：部件并集中心 {[round(v, 3) for v in ctr]} 不在原点附近"
+                        f"—— convert.py 按整件包围盒中心统一居中，偏了说明有部件漏了")
     return errs
 
 
@@ -401,6 +589,60 @@ def check_void(key: str, layout) -> list[str]:
     return errs
 
 
+def check_decor_inside_box(key: str, layout) -> list[str]:
+    """⭐⭐ 每张装饰网格的真实顶点必须整个落在它所装饰的碰撞盒里（包含性不变式的正面证明）。
+
+    ⛔ 为什么它不能被下面那条射线不变性取代：**射线打的全是水平方向**，
+       所以只证伪得了水平方向的探出。2026-08-07 实测，当时有 7 件在 z 方向探出——
+       落地灯的网格钻进地板 15 cm、盆栽 10.6 cm、冰箱 7.8 cm——**48 项自检一条都没红**。
+    ⭐ 这一条不采样、不撞运气：直接从编译好的产物读 `geom_xpos/geom_xmat + mesh_vert`，
+       把网格顶点变换到碰撞盒的局部系，和盒子半长逐轴比。探出多少就报多少毫米。
+    ⚠️ 网格探出时**放大碰撞盒没有用**——`_fit_scale` 会把网格按比例一起撑大。
+       该查的是 `_asset_span`（跨度算对没有）和 `_decor_geoms`（偏移加了几遍）。
+    """
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    if not os.path.exists(path):
+        return []
+    m = mujoco.MjModel.from_xml_path(path)
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    boxes: dict[str, int] = {}
+    meshes: dict[str, list[int]] = {}
+    for g in range(m.ngeom):
+        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or ""
+        if nm.startswith("furn_"):
+            boxes[nm[len("furn_"):]] = g
+        elif nm.startswith("dg_"):
+            # dg_<家具名>_<部件下标>
+            meshes.setdefault(nm[len("dg_"):].rsplit("_", 1)[0], []).append(g)
+    errs: list[str] = []
+    for item, gids in sorted(meshes.items()):
+        b = boxes.get(item)
+        if b is None:
+            _fail(errs, f"装饰 {item} 找不到对应的碰撞盒 furn_{item}")
+            continue
+        Rb = d.geom_xmat[b].reshape(3, 3)
+        cb, hb = d.geom_xpos[b], m.geom_size[b]
+        worst, axis = -1e9, 0
+        for g in gids:
+            mid = m.geom_dataid[g]
+            v = m.mesh_vert[m.mesh_vertadr[mid]:m.mesh_vertadr[mid] + m.mesh_vertnum[mid]]
+            w = (v @ d.geom_xmat[g].reshape(3, 3).T + d.geom_xpos[g] - cb) @ Rb
+            out = np.maximum(w.max(axis=0) - hb, -w.min(axis=0) - hb)
+            if float(out.max()) > worst:
+                worst, axis = float(out.max()), int(out.argmax())
+        if worst > 1e-6:
+            _fail(errs, f"装饰 {item} 的网格探出碰撞盒 {worst * 1000:.1f} mm（{'xyz'[axis]} 轴）"
+                        f"—— 包含性不变式破了，⛔ 别去放大碰撞盒，"
+                        f"去看 make_house 的 _asset_span / _decor_geoms")
+    return errs
+
+
 def check_decor_ray_invariance(key: str, layout) -> list[str]:
     """⭐⭐ 装饰网格不许改变**任何**射线读数 —— 这是"包含性不变式"的正面证明。
 
@@ -444,9 +686,18 @@ def check_decor_ray_invariance(key: str, layout) -> list[str]:
              if m.geom_contype[i] != 0 and m.geom_type[i] == mujoco.mjtGeom.mjGEOM_BOX]
 
     def _inside(p) -> bool:
+        """点在不在某个实心盒子里。
+
+        ⛔ 必须把点变换到**盒子自己的局部系**再比：`geom_size` 是局部系的半长，
+           而带 yaw 的家具（条案、餐椅、冰箱）的盒子是转过的。
+           ⚠️ 老版本直接拿世界轴比 `abs(p - geom_pos) <= geom_size`，
+           于是把一只 yaw=90 的 2.44 m 条案当成东西向的——柜子内部的采样点被判成
+           自由空间，射出去先碰到网格内表面，这条自检就报了个**假阳性**
+           （2026-08-07 给三处条案换真网格时暴露）。
+        """
         for i in solid:
-            c, s = m.geom_pos[i], m.geom_size[i]
-            if all(abs(p[k] - c[k]) <= s[k] + 0.02 for k in range(3)):
+            q = (p - d.geom_xpos[i]) @ d.geom_xmat[i].reshape(3, 3)
+            if all(abs(q[k]) <= m.geom_size[i][k] + 0.02 for k in range(3)):
                 return True
         return False
 
@@ -813,15 +1064,19 @@ CHECKS = [
     ("layout 契约完整", check_contract),
     ("产物是合法 XML", check_wellformed),
     ("⭐ 引用的材质/贴图都真的存在", check_assets),
+    ("⭐⭐ decor.lock 自洽（offset±half ⇄ size）", check_lock_reconciles),
     ("⛔ geom 数没超渲染缓冲", check_geom_budget),
     ("产物能被 MuJoCo 加载", check_loads),
     ("楼梯爬满一层 + 尺寸合规", check_stairs),
     ("⭐ 四个接头闭合（梯段 ↔ 平台）", check_joints),
     ("门宽够机器人过", check_doors),
+    ("⭐⭐ 门真的走得过去（两侧在屋里 + 净通行宽）", check_door_passable),
+    ("⭐ 家具没有捅穿墙伸进隔壁", check_furniture_not_through_wall),
     ("⭐ 声明的东西都真的进了产物", check_no_dead_declarations),
     ("挂画没压在门窗洞口上", check_art_clear),
     ("⭐ 望公园的视线没被挡 + 远景没被裁", check_park_sightline),
     ("⛔ 朝外的房间往外都撞得到实体", check_void),
+    ("⭐⭐ 装饰网格整个装在碰撞盒里", check_decor_inside_box),
     ("⭐⭐ 装饰网格没改变任何射线读数", check_decor_ray_invariance),
     ("⭐ 整条上楼路线实测走通", check_route),
     ("楼梯头顶净空", check_headroom),

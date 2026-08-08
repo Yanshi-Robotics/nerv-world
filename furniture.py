@@ -221,7 +221,7 @@ def tray_set(name: str, room: str, x: float, y: float, z: float) -> list[dict]:
 def mesh_piece(name: str, room: str, x: float, y: float, *, size, mesh: str,
                yaw: float = 0.0, z: float | None = None, rgba=(0.62, 0.60, 0.58, 1.0),
                mat: str = "", offset=(0.0, 0.0, 0.0), fit: str = "contain",
-               shrink: float = 1.0) -> list[dict]:
+               parts=None) -> list[dict]:
     """一件"穿了真网格外衣"的家具。
 
     ⭐ 返回的仍然是**一个普通的 box 零件**——它就是碰撞真相；只是多带一个 `mesh` 字段，
@@ -229,16 +229,23 @@ def mesh_piece(name: str, room: str, x: float, y: float, *, size, mesh: str,
        所以：改尺寸只改 `size`，网格自动跟着缩；不装资产时场景照样完整（只是没外衣）。
     ⛔ `size` 一律写**全长**（和本文件其余部分同约定）。
 
-    `shrink` = **额外收缩系数**（默认 1.0 = 不额外收）。
-    ⚠️ 只在个别资产上需要：`decor/convert.py` 记的是每个部件的**包围盒中心**，而 MuJoCo
-       编译时按**重心**重定位顶点，两者在非闭合网格上能差几十厘米。`decor/calibrate.py`
-       已经把实测重心写回 lock 补掉了主要部分，但少数资产（软包床、抱枕这类布料件）
-       残差仍会让网格探出碰撞盒。判据只有一个：`check_scene.py` 的
-       **⭐⭐ 装饰网格没改变任何射线读数** 那条必须绿。
-    ⛔ 别改成"放大碰撞盒"——`_fit_scale` 会把网格按比例一起撑大，超出量原封不动。
+    ⚠️ **`size` 的比例要贴近网格自己的比例**，否则会白缩：缩放是均匀的、按三轴最紧的
+       那一比取值，盒子哪一维偏瘦，整件就照那一维缩，其余两维空一大截。
+       （实测：条案网格真尺寸 2.44×0.52×0.68，塞进 1.40×0.38×0.84 的盒子只剩 57%。）
+
+    `parts` = 可选的**部件白名单**，用来从"一个文件里装了好几件东西"的上游资产里只取一件。
+    ⭐ 目前唯一的用户是发财树 `plant_b`（Poly Haven 把四棵并排摆在一个文件里）：
+       `parts=(3, 7)` 取第四棵。缩放与摆位都按子集重算，**自动归正，不用手填偏移**。
+
+    ⛔ 这里曾有一个 `shrink=` 额外收缩系数，2026-08-07 连同它的理由一起删掉了。
+       那个"包围盒中心 vs 重心的残差"根本不存在——真因是标定漏转了一次旋转、
+       摆位又多加了一份重心（见 `decor/calibrate.py` 与 `make_house._decor_geoms`）。
+       修完之后全仓没有任何一件资产需要额外收。**网格探出盒子时不要拧系数，去看那两处。**
     """
     zc = size[2] / 2.0 if z is None else z
     d = _p(name, room, "box", (x, y, zc), size, rgba, mat, yaw)
-    d["mesh"] = {"id": mesh, "yaw": yaw, "fit": fit, "offset": tuple(offset),
-                 "shrink": float(shrink)}
+    d["mesh"] = {"id": mesh, "yaw": yaw, "fit": fit, "offset": tuple(offset)}
+    if parts is not None:
+        # ⚠️ 只在真的要挑部件时才写这个键，`parts=None` 的产物与加这个功能之前逐字节一致
+        d["mesh"]["parts"] = tuple(int(i) for i in parts)
     return [d]

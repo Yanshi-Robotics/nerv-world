@@ -145,10 +145,10 @@
     <geom name="closet_dfe0_r" type="box" size="0.085 0.05 1.15" pos="-5.57 2.55 1.15" rgba="0.4 0.29 0.2 1"/>
     <geom name="closet_dfe0_top" type="box" size="0.085 0.6 0.05" pos="-5.57 2 2.3" rgba="0.4 0.29 0.2 1"/>
     <geom name="furn_cl_w" type="box" size="0.29 1.6 1.15" pos="-9.2 2.75 1.15" rgba="0.72 0.63 0.52 1"/>
-    <geom name="furn_cl_e" type="box" size="0.29 1.6 1.15" pos="-5.8 2.75 1.15" rgba="0.72 0.63 0.52 1"/>
+    <geom name="furn_cl_e" type="box" size="0.29 0.8 1.15" pos="-5.8 3.55 1.15" rgba="0.72 0.63 0.52 1"/>
     <geom name="furn_cl_rail_w" type="box" size="0.025 1.5 0.025" pos="-8.88 2.75 1.12" rgba="0.6 0.6 0.62 1"/>
     <geom name="furn_cl_clothes_w" type="box" size="0.12 1.4 0.4" pos="-8.88 2.75 0.7" rgba="0.42 0.45 0.55 1"/>
-    <geom name="furn_cl_clothes_e" type="box" size="0.12 1.4 0.4" pos="-6.12 2.75 0.7" rgba="0.56 0.48 0.44 1"/>
+    <geom name="furn_cl_clothes_e" type="box" size="0.12 0.7 0.4" pos="-6.12 3.55 0.7" rgba="0.56 0.48 0.44 1"/>
     <geom name="furn_cl_island" type="box" size="0.65 0.4 0.44" pos="-7.5 2.75 0.44" rgba="0.55 0.45 0.34 1"/>
 
     <!-- ===== 小孩房 ===== -->
@@ -521,7 +521,7 @@
     <geom name="furn_ck_fridge_handle_l" type="box" size="0.02 0.02 0.19" pos="0.42 -0.73 0.9" material="mat_chrome"/>
     <geom name="furn_sr_cab_n" type="box" size="1.2 0.21 1.15" pos="2 -0.21 1.15" rgba="0.74 0.66 0.55 1"/>
     <geom name="furn_ck_counter" type="box" size="0.325 2.2 0.45" pos="-0.175 -4.8 0.45" rgba="0.84 0.84 0.8 1"/>
-    <geom name="furn_ck_counter_top" type="box" size="0.36 2.25 0.035" pos="-0.16 -4.8 0.93" material="mat_marble_dark"/>
+    <geom name="furn_ck_counter_top" type="box" size="0.36 2.25 0.035" pos="-0.13 -4.8 0.93" material="mat_marble_dark"/>
     <geom name="furn_ck_dishwasher" type="box" size="0.31 0.3 0.4" pos="-0.17 -3 0.44" material="mat_steel"/>
     <geom name="furn_ck_dw_door" type="box" size="0.01 0.29 0.31" pos="0.145 -3 0.4" material="mat_steel"/>
     <geom name="furn_ck_dw_panel" type="box" size="0.01 0.29 0.055" pos="0.15 -3 0.76" material="mat_appliance_panel"/>
@@ -531,7 +531,7 @@
     <geom name="furn_ck_stove" type="box" size="0.29 0.4 0.02" pos="-0.19 -5.3 0.98" rgba="0.1 0.1 0.12 1"/>
     <geom name="furn_ck_burner_a" type="cylinder" size="0.13 0.015" pos="-0.19 -5.08 1.01" rgba="0.45 0.12 0.1 1"/>
     <geom name="furn_ck_burner_b" type="cylinder" size="0.13 0.015" pos="-0.19 -5.52 1.01" rgba="0.45 0.12 0.1 1"/>
-    <geom name="furn_ck_hood" type="box" size="0.275 0.5 0.18" pos="-0.24 -5.3 1.8" material="mat_steel"/>
+    <geom name="furn_ck_hood" type="box" size="0.275 0.5 0.18" pos="-0.22 -5.3 1.8" material="mat_steel"/>
     <geom name="furn_ck_oven" type="box" size="0.31 0.31 0.38" pos="-0.17 -6.4 0.42" material="mat_steel"/>
     <geom name="furn_ck_oven_glass" type="box" size="0.01 0.26 0.25" pos="0.145 -6.4 0.4" material="mat_oven_glass"/>
     <geom name="furn_ck_oven_panel" type="box" size="0.01 0.29 0.055" pos="0.145 -6.4 0.73" material="mat_appliance_panel"/>
@@ -641,7 +641,7 @@
     <geom name="entry_wfe0_top" type="box" size="0.085 0.64 0.04" pos="9.43 1.2 2.35" rgba="0.93 0.93 0.91 1"/>
     <geom name="entry_wfe0_bot" type="box" size="0.085 0.64 0.04" pos="9.43 1.2 0.95" rgba="0.93 0.93 0.91 1"/>
     <geom name="furn_entry_mat" type="box" size="0.45 0.8 0.005" pos="8.7 -0.6 0.005" rgba="0.33 0.31 0.3 1"/>
-    <geom name="furn_shoe_cabinet" type="box" size="0.225 0.9 1.1" pos="9.3 1.2 1.1" rgba="0.72 0.63 0.52 1"/>
+    <geom name="furn_shoe_cabinet" type="box" size="0.225 0.9 1.1" pos="9.19 1.09 1.1" rgba="0.72 0.63 0.52 1"/>
     <geom name="furn_shoe_cab_handle" type="box" size="0.025 0.025 0.14" pos="9.05 0.75 1.05" rgba="0.55 0.56 0.58 1"/>
     <geom name="furn_bench" type="box" size="0.25 0.65 0.23" pos="9.2 -2.2 0.23" material="mat_fabric"/>
     <geom name="furn_coat_board" type="box" size="0.03 0.7 0.425" pos="9.42 -2.2 1.55" rgba="0.66 0.56 0.44 1"/>
@@ -677,12 +677,12 @@
     <geom name="laundry_wfe0_r" type="box" size="0.085 0.04 0.7" pos="9.43 -4.3 1.65" rgba="0.93 0.93 0.91 1"/>
     <geom name="laundry_wfe0_top" type="box" size="0.085 0.74 0.04" pos="9.43 -5 2.35" rgba="0.93 0.93 0.91 1"/>
     <geom name="laundry_wfe0_bot" type="box" size="0.085 0.74 0.04" pos="9.43 -5 0.95" rgba="0.93 0.93 0.91 1"/>
-    <geom name="furn_washer" type="box" size="0.34 0.35 0.45" pos="4.6 -6.3 0.45" material="mat_steel"/>
-    <geom name="furn_washer_door" type="cylinder" size="0.22 0.02" pos="4.95 -6.3 0.55" material="mat_steel"/>
-    <geom name="furn_dryer" type="box" size="0.34 0.35 0.45" pos="4.6 -5.5 0.45" material="mat_steel"/>
-    <geom name="furn_dryer_door" type="cylinder" size="0.22 0.02" pos="4.95 -5.5 0.55" material="mat_steel"/>
-    <geom name="furn_laundry_counter" type="box" size="0.45 1 0.03" pos="4.7 -5.9 0.94" material="mat_marble_dark"/>
-    <geom name="furn_laundry_sink" type="box" size="0.35 0.3 0.15" pos="4.7 -4.3 0.9" material="mat_porcelain"/>
+    <geom name="furn_washer" type="box" size="0.34 0.35 0.45" pos="5.05 -6.3 0.45" material="mat_steel"/>
+    <geom name="furn_washer_door" type="cylinder" size="0.22 0.02" pos="5.4 -6.3 0.55" material="mat_steel"/>
+    <geom name="furn_dryer" type="box" size="0.34 0.35 0.45" pos="5.05 -5.5 0.45" material="mat_steel"/>
+    <geom name="furn_dryer_door" type="cylinder" size="0.22 0.02" pos="5.4 -5.5 0.55" material="mat_steel"/>
+    <geom name="furn_laundry_counter" type="box" size="0.45 1 0.03" pos="5.15 -5.9 0.94" material="mat_marble_dark"/>
+    <geom name="furn_laundry_sink" type="box" size="0.35 0.3 0.15" pos="5.15 -4.3 0.9" material="mat_porcelain"/>
     <geom name="furn_laundry_shelf" type="box" size="0.225 1.3 1.05" pos="9.25 -5.2 1.05" rgba="0.72 0.7 0.66 1"/>
     <geom name="furn_laundry_basket" type="cylinder" size="0.33 0.28" pos="7.2 -6.3 0.28" rgba="0.78 0.74 0.66 1"/>
 

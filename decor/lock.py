@@ -54,16 +54,9 @@ def rel_path(key: str, filename: str) -> str:
     return os.path.join("decor", "assets", key, filename).replace(os.sep, "/")
 
 
-def part_offset(key: str, i: int) -> tuple[float, float, float]:
-    """第 i 个部件的中心相对整件中心的偏移（归一化坐标系，未缩放）。
-
-    ⚠️ 必须用它：MuJoCo 编译时把每张 mesh 按自身重心重新定位，
-       所有部件塞在同一个 pos 上会让多部件资产散架。
-    """
-    p = parts(key)[i]
-    # ⭐ 优先用 `com`（`decor/calibrate.py` 从 MuJoCo 的 `mesh_pos` 实测出来的重心）。
-    #    ⛔ 不能用 `offset`（包围盒中心）：MuJoCo 编译时按**重心**把顶点平移到原点，
-    #       两者在非闭合网格上能差几十厘米甚至几米（实测最大 312 cm），
-    #       用错的话多部件资产就系统性地探出碰撞盒。
-    o = p.get("com") or p.get("offset") or [0.0, 0.0, 0.0]
-    return (float(o[0]), float(o[1]), float(o[2]))
+# ⛔ 这里曾有一个 `part_offset(key, i)`，2026-08-07 删除。
+#    它返回每个部件的重心，生成器拿去当摆位偏移——那是**第二次**施加 MuJoCo 自己
+#    已经补偿掉的量（编译器把 mesh_pos/mesh_quat 抄进了 geom_pos/geom_quat）。
+#    多部件资产的部件因此各自往外飞自己的重心那么远。
+#    ✅ 正解：所有部件共用同一个偏移 `-_asset_span()[1]`，见 `make_house._decor_geoms`。
+#    ⚠️ 别照着"多部件资产会散架"这个旧理由把它加回来——散架的真因是那时 offset 也是错的。

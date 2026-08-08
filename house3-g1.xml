@@ -90,174 +90,201 @@
     <material name="mat_h3_rug" texture="tex_h3_rug" texrepeat="3 3" specular="0.03" shininess="0.06" reflectance="0.0"/>
 
     <!-- ===== 装饰网格资产（decor/manifest.py 登记，decor.lock.json 落账）===== -->
-    <mesh name="dm_coffee_table_0_0_3381" file="../../../decor/assets/coffee_table/p0.obj" scale="0.338122 0.338122 0.338122"/>
+    <mesh name="dm_coffee_table_0_1_0081" file="../../../decor/assets/coffee_table/p0.obj" scale="1.00813 1.00813 1.00813"/>
     <texture type="2d" name="dt_coffee_table_0" file="decor/assets/coffee_table/p0.png" colorspace="sRGB"/>
     <material name="dmat_coffee_table_0" texture="dt_coffee_table_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_armchair_0_0_6794" file="../../../decor/assets/armchair/p0.obj" scale="0.679369 0.679369 0.679369"/>
+    <mesh name="dm_armchair_0_1_0637" file="../../../decor/assets/armchair/p0.obj" scale="1.06369 1.06369 1.06369"/>
     <texture type="2d" name="dt_armchair_0" file="decor/assets/armchair/p0.png" colorspace="sRGB"/>
     <material name="dmat_armchair_0" texture="dt_armchair_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_armchair_1_0_6794" file="../../../decor/assets/armchair/p1.obj" scale="0.679369 0.679369 0.679369"/>
+    <mesh name="dm_armchair_1_1_0637" file="../../../decor/assets/armchair/p1.obj" scale="1.06369 1.06369 1.06369"/>
     <texture type="2d" name="dt_armchair_1" file="decor/assets/armchair/p1.png" colorspace="sRGB"/>
     <material name="dmat_armchair_1" texture="dt_armchair_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_pillows_0_0_6274" file="../../../decor/assets/pillows/p0.obj" scale="0.627431 0.627431 0.627431"/>
+    <mesh name="dm_pillows_0_1_0742" file="../../../decor/assets/pillows/p0.obj" scale="1.07418 1.07418 1.07418"/>
     <texture type="2d" name="dt_pillows_0" file="decor/assets/pillows/p0.png" colorspace="sRGB"/>
     <material name="dmat_pillows_0" texture="dt_pillows_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_pillows_1_0_6274" file="../../../decor/assets/pillows/p1.obj" scale="0.627431 0.627431 0.627431"/>
+    <mesh name="dm_pillows_1_1_0742" file="../../../decor/assets/pillows/p1.obj" scale="1.07418 1.07418 1.07418"/>
     <texture type="2d" name="dt_pillows_1" file="decor/assets/pillows/p1.png" colorspace="sRGB"/>
     <material name="dmat_pillows_1" texture="dt_pillows_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_plant_a_0_0_7599" file="../../../decor/assets/plant_a/p0.obj" scale="0.759888 0.759888 0.759888"/>
+    <mesh name="dm_console_0_0_9898" file="../../../decor/assets/console/p0.obj" scale="0.989793 0.989793 0.989793"/>
+    <texture type="2d" name="dt_console_0" file="decor/assets/console/p0.png" colorspace="sRGB"/>
+    <material name="dmat_console_0" texture="dt_console_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_console_1_0_9898" file="../../../decor/assets/console/p1.obj" scale="0.989793 0.989793 0.989793"/>
+    <texture type="2d" name="dt_console_1" file="decor/assets/console/p1.png" colorspace="sRGB"/>
+    <material name="dmat_console_1" texture="dt_console_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_console_2_0_9898" file="../../../decor/assets/console/p2.obj" scale="0.989793 0.989793 0.989793"/>
+    <texture type="2d" name="dt_console_2" file="decor/assets/console/p2.png" colorspace="sRGB"/>
+    <material name="dmat_console_2" texture="dt_console_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_plant_a_0_1_0119" file="../../../decor/assets/plant_a/p0.obj" scale="1.01188 1.01188 1.01188"/>
     <texture type="2d" name="dt_plant_a_0" file="decor/assets/plant_a/p0.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_0" texture="dt_plant_a_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_plant_a_1_0_7599" file="../../../decor/assets/plant_a/p1.obj" scale="0.759888 0.759888 0.759888"/>
+    <mesh name="dm_plant_a_1_1_0119" file="../../../decor/assets/plant_a/p1.obj" scale="1.01188 1.01188 1.01188"/>
     <texture type="2d" name="dt_plant_a_1" file="decor/assets/plant_a/p1.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_1" texture="dt_plant_a_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_plant_a_2_0_7599" file="../../../decor/assets/plant_a/p2.obj" scale="0.759888 0.759888 0.759888"/>
+    <mesh name="dm_plant_a_2_1_0119" file="../../../decor/assets/plant_a/p2.obj" scale="1.01188 1.01188 1.01188"/>
     <texture type="2d" name="dt_plant_a_2" file="decor/assets/plant_a/p2.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_2" texture="dt_plant_a_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_plant_a_3_0_7599" file="../../../decor/assets/plant_a/p3.obj" scale="0.759888 0.759888 0.759888"/>
+    <mesh name="dm_plant_a_3_1_0119" file="../../../decor/assets/plant_a/p3.obj" scale="1.01188 1.01188 1.01188"/>
     <texture type="2d" name="dt_plant_a_3" file="decor/assets/plant_a/p3.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_3" texture="dt_plant_a_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_floor_lamp_0_0_8376" file="../../../decor/assets/floor_lamp/p0.obj" scale="0.837622 0.837622 0.837622"/>
+    <mesh name="dm_floor_lamp_0_1_0196" file="../../../decor/assets/floor_lamp/p0.obj" scale="1.0196 1.0196 1.0196"/>
     <texture type="2d" name="dt_floor_lamp_0" file="decor/assets/floor_lamp/p0.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_0" texture="dt_floor_lamp_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_floor_lamp_1_0_8376" file="../../../decor/assets/floor_lamp/p1.obj" scale="0.837622 0.837622 0.837622"/>
+    <mesh name="dm_floor_lamp_1_1_0196" file="../../../decor/assets/floor_lamp/p1.obj" scale="1.0196 1.0196 1.0196"/>
     <texture type="2d" name="dt_floor_lamp_1" file="decor/assets/floor_lamp/p1.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_1" texture="dt_floor_lamp_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_floor_lamp_2_0_8376" file="../../../decor/assets/floor_lamp/p2.obj" scale="0.837622 0.837622 0.837622"/>
+    <mesh name="dm_floor_lamp_2_1_0196" file="../../../decor/assets/floor_lamp/p2.obj" scale="1.0196 1.0196 1.0196"/>
     <texture type="2d" name="dt_floor_lamp_2" file="decor/assets/floor_lamp/p2.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_2" texture="dt_floor_lamp_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_dining_chair_0_0_7943" file="../../../decor/assets/dining_chair/p0.obj" scale="0.794335 0.794335 0.794335"/>
+    <mesh name="dm_dining_chair_0_1_0156" file="../../../decor/assets/dining_chair/p0.obj" scale="1.01558 1.01558 1.01558"/>
     <texture type="2d" name="dt_dining_chair_0" file="decor/assets/dining_chair/p0.png" colorspace="sRGB"/>
     <material name="dmat_dining_chair_0" texture="dt_dining_chair_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_dining_chair_0_0_6659" file="../../../decor/assets/dining_chair/p0.obj" scale="0.665907 0.665907 0.665907"/>
-    <mesh name="dm_chandelier_0_0_7117" file="../../../decor/assets/chandelier/p0.obj" scale="0.711727 0.711727 0.711727"/>
+    <mesh name="dm_chandelier_0_1_0206" file="../../../decor/assets/chandelier/p0.obj" scale="1.02061 1.02061 1.02061"/>
     <texture type="2d" name="dt_chandelier_0" file="decor/assets/chandelier/p0.png" colorspace="sRGB"/>
     <material name="dmat_chandelier_0" texture="dt_chandelier_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_chandelier_1_0_7117" file="../../../decor/assets/chandelier/p1.obj" scale="0.711727 0.711727 0.711727"/>
-    <mesh name="dm_vase_a_0_0_9233" file="../../../decor/assets/vase_a/p0.obj" scale="0.923263 0.923263 0.923263"/>
+    <mesh name="dm_chandelier_1_1_0206" file="../../../decor/assets/chandelier/p1.obj" scale="1.02061 1.02061 1.02061"/>
+    <mesh name="dm_vase_a_0_1_0386" file="../../../decor/assets/vase_a/p0.obj" scale="1.03861 1.03861 1.03861"/>
     <texture type="2d" name="dt_vase_a_0" file="decor/assets/vase_a/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_a_0" texture="dt_vase_a_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_0_0_6168" file="../../../decor/assets/rc_fridge/p0.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_0_0_9943" file="../../../decor/assets/rc_fridge/p0.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_0" file="decor/assets/rc_fridge/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_0" texture="dt_rc_fridge_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_1_0_6168" file="../../../decor/assets/rc_fridge/p1.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_1_0_9943" file="../../../decor/assets/rc_fridge/p1.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_1" file="decor/assets/rc_fridge/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_1" texture="dt_rc_fridge_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_2_0_6168" file="../../../decor/assets/rc_fridge/p2.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_2_0_9943" file="../../../decor/assets/rc_fridge/p2.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_2" file="decor/assets/rc_fridge/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_2" texture="dt_rc_fridge_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_3_0_6168" file="../../../decor/assets/rc_fridge/p3.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_3_0_9943" file="../../../decor/assets/rc_fridge/p3.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_3" file="decor/assets/rc_fridge/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_3" texture="dt_rc_fridge_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_4_0_6168" file="../../../decor/assets/rc_fridge/p4.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_4_0_9943" file="../../../decor/assets/rc_fridge/p4.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_4" file="decor/assets/rc_fridge/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_4" texture="dt_rc_fridge_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_5_0_6168" file="../../../decor/assets/rc_fridge/p5.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_5_0_9943" file="../../../decor/assets/rc_fridge/p5.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_5" file="decor/assets/rc_fridge/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_5" texture="dt_rc_fridge_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_6_0_6168" file="../../../decor/assets/rc_fridge/p6.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_6_0_9943" file="../../../decor/assets/rc_fridge/p6.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_6" file="decor/assets/rc_fridge/p6.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_6" texture="dt_rc_fridge_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_7_0_6168" file="../../../decor/assets/rc_fridge/p7.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_7_0_9943" file="../../../decor/assets/rc_fridge/p7.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_7" file="decor/assets/rc_fridge/p7.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_7" texture="dt_rc_fridge_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_fridge_8_0_6168" file="../../../decor/assets/rc_fridge/p8.obj" scale="0.616839 0.616839 0.616839"/>
+    <mesh name="dm_rc_fridge_8_0_9943" file="../../../decor/assets/rc_fridge/p8.obj" scale="0.994315 0.994315 0.994315"/>
     <texture type="2d" name="dt_rc_fridge_8" file="decor/assets/rc_fridge/p8.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_8" texture="dt_rc_fridge_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_0_0_5917" file="../../../decor/assets/rc_stove/p0.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_0_0_9963" file="../../../decor/assets/rc_stove/p0.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_0" file="decor/assets/rc_stove/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_0" texture="dt_rc_stove_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_1_0_5917" file="../../../decor/assets/rc_stove/p1.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_1_0_9963" file="../../../decor/assets/rc_stove/p1.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_1" file="decor/assets/rc_stove/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_1" texture="dt_rc_stove_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_2_0_5917" file="../../../decor/assets/rc_stove/p2.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_2_0_9963" file="../../../decor/assets/rc_stove/p2.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_2" file="decor/assets/rc_stove/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_2" texture="dt_rc_stove_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_3_0_5917" file="../../../decor/assets/rc_stove/p3.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_3_0_9963" file="../../../decor/assets/rc_stove/p3.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_3" file="decor/assets/rc_stove/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_3" texture="dt_rc_stove_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_4_0_5917" file="../../../decor/assets/rc_stove/p4.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_4_0_9963" file="../../../decor/assets/rc_stove/p4.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_4" file="decor/assets/rc_stove/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_4" texture="dt_rc_stove_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_5_0_5917" file="../../../decor/assets/rc_stove/p5.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_5_0_9963" file="../../../decor/assets/rc_stove/p5.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_5" file="decor/assets/rc_stove/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_5" texture="dt_rc_stove_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_6_0_5917" file="../../../decor/assets/rc_stove/p6.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_6_0_9963" file="../../../decor/assets/rc_stove/p6.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_6" file="decor/assets/rc_stove/p6.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_6" texture="dt_rc_stove_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_7_0_5917" file="../../../decor/assets/rc_stove/p7.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_7_0_9963" file="../../../decor/assets/rc_stove/p7.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_7" file="decor/assets/rc_stove/p7.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_7" texture="dt_rc_stove_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_8_0_5917" file="../../../decor/assets/rc_stove/p8.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_8_0_9963" file="../../../decor/assets/rc_stove/p8.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_8" file="decor/assets/rc_stove/p8.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_8" texture="dt_rc_stove_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_stove_9_0_5917" file="../../../decor/assets/rc_stove/p9.obj" scale="0.591703 0.591703 0.591703"/>
+    <mesh name="dm_rc_stove_9_0_9963" file="../../../decor/assets/rc_stove/p9.obj" scale="0.996266 0.996266 0.996266"/>
     <texture type="2d" name="dt_rc_stove_9" file="decor/assets/rc_stove/p9.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_9" texture="dt_rc_stove_9" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_sink_0_0_4607" file="../../../decor/assets/rc_sink/p0.obj" scale="0.460701 0.460701 0.460701"/>
+    <mesh name="dm_rc_sink_0_1_0179" file="../../../decor/assets/rc_sink/p0.obj" scale="1.01789 1.01789 1.01789"/>
     <texture type="2d" name="dt_rc_sink_0" file="decor/assets/rc_sink/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_0" texture="dt_rc_sink_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_sink_1_0_4607" file="../../../decor/assets/rc_sink/p1.obj" scale="0.460701 0.460701 0.460701"/>
+    <mesh name="dm_rc_sink_1_1_0179" file="../../../decor/assets/rc_sink/p1.obj" scale="1.01789 1.01789 1.01789"/>
     <texture type="2d" name="dt_rc_sink_1" file="decor/assets/rc_sink/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_1" texture="dt_rc_sink_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_sink_2_0_4607" file="../../../decor/assets/rc_sink/p2.obj" scale="0.460701 0.460701 0.460701"/>
+    <mesh name="dm_rc_sink_2_1_0179" file="../../../decor/assets/rc_sink/p2.obj" scale="1.01789 1.01789 1.01789"/>
     <texture type="2d" name="dt_rc_sink_2" file="decor/assets/rc_sink/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_2" texture="dt_rc_sink_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_0_0_2348" file="../../../decor/assets/rc_hood/p0.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_0_1_0062" file="../../../decor/assets/rc_hood/p0.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_0" file="decor/assets/rc_hood/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_0" texture="dt_rc_hood_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_1_0_2348" file="../../../decor/assets/rc_hood/p1.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_1_1_0062" file="../../../decor/assets/rc_hood/p1.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_1" file="decor/assets/rc_hood/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_1" texture="dt_rc_hood_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_2_0_2348" file="../../../decor/assets/rc_hood/p2.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_2_1_0062" file="../../../decor/assets/rc_hood/p2.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_2" file="decor/assets/rc_hood/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_2" texture="dt_rc_hood_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_3_0_2348" file="../../../decor/assets/rc_hood/p3.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_3_1_0062" file="../../../decor/assets/rc_hood/p3.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_3" file="decor/assets/rc_hood/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_3" texture="dt_rc_hood_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_4_0_2348" file="../../../decor/assets/rc_hood/p4.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_4_1_0062" file="../../../decor/assets/rc_hood/p4.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_4" file="decor/assets/rc_hood/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_4" texture="dt_rc_hood_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_rc_hood_5_0_2348" file="../../../decor/assets/rc_hood/p5.obj" scale="0.234829 0.234829 0.234829"/>
+    <mesh name="dm_rc_hood_5_1_0062" file="../../../decor/assets/rc_hood/p5.obj" scale="1.00618 1.00618 1.00618"/>
     <texture type="2d" name="dt_rc_hood_5" file="decor/assets/rc_hood/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_5" texture="dt_rc_hood_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_0_0_3297" file="../../../decor/assets/bed/p0.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_0_1_0092" file="../../../decor/assets/bed/p0.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_0" file="decor/assets/bed/p0.png" colorspace="sRGB"/>
     <material name="dmat_bed_0" texture="dt_bed_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_1_0_3297" file="../../../decor/assets/bed/p1.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_1_1_0092" file="../../../decor/assets/bed/p1.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_1" file="decor/assets/bed/p1.png" colorspace="sRGB"/>
     <material name="dmat_bed_1" texture="dt_bed_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_2_0_3297" file="../../../decor/assets/bed/p2.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_2_1_0092" file="../../../decor/assets/bed/p2.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_2" file="decor/assets/bed/p2.png" colorspace="sRGB"/>
     <material name="dmat_bed_2" texture="dt_bed_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_3_0_3297" file="../../../decor/assets/bed/p3.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_3_1_0092" file="../../../decor/assets/bed/p3.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_3" file="decor/assets/bed/p3.png" colorspace="sRGB"/>
     <material name="dmat_bed_3" texture="dt_bed_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_4_0_3297" file="../../../decor/assets/bed/p4.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_4_1_0092" file="../../../decor/assets/bed/p4.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_4" file="decor/assets/bed/p4.png" colorspace="sRGB"/>
     <material name="dmat_bed_4" texture="dt_bed_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_5_0_3297" file="../../../decor/assets/bed/p5.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_5_1_0092" file="../../../decor/assets/bed/p5.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_5" file="decor/assets/bed/p5.png" colorspace="sRGB"/>
     <material name="dmat_bed_5" texture="dt_bed_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_6_0_3297" file="../../../decor/assets/bed/p6.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_6_1_0092" file="../../../decor/assets/bed/p6.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_6" file="decor/assets/bed/p6.png" colorspace="sRGB"/>
     <material name="dmat_bed_6" texture="dt_bed_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_7_0_3297" file="../../../decor/assets/bed/p7.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_7_1_0092" file="../../../decor/assets/bed/p7.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_7" file="decor/assets/bed/p7.png" colorspace="sRGB"/>
     <material name="dmat_bed_7" texture="dt_bed_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bed_8_0_3297" file="../../../decor/assets/bed/p8.obj" scale="0.329693 0.329693 0.329693"/>
+    <mesh name="dm_bed_8_1_0092" file="../../../decor/assets/bed/p8.obj" scale="1.00922 1.00922 1.00922"/>
     <texture type="2d" name="dt_bed_8" file="decor/assets/bed/p8.png" colorspace="sRGB"/>
     <material name="dmat_bed_8" texture="dt_bed_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bust_0_0_9304" file="../../../decor/assets/bust/p0.obj" scale="0.930386 0.930386 0.930386"/>
+    <mesh name="dm_nightstand_0_0_9882" file="../../../decor/assets/nightstand/p0.obj" scale="0.988195 0.988195 0.988195"/>
+    <mesh name="dm_nightstand_1_0_9882" file="../../../decor/assets/nightstand/p1.obj" scale="0.988195 0.988195 0.988195"/>
+    <texture type="2d" name="dt_nightstand_1" file="decor/assets/nightstand/p1.png" colorspace="sRGB"/>
+    <material name="dmat_nightstand_1" texture="dt_nightstand_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_nightstand_2_0_9882" file="../../../decor/assets/nightstand/p2.obj" scale="0.988195 0.988195 0.988195"/>
+    <texture type="2d" name="dt_nightstand_2" file="decor/assets/nightstand/p2.png" colorspace="sRGB"/>
+    <material name="dmat_nightstand_2" texture="dt_nightstand_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_nightstand_3_0_9882" file="../../../decor/assets/nightstand/p3.obj" scale="0.988195 0.988195 0.988195"/>
+    <texture type="2d" name="dt_nightstand_3" file="decor/assets/nightstand/p3.png" colorspace="sRGB"/>
+    <material name="dmat_nightstand_3" texture="dt_nightstand_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_nightstand_4_0_9882" file="../../../decor/assets/nightstand/p4.obj" scale="0.988195 0.988195 0.988195"/>
+    <texture type="2d" name="dt_nightstand_4" file="decor/assets/nightstand/p4.png" colorspace="sRGB"/>
+    <material name="dmat_nightstand_4" texture="dt_nightstand_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_plant_b_3_0_9953" file="../../../decor/assets/plant_b/p3.obj" scale="0.995331 0.995331 0.995331"/>
+    <texture type="2d" name="dt_plant_b_3" file="decor/assets/plant_b/p3.png" colorspace="sRGB"/>
+    <material name="dmat_plant_b_3" texture="dt_plant_b_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_plant_b_7_0_9953" file="../../../decor/assets/plant_b/p7.obj" scale="0.995331 0.995331 0.995331"/>
+    <texture type="2d" name="dt_plant_b_7" file="decor/assets/plant_b/p7.png" colorspace="sRGB"/>
+    <material name="dmat_plant_b_7" texture="dt_plant_b_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
+    <mesh name="dm_bust_0_1_0566" file="../../../decor/assets/bust/p0.obj" scale="1.05658 1.05658 1.05658"/>
     <texture type="2d" name="dt_bust_0" file="decor/assets/bust/p0.png" colorspace="sRGB"/>
     <material name="dmat_bust_0" texture="dt_bust_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_vase_b_0_0_9303" file="../../../decor/assets/vase_b/p0.obj" scale="0.930347 0.930347 0.930347"/>
+    <mesh name="dm_vase_b_0_1_0563" file="../../../decor/assets/vase_b/p0.obj" scale="1.05634 1.05634 1.05634"/>
     <texture type="2d" name="dt_vase_b_0" file="decor/assets/vase_b/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_b_0" texture="dt_vase_b_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_vase_c_0_0_7319" file="../../../decor/assets/vase_c/p0.obj" scale="0.731947 0.731947 0.731947"/>
+    <mesh name="dm_vase_c_0_1_0423" file="../../../decor/assets/vase_c/p0.obj" scale="1.04228 1.04228 1.04228"/>
     <texture type="2d" name="dt_vase_c_0" file="decor/assets/vase_c/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_c_0" texture="dt_vase_c_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
-    <mesh name="dm_bowl_0_0_3118" file="../../../decor/assets/bowl/p0.obj" scale="0.311786 0.311786 0.311786"/>
+    <mesh name="dm_bowl_0_1_0119" file="../../../decor/assets/bowl/p0.obj" scale="1.01191 1.01191 1.01191"/>
     <texture type="2d" name="dt_bowl_0" file="decor/assets/bowl/p0.png" colorspace="sRGB"/>
     <material name="dmat_bowl_0" texture="dt_bowl_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
   </asset>
@@ -310,14 +337,14 @@
     <geom name="primary_bed_we0" type="box" size="2.65 1.65 0.07" pos="-6.47 4.85 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="furn_pb_bench" type="box" size="0.75 0.21 0.23" pos="-8.95 5.9 0.23" rgba="0.52 0.4 0.28 1"/>
     <geom name="furn_pb_bed" type="box" size="0.87 1.05 0.41" pos="-8.95 4.4 0.41" rgba="0.62 0.6 0.58 1" group="3"/>
-    <geom name="furn_pb_nsL" type="box" size="0.26 0.27 0.37" pos="-10.4 3.55 0.37" rgba="0.62 0.6 0.58 1"/>
-    <geom name="furn_pb_nsR" type="box" size="0.26 0.27 0.37" pos="-7.5 3.55 0.37" rgba="0.62 0.6 0.58 1"/>
-    <geom name="furn_pb_lampL_base" type="cylinder" size="0.09 0.025" pos="-10.4 3.55 0.765" rgba="0.28 0.28 0.3 1"/>
-    <geom name="furn_pb_lampL_pole" type="cylinder" size="0.015 0.13" pos="-10.4 3.55 0.9" rgba="0.42 0.43 0.46 1"/>
-    <geom name="furn_pb_lampL_shade" type="cylinder" size="0.15 0.12" pos="-10.4 3.55 1.1" rgba="0.96 0.9 0.62 1"/>
-    <geom name="furn_pb_lampR_base" type="cylinder" size="0.09 0.025" pos="-7.5 3.55 0.765" rgba="0.28 0.28 0.3 1"/>
-    <geom name="furn_pb_lampR_pole" type="cylinder" size="0.015 0.13" pos="-7.5 3.55 0.9" rgba="0.42 0.43 0.46 1"/>
-    <geom name="furn_pb_lampR_shade" type="cylinder" size="0.15 0.12" pos="-7.5 3.55 1.1" rgba="0.96 0.9 0.62 1"/>
+    <geom name="furn_pb_nsL" type="box" size="0.25 0.26 0.36" pos="-10.4 3.55 0.36" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_pb_nsR" type="box" size="0.25 0.26 0.36" pos="-7.5 3.55 0.36" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_pb_lampL_base" type="cylinder" size="0.09 0.025" pos="-10.4 3.55 0.745" rgba="0.28 0.28 0.3 1"/>
+    <geom name="furn_pb_lampL_pole" type="cylinder" size="0.015 0.13" pos="-10.4 3.55 0.88" rgba="0.42 0.43 0.46 1"/>
+    <geom name="furn_pb_lampL_shade" type="cylinder" size="0.15 0.12" pos="-10.4 3.55 1.08" rgba="0.96 0.9 0.62 1"/>
+    <geom name="furn_pb_lampR_base" type="cylinder" size="0.09 0.025" pos="-7.5 3.55 0.745" rgba="0.28 0.28 0.3 1"/>
+    <geom name="furn_pb_lampR_pole" type="cylinder" size="0.015 0.13" pos="-7.5 3.55 0.88" rgba="0.42 0.43 0.46 1"/>
+    <geom name="furn_pb_lampR_shade" type="cylinder" size="0.15 0.12" pos="-7.5 3.55 1.08" rgba="0.96 0.9 0.62 1"/>
 
     <!-- ===== 餐厅 ===== -->
     <geom name="dining_floor" type="box" size="2.4 2.65 0.025" pos="-4 4.85 -0.025" material="mat_h3_oak"/>
@@ -359,8 +386,8 @@
     <geom name="furn_dn_e" type="box" size="0.23 0.3 0.5" pos="-2.75 5 0.5" quat="0 0 0 1" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_dn_w" type="box" size="0.23 0.3 0.5" pos="-5.25 5 0.5" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_dn_chand" type="box" size="0.35 0.33 0.44" pos="-4 5 2.72" rgba="0.62 0.6 0.58 1" group="3"/>
-    <geom name="furn_dn_sideboard" type="box" size="0.22 1 0.44" pos="-6.05 5 0.44" rgba="0.52 0.4 0.28 1"/>
-    <geom name="furn_dn_vase" type="box" size="0.11 0.11 0.21" pos="-6.05 5 1.09" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_dn_sideboard" type="box" size="1.22 0.26 0.34" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" rgba="0.52 0.4 0.28 1" group="3"/>
+    <geom name="furn_dn_vase" type="box" size="0.11 0.11 0.21" pos="-6 5 0.89" rgba="0.62 0.6 0.58 1" group="3"/>
 
     <!-- ===== 大客厅 ===== -->
     <geom name="great_room_floor" type="box" size="3.9 2.65 0.025" pos="2.3 4.85 -0.025" material="mat_h3_oak"/>
@@ -401,11 +428,11 @@
     <geom name="furn_gr_ch1" type="box" size="0.45 0.53 0.55" pos="4.9 6.2 0.55" quat="-0.173648 0 0 0.984808" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_gr_ch2" type="box" size="0.45 0.53 0.55" pos="-0.4 6.2 0.55" quat="0.984808 0 0 -0.173648" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_gr_pillows" type="box" size="0.51 0.26 0.25" pos="1.2 3.05 0.72" quat="0.997564 0 0 0.0697565" rgba="0.62 0.6 0.58 1" group="3"/>
-    <geom name="furn_gr_console" type="box" size="0.25 1.2 0.35" pos="5.8 4.6 0.35" material="mat_h3_oak_dark"/>
+    <geom name="furn_gr_console" type="box" size="1.22 0.26 0.34" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" material="mat_h3_oak_dark" group="3"/>
     <geom name="furn_gr_plant" type="box" size="0.33 0.35 0.69" pos="5.7 6.6 0.69" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_gr_lamp" type="box" size="0.23 0.23 0.49" pos="-0.9 3 0.49" rgba="0.62 0.6 0.58 1" group="3"/>
-    <geom name="furn_gr_vase" type="box" size="0.1 0.1 0.18" pos="5.8 4.6 0.99" quat="0.976296 0 0 0.21644" rgba="0.62 0.6 0.58 1" group="3"/>
-    <geom name="furn_gr_bowl" type="box" size="0.1 0.1 0.055" pos="2.3 4.9 0.56" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_gr_vase" type="box" size="0.1 0.1 0.18" pos="5.8 4.6 0.86" quat="0.976296 0 0 0.21644" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_gr_bowl" type="box" size="0.16 0.16 0.05" pos="2.3 4.9 0.55" rgba="0.62 0.6 0.58 1" group="3"/>
 
     <!-- ===== 厨房 ===== -->
     <geom name="kitchen_floor" type="box" size="2.65 2.65 0.025" pos="8.85 4.85 -0.025" material="mat_h3_travertine"/>
@@ -480,8 +507,10 @@
     <geom name="dressing_dfe0_l" type="box" size="0.085 0.025 1.2" pos="-6.47 -0.1 1.2" rgba="0.2 0.19 0.18 1"/>
     <geom name="dressing_dfe0_r" type="box" size="0.085 0.025 1.2" pos="-6.47 1.1 1.2" rgba="0.2 0.19 0.18 1"/>
     <geom name="dressing_dfe0_top" type="box" size="0.085 0.625 0.025" pos="-6.47 0.5 2.4" rgba="0.2 0.19 0.18 1"/>
-    <geom name="furn_dr_closet_w" type="box" size="0.28 1.5 1.1" pos="-11.2 0.5 1.1" rgba="0.4 0.37 0.34 1"/>
-    <geom name="furn_dr_closet_e" type="box" size="0.28 1.5 1.1" pos="-6.7 0.5 1.1" rgba="0.4 0.37 0.34 1"/>
+    <geom name="furn_dr_closet_w" type="box" size="0.3 1.55 1.1" pos="-11.05 0.5 1.1" rgba="0.4 0.37 0.34 1"/>
+    <geom name="furn_dr_closet_en" type="box" size="0.29 0.38 1.1" pos="-6.84 1.66 1.1" rgba="0.4 0.37 0.34 1"/>
+    <geom name="furn_dr_closet_es" type="box" size="0.29 0.38 1.1" pos="-6.84 -0.66 1.1" rgba="0.4 0.37 0.34 1"/>
+    <geom name="furn_dr_closet_n" type="box" size="0.5 0.29 1.1" pos="-7.75 1.75 1.1" rgba="0.4 0.37 0.34 1"/>
     <geom name="furn_dr_island" type="box" size="0.6 0.35 0.44" pos="-9 0.5 0.44" rgba="0.52 0.4 0.28 1"/>
 
     <!-- ===== 画廊 ===== -->
@@ -515,13 +544,7 @@
     <geom name="gallery_dfw0_top" type="box" size="0.085 0.625 0.025" pos="-6.33 0.5 2.4" rgba="0.2 0.19 0.18 1"/>
     <geom name="gallery_we0" type="box" size="0.525 1.65 0.07" pos="6.13 -0.675 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="gallery_we1" type="box" size="0.525 1.65 0.07" pos="6.13 1.675 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
-    <geom name="furn_gl_plant1_pot" type="cylinder" size="0.22 0.2" pos="-5.6 1.6 0.2" rgba="0.52 0.4 0.33 1"/>
-    <geom name="furn_gl_plant1_pot_rim" type="cylinder" size="0.2376 0.025" pos="-5.6 1.6 0.41" rgba="0.46 0.35 0.29 1"/>
-    <geom name="furn_gl_plant1_soil" type="cylinder" size="0.198 0.015" pos="-5.6 1.6 0.43" rgba="0.22 0.17 0.13 1"/>
-    <geom name="furn_gl_plant1_trunk" type="cylinder" size="0.035 0.18" pos="-5.6 1.6 0.62" rgba="0.34 0.26 0.18 1"/>
-    <geom name="furn_gl_plant1_leaf_a" type="sphere" size="0.31" pos="-5.6 1.6 1.15" rgba="0.24 0.46 0.26 1"/>
-    <geom name="furn_gl_plant1_leaf_b" type="sphere" size="0.22" pos="-5.4 1.48 0.99" rgba="0.28 0.52 0.3 1"/>
-    <geom name="furn_gl_plant1_leaf_c" type="sphere" size="0.2" pos="-5.78 1.74 0.95" rgba="0.22 0.43 0.24 1"/>
+    <geom name="furn_gl_plant1" type="box" size="0.375 0.325 0.655" pos="-5.72 1.62 0.655" rgba="0.62 0.6 0.58 1" group="3"/>
     <geom name="furn_gl_bench" type="box" size="0.8 0.21 0.22" pos="0 0.1 0.22" rgba="0.52 0.4 0.28 1"/>
     <geom name="furn_gl_pedestal" type="box" size="0.18 0.18 0.5" pos="5.4 1.5 0.5" rgba="0.92 0.91 0.89 1"/>
     <geom name="furn_gl_bust" type="box" size="0.15 0.16 0.275" pos="5.4 1.5 1.28" rgba="0.62 0.6 0.58 1" group="3"/>
@@ -628,11 +651,11 @@
     <geom name="foyer_wn1" type="box" size="0.3 1.65 0.07" pos="3.9 -1.27 1.65" quat="0.707107 0.707107 0 0" material="mat_h3_wall"/>
     <geom name="foyer_ww0" type="box" size="3.15 1.65 0.07" pos="0.47 -4.35 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="foyer_we0" type="box" size="3.15 1.65 0.07" pos="4.13 -4.35 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
-    <geom name="furn_fy_console" type="box" size="0.19 0.7 0.42" pos="0.72 -4.2 0.42" rgba="0.52 0.4 0.28 1"/>
+    <geom name="furn_fy_console" type="box" size="1.22 0.26 0.34" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" rgba="0.52 0.4 0.28 1" group="3"/>
     <geom name="furn_fy_lift_l" type="box" size="0.45 0.025 1.15" pos="1.15 -7.45 1.15" material="mat_steel"/>
     <geom name="furn_fy_lift_r" type="box" size="0.45 0.025 1.15" pos="3.45 -7.45 1.15" material="mat_steel"/>
     <geom name="furn_fy_runner" type="box" size="0.55 2.3 0.008" pos="2.3 -4.4 0.008" rgba="0.44 0.4 0.36 1"/>
-    <geom name="furn_fy_vase" type="box" size="0.12 0.12 0.165" pos="0.72 -4.2 1.02" rgba="0.62 0.6 0.58 1" group="3"/>
+    <geom name="furn_fy_vase" type="box" size="0.12 0.12 0.165" pos="0.8 -4.2 0.845" rgba="0.62 0.6 0.58 1" group="3"/>
 
     <!-- ===== 洗衣房 ===== -->
     <geom name="laundry_floor" type="box" size="1 3.15 0.025" pos="5.2 -4.35 -0.025" material="mat_tile"/>
@@ -712,72 +735,93 @@
          ⚠️ mj_ray 不看 contype——射线安全靠的是"包含性不变式"：
             每张网格都缩放进它的碰撞盒里，所以盒子永远先被打中。 -->
     <body name="decor_visual">
-      <geom name="dg_gr_coffee_0" type="mesh" mesh="dm_coffee_table_0_0_3381" material="dmat_coffee_table_0" pos="2.3248 4.90005 0.250002" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_ch1_0" type="mesh" mesh="dm_armchair_0_0_6794" material="dmat_armchair_0" pos="4.84059 6.19224 0.506585" quat="-0.173648 0 0 0.984808" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_ch1_1" type="mesh" mesh="dm_armchair_1_0_6794" material="dmat_armchair_1" pos="4.85829 6.14373 0.602185" quat="-0.173648 0 0 0.984808" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_ch2_0" type="mesh" mesh="dm_armchair_0_0_6794" material="dmat_armchair_0" pos="-0.349505 6.16776 0.506585" quat="0.984808 0 0 -0.173648" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_ch2_1" type="mesh" mesh="dm_armchair_1_0_6794" material="dmat_armchair_1" pos="-0.33188 6.21629 0.602185" quat="0.984808 0 0 -0.173648" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_pillows_0" type="mesh" mesh="dm_pillows_0_0_6274" material="dmat_pillows_0" pos="1.07455 3.01101 0.718294" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_pillows_1" type="mesh" mesh="dm_pillows_1_0_6274" material="dmat_pillows_1" pos="1.32078 3.08547 0.724412" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_plant_0" type="mesh" mesh="dm_plant_a_0_0_7599" material="dmat_plant_a_0" pos="5.79239 6.60386 0.912832" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_plant_1" type="mesh" mesh="dm_plant_a_1_0_7599" material="dmat_plant_a_1" pos="5.80627 6.57008 0.39626" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_plant_2" type="mesh" mesh="dm_plant_a_2_0_7599" material="dmat_plant_a_2" pos="5.80547 6.57333 0.55398" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_plant_3" type="mesh" mesh="dm_plant_a_3_0_7599" material="dmat_plant_a_3" pos="5.77637 6.57669 0.8061" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_lamp_0" type="mesh" mesh="dm_floor_lamp_0_0_8376" material="dmat_floor_lamp_0" pos="-0.895869 3 0.248208" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_lamp_1" type="mesh" mesh="dm_floor_lamp_1_0_8376" material="dmat_floor_lamp_1" pos="-0.89561 3.00053 0.631706" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_lamp_2" type="mesh" mesh="dm_floor_lamp_2_0_8376" material="dmat_floor_lamp_2" pos="-0.895869 3 0.276605" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_n0_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-4.80114 5.91569 0.537137" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_s0_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-4.79886 4.08431 0.537137" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_n1_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-4.00114 5.91569 0.537137" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_s1_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-3.99886 4.08431 0.537137" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_n2_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-3.20114 5.91569 0.537137" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_s2_0" type="mesh" mesh="dm_dining_chair_0_0_7943" material="dmat_dining_chair_0" pos="-3.19886 4.08431 0.537137" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_e_0" type="mesh" mesh="dm_dining_chair_0_0_6659" material="dmat_dining_chair_0" pos="-2.69493 5.00096 0.531133" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_w_0" type="mesh" mesh="dm_dining_chair_0_0_6659" material="dmat_dining_chair_0" pos="-5.30507 4.99904 0.531133" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_chand_0" type="mesh" mesh="dm_chandelier_0_0_7117" material="dmat_chandelier_0" pos="-4.15222 5.00328 2.718" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_chand_1" type="mesh" mesh="dm_chandelier_1_0_7117" rgba="0.62 0.6 0.58 1" pos="-4.15307 5.00316 2.75086" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_vase_0" type="mesh" mesh="dm_vase_a_0_0_9233" material="dmat_vase_a_0" pos="-6.05103 5.00052 1.01789" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_0" type="mesh" mesh="dm_rc_fridge_0_0_6168" material="dmat_rc_fridge_0" pos="11.1098 3.11404 0.948991" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_1" type="mesh" mesh="dm_rc_fridge_1_0_6168" material="dmat_rc_fridge_1" pos="10.8796 3.26255 1.0396" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_2" type="mesh" mesh="dm_rc_fridge_2_0_6168" material="dmat_rc_fridge_2" pos="11.0653 3.25362 0.474201" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_3" type="mesh" mesh="dm_rc_fridge_3_0_6168" material="dmat_rc_fridge_3" pos="11.0653 3.25362 0.71799" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_4" type="mesh" mesh="dm_rc_fridge_4_0_6168" material="dmat_rc_fridge_4" pos="10.8769 2.99393 1.04146" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_5" type="mesh" mesh="dm_rc_fridge_5_0_6168" material="dmat_rc_fridge_5" pos="10.9099 2.98443 1.16598" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_6" type="mesh" mesh="dm_rc_fridge_6_0_6168" material="dmat_rc_fridge_6" pos="11.0697 3.00338 0.483212" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_7" type="mesh" mesh="dm_rc_fridge_7_0_6168" material="dmat_rc_fridge_7" pos="11.0697 3.00338 0.726479" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_fridge_8" type="mesh" mesh="dm_rc_fridge_8_0_6168" material="dmat_rc_fridge_8" pos="11.0781 2.98815 1.07078" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_0" type="mesh" mesh="dm_rc_stove_0_0_5917" material="dmat_rc_stove_0" pos="7.20505 7.01498 0.560902" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_1" type="mesh" mesh="dm_rc_stove_1_0_5917" material="dmat_rc_stove_1" pos="7.38252 6.88853 0.85855" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_2" type="mesh" mesh="dm_rc_stove_2_0_5917" material="dmat_rc_stove_2" pos="7.0275 6.88853 0.85855" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_3" type="mesh" mesh="dm_rc_stove_3_0_5917" material="dmat_rc_stove_3" pos="7.31152 6.88853 0.85855" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_4" type="mesh" mesh="dm_rc_stove_4_0_5917" material="dmat_rc_stove_4" pos="7.0985 6.88853 0.85855" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_5" type="mesh" mesh="dm_rc_stove_5_0_5917" material="dmat_rc_stove_5" pos="7.20506 7.21738 0.594766" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_6" type="mesh" mesh="dm_rc_stove_6_0_5917" material="dmat_rc_stove_6" pos="7.20508 7.21494 0.570751" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_7" type="mesh" mesh="dm_rc_stove_7_0_5917" material="dmat_rc_stove_7" pos="7.24078 6.88853 0.859667" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_8" type="mesh" mesh="dm_rc_stove_8_0_5917" material="dmat_rc_stove_8" pos="7.16951 6.88853 0.859191" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_range_9" type="mesh" mesh="dm_rc_stove_9_0_5917" material="dmat_rc_stove_9" pos="7.20449 7.05883 0.559878" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_sink_0" type="mesh" mesh="dm_rc_sink_0_0_4607" material="dmat_rc_sink_0" pos="10.1231 7.10012 1.05733" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_sink_1" type="mesh" mesh="dm_rc_sink_1_0_4607" material="dmat_rc_sink_1" pos="10.117 7.01846 1.12326" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_sink_2" type="mesh" mesh="dm_rc_sink_2_0_4607" material="dmat_rc_sink_2" pos="10.1564 7.0429 1.18494" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_0" type="mesh" mesh="dm_rc_hood_0_0_2348" material="dmat_rc_hood_0" pos="7.22325 7.2562 1.90871" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_1" type="mesh" mesh="dm_rc_hood_1_0_2348" material="dmat_rc_hood_1" pos="7.23681 7.29056 1.85137" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_2" type="mesh" mesh="dm_rc_hood_2_0_2348" material="dmat_rc_hood_2" pos="7.22972 7.29057 1.85137" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_3" type="mesh" mesh="dm_rc_hood_3_0_2348" material="dmat_rc_hood_3" pos="7.22262 7.29056 1.85137" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_4" type="mesh" mesh="dm_rc_hood_4_0_2348" material="dmat_rc_hood_4" pos="7.21552 7.29058 1.85137" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_kt_hood_5" type="mesh" mesh="dm_rc_hood_5_0_2348" material="dmat_rc_hood_5" pos="7.20842 7.29057 1.85137" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_0" type="mesh" mesh="dm_bed_0_0_3297" material="dmat_bed_0" pos="-8.95233 4.19904 0.422688" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_1" type="mesh" mesh="dm_bed_1_0_3297" material="dmat_bed_1" pos="-8.95509 4.19644 0.426558" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_2" type="mesh" mesh="dm_bed_2_0_3297" material="dmat_bed_2" pos="-8.96726 4.55565 0.459173" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_3" type="mesh" mesh="dm_bed_3_0_3297" material="dmat_bed_3" pos="-8.96745 4.55737 0.446533" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_4" type="mesh" mesh="dm_bed_4_0_3297" material="dmat_bed_4" pos="-8.97363 4.4448 0.478745" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_5" type="mesh" mesh="dm_bed_5_0_3297" material="dmat_bed_5" pos="-8.97348 4.44789 0.458242" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_6" type="mesh" mesh="dm_bed_6_0_3297" material="dmat_bed_6" pos="-8.95882 4.3009 0.416173" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_7" type="mesh" mesh="dm_bed_7_0_3297" material="dmat_bed_7" pos="-8.95819 4.63499 0.431639" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_pb_bed_8" type="mesh" mesh="dm_bed_8_0_3297" material="dmat_bed_8" pos="-8.95819 4.31673 0.396767" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gl_bust_0" type="mesh" mesh="dm_bust_0_0_9304" material="dmat_bust_0" pos="5.38667 1.49176 1.26264" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_fy_vase_0" type="mesh" mesh="dm_vase_b_0_0_9303" material="dmat_vase_b_0" pos="0.722289 -4.20009 1.00417" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_vase_0" type="mesh" mesh="dm_vase_c_0_0_7319" material="dmat_vase_c_0" pos="5.79969 4.59985 0.956786" quat="0.976296 0 0 0.21644" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_gr_bowl_0" type="mesh" mesh="dm_bowl_0_0_3118" material="dmat_bowl_0" pos="2.29817 4.89967 0.560064" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_coffee_0" type="mesh" mesh="dm_coffee_table_0_1_0081" material="dmat_coffee_table_0" pos="2.3 4.9 0.25" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_ch1_0" type="mesh" mesh="dm_armchair_0_1_0637" material="dmat_armchair_0" pos="4.9 6.2 0.55" quat="-0.173648 0 0 0.984808" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_ch1_1" type="mesh" mesh="dm_armchair_1_1_0637" material="dmat_armchair_1" pos="4.9 6.2 0.55" quat="-0.173648 0 0 0.984808" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_ch2_0" type="mesh" mesh="dm_armchair_0_1_0637" material="dmat_armchair_0" pos="-0.4 6.2 0.55" quat="0.984808 0 0 -0.173648" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_ch2_1" type="mesh" mesh="dm_armchair_1_1_0637" material="dmat_armchair_1" pos="-0.4 6.2 0.55" quat="0.984808 0 0 -0.173648" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_pillows_0" type="mesh" mesh="dm_pillows_0_1_0742" material="dmat_pillows_0" pos="1.2 3.05 0.72" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_pillows_1" type="mesh" mesh="dm_pillows_1_1_0742" material="dmat_pillows_1" pos="1.2 3.05 0.72" quat="0.997564 0 0 0.0697565" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_1" type="mesh" mesh="dm_console_1_0_9898" material="dmat_console_1" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_console_2" type="mesh" mesh="dm_console_2_0_9898" material="dmat_console_2" pos="5.8 4.6 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_plant_0" type="mesh" mesh="dm_plant_a_0_1_0119" material="dmat_plant_a_0" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_plant_1" type="mesh" mesh="dm_plant_a_1_1_0119" material="dmat_plant_a_1" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_plant_2" type="mesh" mesh="dm_plant_a_2_1_0119" material="dmat_plant_a_2" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_plant_3" type="mesh" mesh="dm_plant_a_3_1_0119" material="dmat_plant_a_3" pos="5.70371 6.61179 0.69" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_lamp_0" type="mesh" mesh="dm_floor_lamp_0_1_0196" material="dmat_floor_lamp_0" pos="-0.9 3 0.49" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_lamp_1" type="mesh" mesh="dm_floor_lamp_1_1_0196" material="dmat_floor_lamp_1" pos="-0.9 3 0.49" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_lamp_2" type="mesh" mesh="dm_floor_lamp_2_1_0196" material="dmat_floor_lamp_2" pos="-0.9 3 0.49" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_n0_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-4.80133 5.84981 0.499271" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_s0_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-4.79867 4.15019 0.499271" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_n1_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-4.00133 5.84981 0.499271" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_s1_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.99867 4.15019 0.499271" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_n2_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.20133 5.84981 0.499271" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_s2_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.19867 4.15019 0.499271" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_e_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-2.75019 5.00133 0.499271" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_w_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-5.24981 4.99867 0.499271" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_chand_0" type="mesh" mesh="dm_chandelier_0_1_0206" material="dmat_chandelier_0" pos="-3.99998 4.99993 2.72" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_chand_1" type="mesh" mesh="dm_chandelier_1_1_0206" rgba="0.62 0.6 0.58 1" pos="-3.99998 4.99993 2.72" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_sideboard_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_sideboard_1" type="mesh" mesh="dm_console_1_0_9898" material="dmat_console_1" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_sideboard_2" type="mesh" mesh="dm_console_2_0_9898" material="dmat_console_2" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_vase_0" type="mesh" mesh="dm_vase_a_0_1_0386" material="dmat_vase_a_0" pos="-6.00065 5.00034 0.890038" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_0" type="mesh" mesh="dm_rc_fridge_0_0_9943" material="dmat_rc_fridge_0" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_1" type="mesh" mesh="dm_rc_fridge_1_0_9943" material="dmat_rc_fridge_1" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_2" type="mesh" mesh="dm_rc_fridge_2_0_9943" material="dmat_rc_fridge_2" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_3" type="mesh" mesh="dm_rc_fridge_3_0_9943" material="dmat_rc_fridge_3" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_4" type="mesh" mesh="dm_rc_fridge_4_0_9943" material="dmat_rc_fridge_4" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_5" type="mesh" mesh="dm_rc_fridge_5_0_9943" material="dmat_rc_fridge_5" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_6" type="mesh" mesh="dm_rc_fridge_6_0_9943" material="dmat_rc_fridge_6" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_7" type="mesh" mesh="dm_rc_fridge_7_0_9943" material="dmat_rc_fridge_7" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_fridge_8" type="mesh" mesh="dm_rc_fridge_8_0_9943" material="dmat_rc_fridge_8" pos="11.05 3.1 0.95" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_0" type="mesh" mesh="dm_rc_stove_0_0_9963" material="dmat_rc_stove_0" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_1" type="mesh" mesh="dm_rc_stove_1_0_9963" material="dmat_rc_stove_1" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_2" type="mesh" mesh="dm_rc_stove_2_0_9963" material="dmat_rc_stove_2" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_3" type="mesh" mesh="dm_rc_stove_3_0_9963" material="dmat_rc_stove_3" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_4" type="mesh" mesh="dm_rc_stove_4_0_9963" material="dmat_rc_stove_4" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_5" type="mesh" mesh="dm_rc_stove_5_0_9963" material="dmat_rc_stove_5" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_6" type="mesh" mesh="dm_rc_stove_6_0_9963" material="dmat_rc_stove_6" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_7" type="mesh" mesh="dm_rc_stove_7_0_9963" material="dmat_rc_stove_7" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_8" type="mesh" mesh="dm_rc_stove_8_0_9963" material="dmat_rc_stove_8" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_range_9" type="mesh" mesh="dm_rc_stove_9_0_9963" material="dmat_rc_stove_9" pos="7.2 7.1 0.57" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_sink_0" type="mesh" mesh="dm_rc_sink_0_1_0179" material="dmat_rc_sink_0" pos="10.1 7.1 1.06" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_sink_1" type="mesh" mesh="dm_rc_sink_1_1_0179" material="dmat_rc_sink_1" pos="10.1 7.1 1.06" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_sink_2" type="mesh" mesh="dm_rc_sink_2_1_0179" material="dmat_rc_sink_2" pos="10.1 7.1 1.06" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_0" type="mesh" mesh="dm_rc_hood_0_1_0062" material="dmat_rc_hood_0" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_1" type="mesh" mesh="dm_rc_hood_1_1_0062" material="dmat_rc_hood_1" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_2" type="mesh" mesh="dm_rc_hood_2_1_0062" material="dmat_rc_hood_2" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_3" type="mesh" mesh="dm_rc_hood_3_1_0062" material="dmat_rc_hood_3" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_4" type="mesh" mesh="dm_rc_hood_4_1_0062" material="dmat_rc_hood_4" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_kt_hood_5" type="mesh" mesh="dm_rc_hood_5_1_0062" material="dmat_rc_hood_5" pos="7.2 7.28 1.95" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_0" type="mesh" mesh="dm_bed_0_1_0092" material="dmat_bed_0" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_1" type="mesh" mesh="dm_bed_1_1_0092" material="dmat_bed_1" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_2" type="mesh" mesh="dm_bed_2_1_0092" material="dmat_bed_2" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_3" type="mesh" mesh="dm_bed_3_1_0092" material="dmat_bed_3" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_4" type="mesh" mesh="dm_bed_4_1_0092" material="dmat_bed_4" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_5" type="mesh" mesh="dm_bed_5_1_0092" material="dmat_bed_5" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_6" type="mesh" mesh="dm_bed_6_1_0092" material="dmat_bed_6" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_7" type="mesh" mesh="dm_bed_7_1_0092" material="dmat_bed_7" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_bed_8" type="mesh" mesh="dm_bed_8_1_0092" material="dmat_bed_8" pos="-8.95 4.4 0.41" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsL_0" type="mesh" mesh="dm_nightstand_0_0_9882" rgba="0.62 0.6 0.58 1" pos="-10.4 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsL_1" type="mesh" mesh="dm_nightstand_1_0_9882" material="dmat_nightstand_1" pos="-10.4 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsL_2" type="mesh" mesh="dm_nightstand_2_0_9882" material="dmat_nightstand_2" pos="-10.4 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsL_3" type="mesh" mesh="dm_nightstand_3_0_9882" material="dmat_nightstand_3" pos="-10.4 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsL_4" type="mesh" mesh="dm_nightstand_4_0_9882" material="dmat_nightstand_4" pos="-10.4 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsR_0" type="mesh" mesh="dm_nightstand_0_0_9882" rgba="0.62 0.6 0.58 1" pos="-7.5 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsR_1" type="mesh" mesh="dm_nightstand_1_0_9882" material="dmat_nightstand_1" pos="-7.5 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsR_2" type="mesh" mesh="dm_nightstand_2_0_9882" material="dmat_nightstand_2" pos="-7.5 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsR_3" type="mesh" mesh="dm_nightstand_3_0_9882" material="dmat_nightstand_3" pos="-7.5 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_pb_nsR_4" type="mesh" mesh="dm_nightstand_4_0_9882" material="dmat_nightstand_4" pos="-7.5 3.55 0.36" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gl_plant1_3" type="mesh" mesh="dm_plant_b_3_0_9953" material="dmat_plant_b_3" pos="-2.67174 1.75886 0.954875" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gl_plant1_7" type="mesh" mesh="dm_plant_b_7_0_9953" material="dmat_plant_b_7" pos="-2.67174 1.75886 0.954875" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gl_bust_0" type="mesh" mesh="dm_bust_0_1_0566" material="dmat_bust_0" pos="5.4 1.50006 1.28001" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_fy_console_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_fy_console_1" type="mesh" mesh="dm_console_1_0_9898" material="dmat_console_1" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_fy_console_2" type="mesh" mesh="dm_console_2_0_9898" material="dmat_console_2" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_fy_vase_0" type="mesh" mesh="dm_vase_b_0_1_0563" material="dmat_vase_b_0" pos="0.8 -4.20001 0.84501" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_vase_0" type="mesh" mesh="dm_vase_c_0_1_0423" material="dmat_vase_c_0" pos="5.79991 4.6 0.86" quat="0.976296 0 0 0.21644" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_gr_bowl_0" type="mesh" mesh="dm_bowl_0_1_0119" material="dmat_bowl_0" pos="2.30005 4.90005 0.550137" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
     </body>
 
     <!-- ===== 墙上挂画（视觉干扰项）===== -->
