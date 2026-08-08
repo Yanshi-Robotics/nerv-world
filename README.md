@@ -318,7 +318,11 @@ Two traps found the hard way, both of which compile clean and render fine:
 
 - ⛔ **Hiding the collision box with `rgba` alpha = 0 deletes it from `mj_ray`.** The box still
   collides, so physics looks right, while navigation and lidar quietly see straight through the
-  furniture. Use `group="3"` instead — that controls drawing only; rays are unaffected.
+  furniture. Put it in a non-drawn `group` instead — `group` controls drawing only; rays are
+  unaffected. ⛔ But not just any number: **2 and 3 belong to the robot** (MuJoCo Menagerie
+  convention). If the house takes one of them, a consumer can no longer tell "the robot" from
+  "the house" and will refuse to start. The house uses **4**
+  (`make_house.HIDDEN_BOX_GROUP`), and it must stay ≤ 5 — the group mask has only six slots.
 - ⛔ **Making the box bigger does not fix a mesh that pokes out**, because the fit scale grows the
   mesh proportionally and the overshoot stays. The real cause is how MuJoCo compiles a `<mesh>`,
   and it bites **twice**: it moves the vertices into the inertial frame — translating to the centre

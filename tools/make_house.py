@@ -282,6 +282,28 @@ def _floor_geom(room_key: str) -> list[str]:
 
 _FURN_TYPES = ("box", "cylinder", "sphere")
 
+# ⭐⭐ MuJoCo geom 分组的归属约定 —— 本仓与消费方**共用的一张表**，改之前先读完。
+#
+# `group` 在 MuJoCo 里只有一个语义：**画不画**（默认渲染器只画第 0–2 组，射线一律照打）。
+# 但消费方（anima-zero 的 sim-house-nav）还得靠它把「机器人自己」和「房子」分开——
+# 它的激光测距要滤掉打在自己身上的射线，而 `mj_ray` 的过滤接口**只吃一个 6 位分组掩码**，
+# 没法按 geom 或 body 子树过滤。于是这个本来只管渲染的数字，事实上也承担了"谁是谁"。
+#
+#   | 组 | 归谁 | 画不画 |
+#   |----|------|--------|
+#   | 0  | 房子可见部分：墙 / 地板 / 门套 / 窗框 / 玻璃 / 裸家具 / 装饰网格 | 画 |
+#   | 1  | 天花板（各场景 layout 的 `CEILING_GROUP`，出俯视图时单独关掉）        | 画 |
+#   | 2  | ⛔ **机器人视觉网格**（MuJoCo Menagerie 惯例）—— 房子不许用          | 画 |
+#   | 3  | ⛔ **机器人碰撞网格**（同上惯例）—— 房子不许用                      | 不画 |
+#   | 4  | 房子的隐身碰撞盒（穿了网格外衣的家具，见下）                          | 不画 |
+#   | 5  | 预留                                                                | 不画 |
+#
+# ⛔ 房子这边只准用 **0 / 1 / 4 / 5**。占了 2 或 3，消费方的自检会当场拒绝启动
+#    （2026-08-08 apt1 就是这么炸的：31 个隐身盒占着 3，和 g1/go2 的碰撞网格撞车）。
+# ⛔ 硬上界 **≤ 5**：MuJoCo 的分组掩码固定 6 个槽，≥6 会被静默丢掉——那些碰撞盒对激光
+#    就成了透明的，和下面 alpha=0 那个坑是同一类，但连报错都没有。
+HIDDEN_BOX_GROUP = 4
+
 
 def _has_mesh_coat(item: dict) -> bool:
     """这件家具是不是真的会发出一张网格外衣（资产已登记且字节在磁盘上）。"""
@@ -309,11 +331,11 @@ def _furniture_geom(item: dict) -> str:
     #    网格是缩到盒子里面去的（包含性不变式），盒子不透明就把外衣整个盖住了——
     #    ⚠️ 这个错渲染不报错、自检也全绿，只有看图才发现"上了真家具还是一堆白盒子"。
     #
-    # ⛔⛔ 隐身只能用 `group="3"`，**绝不能把 rgba 的 alpha 设成 0**。
+    # ⛔⛔ 隐身只能靠 `group`（见上面 HIDDEN_BOX_GROUP 那张表），
+    #    **绝不能把 rgba 的 alpha 设成 0**。
     #    实测：alpha=0 之后 `mj_ray` 直接跳过这个 geom——碰撞盒等于被悄悄挖空，
     #    导航和雷达全变，而**编译不报错**。是本仓的射线不变性自检当场抓到的
     #    （3 条射线穿过茶几打到了后面）。
-    #    `group` 只管画不画：MuJoCo 默认渲染器只画第 0–2 组，而射线一律照打。
     hide_box = _has_mesh_coat(item)
     zb = _zbase(item["room"])
     px, py, pz = item["pos"]
@@ -326,7 +348,7 @@ def _furniture_geom(item: dict) -> str:
         return (f'    <geom name="furn_{item["name"]}" type="{item["type"]}" size="{dims}" '
                 f'pos="{item["pos"][0]:g} {item["pos"][1]:g} {item["pos"][2]:g}"{rot} {look}/>')
     return _box(f'furn_{item["name"]}', item["pos"], item["size"], item["rgba"],
-                mat=mat, euler=eu, quat=qt, group=3 if hide_box else 0)
+                mat=mat, euler=eu, quat=qt, group=HIDDEN_BOX_GROUP if hide_box else 0)
 
 
 def _ceiling_geom(room_key: str) -> str:
