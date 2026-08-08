@@ -64,9 +64,15 @@ def keys() -> list[str]:
 def load_layout(key: str):
     """按 key 加载该场景的 layout 模块（加载一次即缓存）。
 
-    ⚠️ 加载期间把仓根塞进 sys.path：各场景的 layout 都 `import furniture`（家具零件库住仓根，
-    所有场景共用）。生成器在仓根执行时碰巧能 import 到，但外部消费方（anima-zero 的世界服务）
-    是从别处按路径加载的，那时就找不到——这里补上，消费方不必知道资产库的内部布局。
+    ⚠️ 加载期间把**仓根**塞进 sys.path：各场景的 layout 都
+    `from scenes import furniture as F`（家具零件库住 `scenes/furniture.py`，所有场景共用），
+    `shots.py` 还会 `from scenes import manifest` —— 两者都要求仓根在 sys.path 上。
+    外部消费方（anima-zero 的世界服务）是从别处按路径加载的，不补就找不到；
+    补上之后消费方不必知道资产库的内部布局。
+
+    ⛔ 注入的是**仓根**，不是 `scenes/` 目录。注入 `scenes/` 会让本模块同时能以
+    `scenes.manifest` 和 `manifest` 两个名字各被 import 一遍，`SCENES` 与 `_cache`
+    当场分家——而 `_cache` 是有状态的，双份缓存是最难查的那类 bug。
     """
     if key in _cache:
         return _cache[key]
@@ -90,8 +96,9 @@ def load_layout(key: str):
 def load_sibling(key: str, module: str):
     """加载某个场景目录下的另一个模块（如 `shots`）。
 
-    与 layout 同样处理：临时把仓根塞进 sys.path，因为场景模块会 import 仓根的
-    共用库（furniture 等）。
+    与 layout 同样处理：临时把**仓根**塞进 sys.path，因为场景模块会
+    `from scenes import ...` 拿共用库（`scenes/furniture.py`、本模块）。
+    ⛔ 同样不能改成注入 `scenes/`，理由见 `load_layout` 的 docstring。
     """
     path = os.path.join(ROOT, os.path.dirname(get(key)["layout"]), f"{module}.py")
     if not os.path.exists(path):

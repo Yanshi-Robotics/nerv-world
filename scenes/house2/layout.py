@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import math
 
-import furniture as F  # noqa: E402  家具零件库住仓根，所有场景共用
+from scenes import furniture as F  # noqa: E402  家具零件库住 scenes/furniture.py，所有场景共用
 
 # ────────────────────────────────────────────────────────── 构造尺度
 WALL_THICK = 0.14

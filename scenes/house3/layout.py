@@ -48,10 +48,8 @@ from __future__ import annotations
 
 import math
 import os
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-import furniture as F  # noqa: E402
+from scenes import furniture as F  # noqa: E402
 
 # ---------------------------------------------------------------- 建筑尺度
 WALL_HEIGHT = 3.30     # 层高(m)。曼哈顿高端公寓 10'8" ≈ 3.25，取 3.30
