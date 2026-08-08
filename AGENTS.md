@@ -37,6 +37,7 @@
 | 换 README 里的配图 | `tools/make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
 | 加或改家具几何 | `scenes/furniture.py` | 家具零件的生成函数都在这 |
 | 改贴图 | `tools/make_textures.py` | 贴图是生成物，不是素材库 |
+| 加一张新贴图 | 放 `textures/`，**做成正方形** | ⛔ 贴到基本体上的必须是 `type="cube"`（2d 在竖直面上会被沿局部 Z 拖成条纹）；而 cube 要求 PNG 是 gridsize 的整数倍，非方形会**编译期报错**。生成器按图片实际尺寸自动判，不用手写名单 |
 | ⛔ 给家具穿真网格外衣 / 加装饰资产 | `decor/manifest.py` 登记 → `python -m decor.fetch` → **`python -m decor.calibrate`** → layout 里改用 `F.mesh_piece(...)` | 网格是**外衣**，碰撞真相仍是原来的盒子；漏跑 calibrate 网格会摆偏、被射线自检判红（见红线一节） |
 | 改 apt1 的窗外景色（天空 / 建筑群 / 航拍） | `tools/make_view.py`（`--sky` / `--nyc` / `--naip`），产物落 `textures/house3/` 与 `scenes/apt1/nyc_massing.py` | ⛔ 天空盒六面到世界方向的对应是**实测**出来的、而且全是反的，改之前先跑 `--calib` |
 | 加厨房电器 | `decor/robocasa.py` 里的 `FIXTURES` 换型号，`--list` 看有哪些 | ⛔ 不能直接 `<include>` 那份 MJCF：它带 actuator/joint/option，会改变 `nu`/`nq`/`nv`，弄坏策略契约 |

@@ -498,6 +498,41 @@ _BASE_TEXTURES = ("wood_floor", "wood_floor_light", "tile_white", "tile_grey",
                   "city_skyline", "art0", "art1", "art2", "art3",
                   "oven_glass", "appliance_panel")
 
+# ⭐⭐ 贴到**基本体**上的贴图必须是 `type="cube"`，不能是 `type="2d"`。
+#
+# ⛔ MuJoCo 给基本体贴 2D 图时**沿几何体的局部 Z 轴投影**：只有法线朝 Z 的面（地板、台面
+#    这些水平面）是对的，四个**竖直面**上贴图会被沿 Z 拖成一道道竖条纹。
+#    地板一直好看、沙发/柜子/墙面一直"像拉丝金属"，就是这个原因——
+#    Jeff 2026-08-08 的原话是"好多 vertical 射线，而不是沙发材质的感觉"。
+#    cube 贴图对六个面各自投影，竖直面才有真正的织物/木纹。
+#
+# ⚠️ 走过的弯路（别再走一遍）：`texuniform` **治不了这个**。它只改"texrepeat 是相对
+#    geom 还是按空间单位"，实测开/关渲染出来**逐像素一样**。塔楼立面之所以正常，
+#    是因为它本来就声明成了 cube（见 apt1 layout 的 TEXTURES_EXTRA），不是因为 texuniform。
+#
+# ⛔ 两类例外必须留 2d：
+#   ① **整张图只铺一次、只看一个面**的（城市天际线背景板、挂画）——cube 只是把同一张图
+#      在六个面各贴一遍，没有收益；挂画那种细横线换投影反而走样。
+#   ② ⛔ **非正方形的图**——MuJoCo 的 cube 贴图要求"PNG 尺寸是 gridsize 的整数倍"，
+#      喂一张 512×128 的会**编译期直接报错**（`appliance_panel` 就是 512×128）。
+#      判据**从图片实际尺寸算**，⛔ 不要手维护一张名单：以后换张图、加张图，名单必然忘记跟。
+_FLAT_ONLY_TEXTURES = ("city_skyline", "art0", "art1", "art2", "art3")
+
+
+def _tex_kind(name: str) -> str:
+    """这张贴图该用 cube 还是 2d。见上面 _FLAT_ONLY_TEXTURES 那段。"""
+    if name in _FLAT_ONLY_TEXTURES:
+        return "2d"
+    path = os.path.join(ROOT, "textures", f"{name}.png")
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            if im.size[0] != im.size[1]:
+                return "2d"                  # 非方形，cube 会编译失败
+    except Exception:
+        return "2d"                          # 读不出来就保守走 2d（至少能编译）
+    return "cube"
+
 
 def _assets(robot_key: str) -> list[str]:
     """<asset> 段：天空盒 + 程序化贴图（make_textures.py 生成）+ 材质定义。
@@ -517,7 +552,8 @@ def _assets(robot_key: str) -> list[str]:
         out.append(f'    <texture type="skybox" {attrs}/>')
     # 贴图（file 路径相对**本 XML 所在目录**，即 build/ —— 所以要 _root_rel 退回仓根）
     for name in _BASE_TEXTURES:
-        out.append(f'    <texture type="2d" name="tex_{name}" '
+        kind = _tex_kind(name)
+        out.append(f'    <texture type="{kind}" name="tex_{name}" '
                    f'file="{_root_rel(f"textures/{name}.png")}"/>')
     # 场景自己的额外贴图（apt1 的公园航拍、城市底图、塔楼立面等）。
     # ⛔ 名字必须和 _BASE_TEXTURES 不撞——不撞 = 对 house1/house2 零回归面。

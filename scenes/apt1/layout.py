@@ -298,9 +298,17 @@ TEXTURES_EXTRA = [
     # ⚠️ 贴在**水平面**上的（地面、台面、地毯）用 2d 就对；
     #    贴在**竖直面**上的（墙面）必须用 **cube**——2d 在基本体上沿局部 Z 投影，
     #    竖墙会被拉成条纹。这个坑本仓在城市背景板和塔楼立面上已经栽过两次了。
-    *[{"name": f"tex_h3_{n}", "file": f"textures/house3/h3_{n}.png", "colorspace": "sRGB"}
+    # ⛔⛔ `type="cube"` 不是可选项（2026-08-08 补上）。上面那三行注释从 v0.8 起就写着
+    #    "竖直面必须用 cube"，**而这九张一直是默认的 2d** —— 知识写下来了但没落到代码上，
+    #    于是全屋的墙面、沙发、柜子侧面都被沿局部 Z 拖成竖条纹整整四版。
+    #    Jeff 2026-08-08 的原话："好多 vertical 射线，而不是沙发材质的感觉"。
+    #    ⚠️ 别去试 `texuniform`：实测开/关渲染出来**逐像素一样**，它管的是另一件事
+    #    （texrepeat 相对 geom 还是按空间单位）。真正的旋钮只有贴图**类型**。
+    #    ⭐ 水平面用 cube 也完全正确，所以九张一律 cube，不用分。
+    *[{"type": "cube", "name": f"tex_h3_{n}", "file": f"textures/house3/h3_{n}.png",
+       "colorspace": "sRGB"}
       for n in ("oak", "oak_dark", "marble", "marble_blk", "travertine", "linen", "rug")],
-    *[{"name": f"tex_h3_{n}", "file": f"textures/house3/h3_{n}.png",
+    *[{"type": "cube", "name": f"tex_h3_{n}", "file": f"textures/house3/h3_{n}.png",
        "colorspace": "sRGB"} for n in ("plaster", "onyx")],
     {"type": "cube", "name": "tex_h3_fac_glass", "gridsize": "3 4", "gridlayout": ".U..LFRB.D..",
      "file": "textures/house3/facade_glass.png", "colorspace": "sRGB"},
