@@ -2,6 +2,72 @@
 
 场景资产库的版本记录。**要点：保持简洁，每版只说重点。**（格式参考 [Keep a Changelog](https://keepachangelog.com)）
 
+## [0.10] — 2026-08-08
+
+Main: **一次纯粹的重组** —— 目录归位 + 一次场景改名。**任何几何、材质、尺寸都没有动。**
+产物除了多一层 `../` 路径前缀之外与 [0.9] **逐字节相同**（验证办法见下）。
+
+### ⛔ BREAKING（四条，按对消费方的影响排序）
+
+1. **`scenes/manifest.py` 的 `scene_filename()` 现在返回带目录的仓根相对路径**
+   `build/<场景>-<机器人>.xml`，原来是裸文件名。
+   ⭐ 按文档那样写 `os.path.join(<资产库仓根>, scene_filename(...))` 的消费方
+   **一个字都不用改**（已实测）；自己拼 `f"{scene}-{robot}.xml"` 的会断——
+   那本来就是文档里 ⛔ 过的用法。⛔ 函数名不改：改了就是一次跨仓破坏，名字给兼容性让路。
+2. **场景 key `house3` → `apt1`。** 第三个地方是曼哈顿 62 层的**公寓**而不是房子，
+   从它开始按类型命名。⛔ `house1` / `house2` **不改名**——最早 build 的两个，留纪念
+   （建造顺序写进了 README）。配图目录随之 `docs/images/house3/` → `docs/images/apt1/`，
+   场景目录 `scenes/house3/` → `scenes/apt1/`。
+   ⚠️ 贴图目录 `textures/house3/` 与 `h3_` 材质前缀**有意保留**：那 9 张材质的文件名
+   本身就叫 `h3_oak.png`，只改目录会造出新的不一致；而 `nyc_massing.py` 是
+   `make_view.py --nyc` 从 NYC Open Data **联网抓出来的生成物**，为改名重跑它
+   会拿到可能已更新的数据——那就不是改名，是换内容。定性为"这个场景的资产命名空间"。
+   ⚠️ `docs/house4-设计草案.md` → `docs/apt2-设计草案.md`（[0.9] 里提到的旧名不改，
+   历史按当时的事实记；目录历史用 `git log --follow` 看）。
+3. **7 个入口脚本搬进 `tools/`**：`python make_house.py` → `python tools/make_house.py`。
+4. **产物 XML 搬进 `build/`**；`furniture.py` → `scenes/furniture.py`，layout 里改用
+   `from scenes import furniture as F`；`robots/*/*.xml` 的 `meshdir` 各加一层 `../`。
+
+### 怎么验证"只改名、只挪位置"
+
+- 改名那一步（产物还在仓根）：`cmp house3-g1.xml apt1-g1.xml` **逐字节相同**。
+  产物里 `<mujoco model="sim_house_nav_g1">` 不含场景 key，19 处 `house3` 全是贴图路径。
+- 挪进 `build/` 那一步：把 [0.9] 的产物过一遍
+  `sed -E 's/( file[a-z]*=")(textures\/|decor\/|robots\/)/\1..\/\2/g'` 再 diff，
+  6 份**全部零差异**。⭐ 那条 sed 碰不到 `file="../../../decor/…"`（引号后是 `../`），
+  所以它**同时证明了 mesh 前缀该保持不变**。
+
+### 新增的两道闸门
+
+- **`_assert_meshdir_agrees()`**：同一个 meshdir 现在在两处各存一份，**语义有意不同**
+  （`robots/manifest.py` 存仓根相对的 durable 事实，机器人 XML 存从产物目录看的形式）。
+  这个仓被"同一个量存两处、没人逼它们对账"咬过两次，所以生成每份产物时当场读 XML 核对。
+  ⚠️ 它第一版挂在 `_decor_prefix()` 里，而那个函数只有**有装饰网格的场景**才会调到——
+  实测把 meshdir 改错后 house1/house2 照常生成成功，漏检三分之二的产物。已挪到无条件路径。
+- **`make_house.py --out` 的落点闸门**：产物里的 `../` 层数按"仓根下恰好一层"算死了，
+  落到别的深度 XML 长得一模一样、写文件也照常成功，只有 MuJoCo 加载时才报错。
+
+### 顺手修掉的三个既有问题
+
+- `check_lock_reconciles` 用 `if key != SCENES.keys()[0]` 实现"只跑一次"，是**拿排序当
+  控制流**：① 场景一改名首个 key 就换人，"对账在哪个场景上跑"悄悄挪了地方；
+  ② `--scene <非首个>` 时它一次都不跑，屏幕上却显示 ✅。改成显式的模块级标志。
+  ⚠️ 行为变化：`--scene house2` 从"静默跳过"变成"真跑"，只会更严不会放水。
+- `make_docs_images.py` 的 `OUT_DIR` 被赋了两次，前一次是死代码——搬家时最可能的错法是
+  改了死的那行、以为改完了，配图写到 `tools/docs/images/` 而**脚本照常打印完成**
+  （这个仓 2026-07-26 栽过一模一样的跟头）。已删。
+- `check_scene` 的贴图存在性检查原来按仓根解析，那是在这里复制一份 MuJoCo 的规则；
+  改成**相对产物 XML 自己的目录**，产物再挪也不用动它。
+- `.gitignore`：`preview/` 与 `output/` 两条删掉——仓里根本没有这两个目录、也没有脚本
+  写它们，而 `output/` 那条**无前导斜杠**，和它上面"`scenes/**/output/` 是交付物要保留"
+  的注释**正好相反**。`build/` 显式反选（很多人的全局 gitignore 会忽略它）。
+
+### 给消费方的话
+
+anima-zero 侧**无需任何改动**（已用三个 key 各实测一次）；只有
+`world/sim-house-nav/scene_assets.py` 里那句报错文案还写着老的 `python make_house.py`，
+不影响功能，等下次动那个仓时顺手改。
+
 ## [0.9] — 2026-08-07
 
 Main: **家具的尺寸终于是对的。** 上一版有三个叠在一起的缩放 bug，让全屋真网格家具被缩小

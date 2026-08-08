@@ -25,18 +25,18 @@
 
 | 你想…… | 改 / 读 | 为什么是这个 |
 |---|---|---|
-| 改屋子（房间、门窗、家具、出生点） | `scenes/<场景>/layout.py`，然后重跑 `make_house.py --scene <场景>` | `<场景>-<机器人>.xml` 是**产物**，手改会被下一次重跑覆盖 |
+| 改屋子（房间、门窗、家具、出生点） | `scenes/<场景>/layout.py`，然后重跑 `tools/make_house.py --scene <场景>` | `build/<场景>-<机器人>.xml` 是**产物**，手改会被下一次重跑覆盖 |
 | 加一个新地方（apt2…） | `scenes/manifest.py` 追加一条 + 建 `scenes/<key>/layout.py` | 变体名与产物名的规则住 `scenes/manifest.py`，⛔ 别在别处再拼一份 |
 | ⛔ 改楼梯 | **先读 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
-| 自己进去看看 | `python walkthrough.py --scene house2`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
-| 场景改完验一下 | `python check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
+| 自己进去看看 | `python tools/walkthrough.py --scene house2`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
+| 场景改完验一下 | `python tools/check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
 | 知道某台机器人是什么（模型 / 出生高度 / 相机 / 力矩模式） | `robots/manifest.py` | 机器人事实的**单一真相源** |
 | 知道某个策略怎么用（关节序 / 增益 / 观测布局 / 控制周期） | `policies/<名字>/contract.json` | 契约是策略侧的单一真相源，**别抄进 manifest** |
-| 换 README 里的配图 | `make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
-| 加或改家具几何 | `furniture.py` | 家具零件的生成函数都在这 |
-| 改贴图 | `make_textures.py` | 贴图是生成物，不是素材库 |
+| 换 README 里的配图 | `tools/make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
+| 加或改家具几何 | `scenes/furniture.py` | 家具零件的生成函数都在这 |
+| 改贴图 | `tools/make_textures.py` | 贴图是生成物，不是素材库 |
 | ⛔ 给家具穿真网格外衣 / 加装饰资产 | `decor/manifest.py` 登记 → `python -m decor.fetch` → **`python -m decor.calibrate`** → layout 里改用 `F.mesh_piece(...)` | 网格是**外衣**，碰撞真相仍是原来的盒子；漏跑 calibrate 网格会摆偏、被射线自检判红（见红线一节） |
-| 改 apt1 的窗外景色（天空 / 建筑群 / 航拍） | `make_view.py`（`--sky` / `--nyc` / `--naip`），产物落 `textures/house3/` 与 `scenes/apt1/nyc_massing.py` | ⛔ 天空盒六面到世界方向的对应是**实测**出来的、而且全是反的，改之前先跑 `--calib` |
+| 改 apt1 的窗外景色（天空 / 建筑群 / 航拍） | `tools/make_view.py`（`--sky` / `--nyc` / `--naip`），产物落 `textures/house3/` 与 `scenes/apt1/nyc_massing.py` | ⛔ 天空盒六面到世界方向的对应是**实测**出来的、而且全是反的，改之前先跑 `--calib` |
 | 加厨房电器 | `decor/robocasa.py` 里的 `FIXTURES` 换型号，`--list` 看有哪些 | ⛔ 不能直接 `<include>` 那份 MJCF：它带 actuator/joint/option，会改变 `nu`/`nq`/`nv`，弄坏策略契约 |
 | 看版本改了什么 | [`CHANGELOG.md`](CHANGELOG.md) | 本仓已公开、有外部消费方，CHANGELOG 是写给使用者的 |
 
@@ -46,35 +46,35 @@
 |---|---|
 | `scenes/manifest.py` | **有哪些地方**（与 `robots/manifest.py` 成对：那边是有哪些身体）。两者正交，交叉组合生成 |
 | `scenes/<场景>/layout.py` | **那个地方的唯一布局定义**：房间矩形、门窗洞、家具摆位、出生点；多层场景另有楼层与楼梯 |
-| `check_scene.py` | 场景自检：能不能被 MuJoCo 加载、**整条上楼路线走不走得通**、四个接头闭不闭合、门够不够宽 |
-| `walkthrough.py` | 第一人称漫游（WASD + 鼠标），用来人眼验收；`--selftest` 无窗口自测 |
-| `furniture.py` | 家具/零件的几何生成函数 |
-| `make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
-| `make_textures.py` · `make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
-| `make_view.py` | **apt1 的窗景**：`--sky` 天空六面 · `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
-| `fetch_assets.py` | 下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 `--verify` |
+| `tools/check_scene.py` | 场景自检：能不能被 MuJoCo 加载、**整条上楼路线走不走得通**、四个接头闭不闭合、门够不够宽 |
+| `tools/walkthrough.py` | 第一人称漫游（WASD + 鼠标），用来人眼验收；`--selftest` 无窗口自测 |
+| `scenes/furniture.py` | 家具/零件的几何生成函数（所有场景共用） |
+| `tools/make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
+| `tools/make_textures.py` · `tools/make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
+| `tools/make_view.py` | **apt1 的窗景**：`--sky` 天空六面 · `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
+| `tools/fetch_assets.py` | 下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 `--verify` |
 | `decor/` | **真家具网格管线**：`manifest.py` 登记表 + 可执行许可白名单、`fetch.py` 下载转换、`convert.py` glTF→OBJ、`calibrate.py` ⛔ 实测重心、`robocasa.py` 厨房电器移植器。⛔ `decor/assets/` 的字节 gitignore，永不入库 |
 | `scenes/apt1/nyc_massing.py` | 由 `make_view.py --nyc` 生成的建筑体量表（**入库**，因为数据源无 share-alike） |
-| `house1-g1.xml` · `house2-g1.xml` … | **产物**：完整可跑场景（含屋外景色 + `<include>` 进来的那台机器人） |
+| `build/<场景>-<机器人>.xml` | **产物**（入库的交付物，不是构建缓存）：完整可跑场景，含屋外景色 + `<include>` 进来的那台机器人。⛔ 里面的相对路径按"住在仓根下恰好一层"算死了，别把 `build/` 挪走 |
 | `robots/manifest.py` | 机器人清单与事实源；`robots/g1/`、`robots/go2/` 是模型资产 |
 | `policies/<名字>/` | 训练好的 `policy.onnx` + 与它配套的 `contract.json` |
-| `textures/` · `docs/` | 生成出来的贴图 · 配图与文档 |
+| `textures/` · `docs/` | 生成出来的贴图 · 配图与文档。⚠️ apt1 的贴图住 `textures/house3/`、材质名带 `h3_` 前缀 —— 那是这个场景的**资产命名空间**，沿用它最早的名字，有意不跟着 key 改 |
 
 ## 怎么跑起来
 
 ```bash
 pip install mujoco numpy pillow
 
-python -m mujoco.viewer --mjcf=house1-go2.xml   # 单层大平层（四足那份）
-python -m mujoco.viewer --mjcf=house2-g1.xml    # 三层小楼带楼梯（人形那份）
-python -m mujoco.viewer --mjcf=apt1-g1.xml   # 62 层俯瞰中央公园（人形那份）
+python -m mujoco.viewer --mjcf=build/house1-go2.xml   # 单层大平层（四足那份）
+python -m mujoco.viewer --mjcf=build/house2-g1.xml    # 三层小楼带楼梯（人形那份）
+python -m mujoco.viewer --mjcf=build/apt1-g1.xml   # 62 层俯瞰中央公园（人形那份）
 
-python make_textures.py        # 改过贴图才需要
-python make_house.py                       # 全场景 × 全机器人
-python make_house.py --scene house2 --robot g1
-python check_scene.py                      # ⭐ 生成之后必跑
-python walkthrough.py --scene house2       # 自己走进去看（--selftest = 无窗口自测）
-ALICE_SCENE=house2 python make_docs_images.py   # 重出 README 配图
+python tools/make_textures.py        # 改过贴图才需要
+python tools/make_house.py                       # 全场景 × 全机器人
+python tools/make_house.py --scene house2 --robot g1
+python tools/check_scene.py                      # ⭐ 生成之后必跑
+python tools/walkthrough.py --scene house2       # 自己走进去看（--selftest = 无窗口自测）
+ALICE_SCENE=house2 python tools/make_docs_images.py   # 重出 README 配图
 ```
 
 apt1 的贴图与 2716 栋楼**已入库**，clone 下来直接能编译；下面这些只在想改它们时才跑。
@@ -83,8 +83,8 @@ apt1 的贴图与 2716 栋楼**已入库**，clone 下来直接能编译；下�
 ```bash
 pip install trimesh fast-simplification   # 只有下载/转换那一侧要它，⛔ 生成器不许 import
 
-python fetch_assets.py            # CC0 室内材质
-python make_view.py --all         # 天空六面 · 公园航拍 · 2716 栋楼
+python tools/fetch_assets.py            # CC0 室内材质
+python tools/make_view.py --all         # 天空六面 · 公园航拍 · 2716 栋楼
 python -m decor.fetch             # 家具网格（Poly Haven CC0 + Objaverse CC-BY，逐件核许可）
 python -m decor.robocasa          # 厨房电器（RoboCasa，CC-BY-4.0）
 python -m decor.calibrate         # ⛔ 上面两条只要跑过，这条必跑（见红线）

@@ -6,12 +6,19 @@ CLAUDE.md
 __pycache__/
 *.pyc
 .venv/
-preview/
-output/
 .DS_Store
 
-# Scratch + stray runtime logs. NOTE: scenes/**/output/ are deliverables and stay tracked;
-# only this repo's own temp/ scratch dir and MuJoCo's stray log are ignored here.
+# ⛔ build/ is NOT ignored: <scene>-<robot>.xml in there are this repo's deliverables
+#    (consumers read them directly), not a build cache. Many people's global gitignore
+#    lists build/, and a repo-local .gitignore outranks core.excludesFile — hence the
+#    explicit un-ignore below. Only the renderer's temp probe is excluded.
+!/build/
+!/build/**
+/build/_docs_probe.xml
+
+# Scratch + stray runtime log.
+# ⚠️ MUJOCO_LOG.TXT deliberately has no leading slash: MuJoCo writes it to the *current
+#    working directory*, so it can land anywhere depending on where you ran the script.
 temp/
 MUJOCO_LOG.TXT
 node_modules/

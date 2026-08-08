@@ -2,7 +2,7 @@
 
 # alice-house · 给机器人住的房子
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.8-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.10-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
 > 这个仓是什么、每个事实住在哪、入口命令、以及红线。
@@ -51,6 +51,20 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 | **house1** | 大平层三室两厅双卫，单层 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离。全屋无高差 |
 | **house2** | 门厅/客厅/厨房、主卧/书房/卫生间、阁楼工作间/储藏，**三层** | 11 个空间 / 381 ㎡ | 为高差建的。人形的爬楼、跨层导航、以及「摔在楼梯上」这类真实失败模式，在平地上一个都测不到 |
 | **apt1** | 曼哈顿满层一户，**62 层**——玄关/画廊/大客厅/餐厅/厨房/主卧套间/客卧 | 13 个空间 / 345 ㎡ | 为**窗外**建的。三面落地玻璃、脚下 232 米空气、正前方是中央公园的真实航拍。考的是「视觉信息极强但绝大部分够不着」这种情形 |
+
+**建造顺序：house1 → house2 → apt1。**
+
+名字不成体系是**有意的**。`house1` 与 `house2` 是这个仓最早 build 出来的两个地方，
+名字保持原样不改——它们是「一行几何都不手写、全部由代码生成」这套做法第一次跑通的地方，
+留个纪念。house1 虽然只有一层，但它就是一栋 house。
+第三个地方是曼哈顿 62 层的**公寓**（apartment）而不是房子，所以从它开始按类型命名：`apt1`。
+下一个已经起草的复式顶层公寓叫 `apt2`（见 [`docs/apt2-设计草案.md`](docs/apt2-设计草案.md)，未开工）。
+
+⛔ **key 不轻易重命名**：它是仓外消费方（世界服务）用来选场景的标识符，改一次就是一次跨仓破坏。
+apt1 在 v0.10 之前叫 `house3`，那次改名是为了让「这是套公寓」写在名字里，
+也是本仓**唯一**一次场景改名。
+⚠️ 它的贴图目录仍叫 `textures/house3/`、材质名仍带 `h3_` 前缀——那是这个场景的
+**资产命名空间**（也是它最早的名字），有意保留，别顺手改。
 
 ### 现有机器人
 
@@ -225,8 +239,8 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 **别手工截图。** 机位全写在 `make_docs_images.py` 里，改了场景就重跑：
 
 ```bash
-python make_docs_images.py        # 全出
-python make_docs_images.py E1 G3  # 只出指定几张
+python tools/make_docs_images.py        # 全出
+python tools/make_docs_images.py E1 G3  # 只出指定几张
 ```
 
 背景：第一版配图是一张张手摆机位截的，中厨一重排就全过时，还没人记得当初相机在哪。
@@ -310,6 +324,7 @@ scenes/
   apt1/layout.py  62 层曼哈顿大平层：玻璃幕墙、窗景四层、真家具
   apt1/shots.py
   apt1/nyc_massing.py  ⭐ 2716 栋真实曼哈顿建筑（由 make_view.py --nyc 生成，入库）
+  furniture.py      参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…），所有场景共用
 decor/              ⭐ 真家具网格——脚本入库，资产字节永不入库
   manifest.py       拉什么 + 可执行的许可白名单
   fetch.py          下载 → 转换 → 减面 → 写 decor.lock.json 与 ATTRIBUTION.md
@@ -321,17 +336,20 @@ robots/
   manifest.py       ⭐ 机器人清单单一真相源（模型/出生高度/相机/策略/力矩怎么发）
   go2/              宇树 Go2 模型（含头部前视相机）
   g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
-furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
-make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-make_view.py        apt1 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
-fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
-make_house.py       布局 + 机器人 → <场景>-<机器人>.xml（MJCF）
-check_scene.py      ⭐ 场景自检：查产物不查声明，生成之后必跑
-walkthrough.py      第一人称漫游，用来人眼验收（WASD + 鼠标，带碰撞与重力）
-make_docs_images.py 出 README 配图（机位写在 shots.py，一条命令重出）
-house1-g1.xml · house2-g1.xml …   生成产物（一个「场景 × 机器人」一份）
+tools/              入口脚本，都从仓根跑：`python tools/<名字>.py`
+  make_house.py       布局 + 机器人 → build/<场景>-<机器人>.xml（MJCF）
+  check_scene.py      ⭐ 场景自检：查产物不查声明，生成之后必跑
+  walkthrough.py      第一人称漫游，用来人眼验收（WASD + 鼠标，带碰撞与重力）
+  make_docs_images.py 出 README 配图（机位写在 shots.py，一条命令重出）
+  make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
+  make_view.py        apt1 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
+  fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
+build/              ⭐ **产物**（入库的交付物，不是构建缓存）：<场景>-<机器人>.xml
+                    ⛔ 里面那些相对路径按"住在仓根下恰好一层"算死了，别把它挪走
 policies/           训练好的运动策略（ONNX + 契约）
 textures/ · docs/images/<场景>/   生成的贴图 · README 配图
+                    ⚠️ apt1 的贴图住 textures/house3/、材质名带 h3_ 前缀 —— 那是这个场景的
+                    资产命名空间，沿用它最早的名字，有意不跟着 key 改（见上面「建造顺序」）
 ```
 
 ## 快速开始
@@ -342,21 +360,21 @@ cd alice-house
 pip install mujoco numpy pillow
 
 # 看一眼（场景已经生成好了，直接就能开）
-python -m mujoco.viewer --mjcf=house1-go2.xml    # 单层大平层，四足那份
-python -m mujoco.viewer --mjcf=house2-g1.xml     # 三层小楼带楼梯，人形那份
-python -m mujoco.viewer --mjcf=apt1-g1.xml    # 62 层俯瞰中央公园，人形那份
+python -m mujoco.viewer --mjcf=build/house1-go2.xml    # 单层大平层，四足那份
+python -m mujoco.viewer --mjcf=build/house2-g1.xml     # 三层小楼带楼梯，人形那份
+python -m mujoco.viewer --mjcf=build/apt1-g1.xml    # 62 层俯瞰中央公园，人形那份
 
-python walkthrough.py --scene apt1            # 自己走进去看（第一人称）
+python tools/walkthrough.py --scene apt1            # 自己走进去看（第一人称）
 ```
 
 改了屋子要重新生成：
 
 ```bash
-python make_textures.py                        # 贴图（只在改过贴图时要跑）
-python make_house.py                           # 全场景 × 全机器人
-python make_house.py --scene house2 --robot g1 # 只出三层楼的人形那份
-python check_scene.py                          # ⭐ 生成之后必跑
-ALICE_SCENE=house2 python make_docs_images.py  # 重出配图
+python tools/make_textures.py                        # 贴图（只在改过贴图时要跑）
+python tools/make_house.py                           # 全场景 × 全机器人
+python tools/make_house.py --scene house2 --robot g1 # 只出三层楼的人形那份
+python tools/check_scene.py                          # ⭐ 生成之后必跑
+ALICE_SCENE=house2 python tools/make_docs_images.py  # 重出配图
 ```
 
 下面这些是可选的。apt1 的贴图和那 2716 栋楼**已经入库**，clone 下来直接就能编译；
@@ -366,12 +384,12 @@ apt1 的家具会一直是素盒子，直到你把它们拉下来：
 ```bash
 pip install trimesh fast-simplification           # 只有下载/转换那一侧要它
 
-python fetch_assets.py                            # CC0 室内材质（ambientCG）
-python make_view.py --all                         # 天空六面 · 中央公园航拍 · 2716 栋楼
+python tools/fetch_assets.py                            # CC0 室内材质（ambientCG）
+python tools/make_view.py --all                         # 天空六面 · 中央公园航拍 · 2716 栋楼
 python -m decor.fetch                             # 家具网格（Poly Haven CC0 + Objaverse CC-BY）
 python -m decor.robocasa                          # 厨房电器（RoboCasa，CC-BY）
 python -m decor.calibrate                         # ⛔ 上面两条只要跑过，这条必跑
-python make_house.py && python check_scene.py     # 重新生成并自检
+python tools/make_house.py && python tools/check_scene.py     # 重新生成并自检
 ```
 
 ⛔ `decor/calibrate.py` 不是可选的。它用编译出来的探针模型实测每张网格的真实重心与包围盒；
