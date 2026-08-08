@@ -271,7 +271,7 @@ DOOR_STEPOVER_M = 0.25
 def check_door_passable(key: str, layout) -> list[str]:
     """⭐⭐ 门要**真的走得过去**：两侧都得是房间，且门前后 0.6 m 的净通行宽够机器人过。
 
-    ⛔ 为什么单开一项（2026-08-07 在 house3 抓到的）：`dr_closet_e` 是一只
+    ⛔ 为什么单开一项（2026-08-07 在 apt1 抓到的）：`dr_closet_e` 是一只
        0.56 × 3.00 × 2.20 的通柜，沿衣帽间东墙一拉到底，正好把「画廊→衣帽间」那道
        1.2 m 的门**整个封死**——穿过门一步撞进实心柜子，衣帽间/主卧/主卫整个西翼
        从画廊走不进来。当时全部自检都是绿的，因为 `check_doors` 只量门自己的净宽，
@@ -461,6 +461,9 @@ def check_assets(key: str, layout) -> list[str]:
 #    5 cm 足够放过它，又远小于真出事时的量级（床差 136 cm、条案差 176 cm）。
 LOCK_SPAN_TOL = 0.05
 
+# 同一份 lock 全仓共用，`check_lock_reconciles` 每次运行只跑一次。⛔ 别改回按场景排序判断。
+_LOCK_CHECKED = False
+
 
 def check_lock_reconciles(key: str, layout) -> list[str]:
     """⭐⭐ decor.lock 自洽对账：各部件 `offset ± half` 的并集必须等于整件 `size`。
@@ -473,10 +476,18 @@ def check_lock_reconciles(key: str, layout) -> list[str]:
        **编译不报错、射线自检全绿、渲染看着也正常**，只有把这两个数摆在一起才看得出来。
 
     ⭐ 这条只查 lock 自己：**不需要 mujoco，也不需要资产字节**，裸 clone 上照样能红。
-       同一份 lock 全仓共用，所以只在第一个场景跑一次，免得刷三遍屏。
+       同一份 lock 全仓共用，所以**每次运行只跑一次**，免得刷三遍屏。
+
+    ⛔ 这里曾经写的是 `if key != SCENES.keys()[0]: return []`——**拿排序当控制流**，两个毛病：
+       ① `keys()` 是 sorted 的，场景一改名首个 key 就换人（apt1→apt1 那次就换了），
+          "对账在哪个场景上跑"悄悄挪了地方，没人知道；
+       ② `--scene <非首个>` 时它**一次都不跑，屏幕上却显示 ✅**。
+       用一个显式的模块级标志表达"每次运行只跑一次"，跟场景排序彻底脱钩。
     """
-    if key != SCENES.keys()[0]:
+    global _LOCK_CHECKED
+    if _LOCK_CHECKED:
         return []
+    _LOCK_CHECKED = True
     try:
         from decor import lock
     except ImportError:
@@ -751,7 +762,7 @@ def check_decor_ray_invariance(key: str, layout) -> list[str]:
 def check_park_sightline(key: str, layout) -> list[str]:
     """本楼和公园之间不许有东西挡着；`zfar × extent` 必须够远。
 
-    ⛔ 两条都实际踩过（2026-08-05 house3）：
+    ⛔ 两条都实际踩过（2026-08-05 apt1）：
        1. 把 220 CPS 放到了公园里（y=+45），它正杵在大客厅和公园中间，挡死左半边视野。
        2. `zfar=500 × extent 6 = 3000 m` 而公园伸到 4230 m，远半截被裁掉——
           而画面上**读起来像大气雾霾**，根本想不到是裁剪 bug。
@@ -787,7 +798,7 @@ def check_park_sightline(key: str, layout) -> list[str]:
 def check_art_clear(key: str, layout) -> list[str]:
     """挂画不许压在门洞或窗洞上。
 
-    ⛔ 为什么要这条（2026-08-05 house3 实际踩到）：一幅画挂到了贯通轴线的门洞正中间，
+    ⛔ 为什么要这条（2026-08-05 apt1 实际踩到）：一幅画挂到了贯通轴线的门洞正中间，
        渲染出来是一块大黑板把整条视线堵死。而**代码上完全看不出来**——
        画和门是两份互不相干的声明，生成器照单全收，自检也全绿。
        这类"两份声明各自合法、凑在一起才错"的问题，只能靠算重叠来抓。

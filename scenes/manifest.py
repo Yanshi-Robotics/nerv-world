@@ -36,9 +36,13 @@ SCENES: dict[str, dict] = {
         "floors": 1,
         "note": "首个场景。无高差、无楼梯，适合导航与房间识别。",
     },
-    "house3": {
+    # ⚠️ v0.10 之前这个 key 叫 house3。改名是为了让"这是套公寓"写在名字里
+    #    （house1/house2 是最早 build 的两栋房子，名字保留不改，见 README 的建造顺序）。
+    #    ⛔ 贴图目录仍叫 `textures/house3/`、材质名仍带 `h3_` 前缀 —— 那是这个场景的
+    #    资产命名空间（也是它最早的名字），有意保留，别顺手改。
+    "apt1": {
         "label": "曼哈顿高层豪宅大平层（13 空间，约 345 ㎡，62 层）",
-        "layout": "scenes/house3/layout.py",
+        "layout": "scenes/apt1/layout.py",
         "floors": 1,
         "note": "北面整墙落地窗俯瞰中央公园。考的是视觉信息极强、且窗外是 232 米空气的环境；"
                 "落地窗有可碰撞玻璃，不然机器人会直接走出去。",

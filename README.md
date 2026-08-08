@@ -31,7 +31,7 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 ## Table of Contents
 
 - [What's Inside](#whats-inside) · [Robots](#robots) · [Floor Plan & Screenshots](#floor-plan)
-- [house3 — 232 Metres Up, Facing Central Park](#house3--232-metres-up-facing-central-park)
+- [apt1 — 232 Metres Up, Facing Central Park](#apt1--232-metres-up-facing-central-park)
 - [Design Principles](#design-principles) · [Real Meshes as Clothing](#real-meshes-as-clothing)
 - [Project Structure](#project-structure)
 - [Quick Start](#quick-start)
@@ -48,7 +48,7 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 |---|---|---|---|
 | **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
 | **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 381 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
-| **house3** | Full-floor Manhattan apartment, **62nd storey** — foyer / gallery / great room / dining / kitchen / primary suite / guest rooms | 13 spaces / 345 m² | Built for **what's outside**. Floor-to-ceiling glass on three sides, 232 m of air below, and a real aerial of Central Park in front. Tests perception where the visual signal is overwhelmingly out of reach |
+| **apt1** | Full-floor Manhattan apartment, **62nd storey** — foyer / gallery / great room / dining / kitchen / primary suite / guest rooms | 13 spaces / 345 m² | Built for **what's outside**. Floor-to-ceiling glass on three sides, 232 m of air below, and a real aerial of Central Park in front. Tests perception where the visual signal is overwhelmingly out of reach |
 
 ### Robots
 
@@ -145,17 +145,17 @@ A top-down view only catches the topmost storey (the three floor plans overlap),
 
 ![Three-storey plan](docs/images/house2/A1-三层楼-顶视.png)
 
-### house3 — 232 Metres Up, Facing Central Park
+### apt1 — 232 Metres Up, Facing Central Park
 
-![Manhattan apartment, ceiling hidden](docs/images/house3/A1-户型俯视图.png)
+![Manhattan apartment, ceiling hidden](docs/images/apt1/A1-户型俯视图.png)
 
-house1 tests flat navigation, house2 tests climbing. **house3 tests the window.** Three sides are
+house1 tests flat navigation, house2 tests climbing. **apt1 tests the window.** Three sides are
 floor-to-ceiling glass, the floor slab sits 232.5 m above the street, and everything a camera sees
 through that glass is unreachable — no amount of walking changes it.
 
 | The whole view wall, great room | Down the 15 m sight line, from the front door |
 |---|---|
-| ![View wall](docs/images/house3/V2-大客厅-整面观景墙.png) | ![Enfilade](docs/images/house3/V1-贯通轴线-从入户门望公园.png) |
+| ![View wall](docs/images/apt1/V2-大客厅-整面观景墙.png) | ![Enfilade](docs/images/apt1/V1-贯通轴线-从入户门望公园.png) |
 
 **None of that view is a matte painting.** It is built in four layers, and where each layer takes
 over was decided by parallax arithmetic — move 8 m sideways and a building 120 m away shifts 61
@@ -180,7 +180,7 @@ This is the whole reason the mid-ground is real geometry instead of a photograph
 
 | Camera 3 m west of centre | Same heading, 6 m east |
 |---|---|
-| ![Parallax left](docs/images/house3/P1-视差对照-左.png) | ![Parallax right](docs/images/house3/P2-视差对照-右.png) |
+| ![Parallax left](docs/images/apt1/P1-视差对照-左.png) | ![Parallax right](docs/images/apt1/P2-视差对照-右.png) |
 
 #### The building itself, and what it stands next to
 
@@ -191,7 +191,7 @@ buildings standing between the apartment and the park.
 
 | The host tower from outside | Over the window frame, straight down | Central Park, full width |
 |---|---|---|
-| ![Host tower](docs/images/house3/X1-本楼外景.png) | ![Looking down](docs/images/house3/X2-越过窗框俯瞰公园.png) | ![Park panorama](docs/images/house3/X3-公园全景.png) |
+| ![Host tower](docs/images/apt1/X1-本楼外景.png) | ![Looking down](docs/images/apt1/X2-越过窗框俯瞰公园.png) | ![Park panorama](docs/images/apt1/X3-公园全景.png) |
 
 #### Inside
 
@@ -199,21 +199,21 @@ The plan is an enfilade: front door → gallery → great room line up on one ax
 sight line that ends on the park. The gallery is a 12 m hanging wall; the great room opens to
 dining and kitchen.
 
-![Great room, dining and kitchen](docs/images/house3/A2-客厅餐厅厨房.png)
+![Great room, dining and kitchen](docs/images/apt1/A2-客厅餐厅厨房.png)
 
 | Gallery — 12 m of hanging wall | Dining room | Kitchen island |
 |---|---|---|
-| ![Gallery](docs/images/house3/V3-画廊-12米展线.png) | ![Dining](docs/images/house3/V4-餐厅望公园.png) | ![Kitchen](docs/images/house3/V8-厨房中岛.png) |
+| ![Gallery](docs/images/apt1/V3-画廊-12米展线.png) | ![Dining](docs/images/apt1/V4-餐厅望公园.png) | ![Kitchen](docs/images/apt1/V8-厨房中岛.png) |
 
 | Primary bedroom, corner window | Guest room, facing Midtown | Spawn point, quadruped's eye height |
 |---|---|---|
-| ![Primary bedroom](docs/images/house3/V5-主卧转角窗.png) | ![Guest room](docs/images/house3/V6-客卧望中城.png) | ![Dog view](docs/images/house3/V7-狗视角-玄关出生点.png) |
+| ![Primary bedroom](docs/images/apt1/V5-主卧转角窗.png) | ![Guest room](docs/images/apt1/V6-客卧望中城.png) | ![Dog view](docs/images/apt1/V7-狗视角-玄关出生点.png) |
 
 That last one is the point of the whole scene: at 0.38 m the quadruped sees mostly floor, skirting
 and the underside of furniture — and a band of sky it can never reach. The same room through the
 humanoid's 1.25 m camera is a different room.
 
-Indoors, house3 is the first place dressed with **real furniture meshes** rather than assembled
+Indoors, apt1 is the first place dressed with **real furniture meshes** rather than assembled
 primitives. See [Real Meshes as Clothing](#real-meshes-as-clothing) for how they are attached
 without changing a single collision.
 
@@ -279,11 +279,11 @@ See `furniture.py`.
 geom group so it can be switched off in one line for top-down renders.
 
 **There's a world outside the windows.** Near trees and grass → mid-ground buildings → a distant
-city skyline backdrop. In house3 that backdrop is replaced by real data all the way out.
+city skyline backdrop. In apt1 that backdrop is replaced by real data all the way out.
 
 ### Real Meshes as Clothing
 
-house1 and house2 build every piece of furniture out of primitives. house3 keeps doing that — and
+house1 and house2 build every piece of furniture out of primitives. apt1 keeps doing that — and
 then puts a **downloaded mesh on top as clothing**. The box underneath is still the collision
 truth; the mesh is purely visual (`contype="0" conaffinity="0"`).
 
@@ -333,9 +333,9 @@ scenes/
   house2/layout.py  three-storey house: storeys, flights, landings, well wall, parapet
   house2/shots.py
   house2/楼梯设计.md ⭐ how the stair dimensions are derived, which code clauses, what got built wrong
-  house3/layout.py  62nd-floor Manhattan apartment: glazing, the four view layers, real furniture
-  house3/shots.py
-  house3/nyc_massing.py  ⭐ 2716 real Manhattan buildings (generated by make_view.py --nyc; committed)
+  apt1/layout.py  62nd-floor Manhattan apartment: glazing, the four view layers, real furniture
+  apt1/shots.py
+  apt1/nyc_massing.py  ⭐ 2716 real Manhattan buildings (generated by make_view.py --nyc; committed)
 decor/              ⭐ real furniture meshes — scripts committed, asset bytes never
   manifest.py       what to fetch + the executable licence allow-list
   fetch.py          download → convert → decimate → write decor.lock.json + ATTRIBUTION.md
@@ -349,7 +349,7 @@ robots/
   g1/               Unitree G1 humanoid, 29 dof (imported from Menagerie by import_from_menagerie.py)
 furniture.py        parametric furniture part library (chairs / tables / lamps / vases / plants…)
 make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
-make_view.py        house3's window view: --sky (HDRI → cube faces) · --nyc (building footprints) · --naip (aerial) · --calib
+make_view.py        apt1's window view: --sky (HDRI → cube faces) · --nyc (building footprints) · --naip (aerial) · --calib
 fetch_assets.py     downloads the CC0 interior materials (ambientCG), with SHA-256 bookkeeping and --verify
 make_house.py       layout + robot → <scene>-<robot>.xml (MJCF)
 check_scene.py      ⭐ scene self-check: verifies the product, not the claim. Run it after generating
@@ -370,9 +370,9 @@ pip install mujoco numpy pillow
 # Take a look at the house (scenes are already generated — just open them)
 python -m mujoco.viewer --mjcf=house1-go2.xml    # single-floor apartment, with the quadruped
 python -m mujoco.viewer --mjcf=house2-g1.xml     # three-storey house with stairs, with the humanoid
-python -m mujoco.viewer --mjcf=house3-g1.xml     # 62nd floor over Central Park, with the humanoid
+python -m mujoco.viewer --mjcf=apt1-g1.xml     # 62nd floor over Central Park, with the humanoid
 
-python walkthrough.py --scene house3             # or walk in yourself (first person)
+python walkthrough.py --scene apt1             # or walk in yourself (first person)
 ```
 
 Re-generate after changing the house:
@@ -385,9 +385,9 @@ python check_scene.py                          # ⭐ always run this after gener
 ALICE_SCENE=house2 python make_docs_images.py  # re-render the screenshots
 ```
 
-Optional. house3's textures and its 2716 buildings are **already committed**, so it compiles
+Optional. apt1's textures and its 2716 buildings are **already committed**, so it compiles
 straight from a clone; the commands below only need re-running if you want to change them. The
-furniture meshes are the exception — their bytes are never stored, so on a fresh clone house3's
+furniture meshes are the exception — their bytes are never stored, so on a fresh clone apt1's
 furniture stays as plain boxes until you fetch them:
 
 ```bash
@@ -494,15 +494,15 @@ the MIT license above. Every such asset ships in its own directory with its own 
 
 What we changed in the G1 model and why is written up in `robots/g1/G1_MODEL_UPSTREAM.md`.
 
-house3's window view is built from **data**, not bytes copied out of someone's dataset. Two sources
-are redistributed here (the derived coordinate tables in `scenes/house3/nyc_massing.py`); the rest
+apt1's window view is built from **data**, not bytes copied out of someone's dataset. Two sources
+are redistributed here (the derived coordinate tables in `scenes/apt1/nyc_massing.py`); the rest
 is fetched on your machine:
 
 | What | Source | Terms |
 |---|---|---|
 | 2716 building footprints (bounding boxes only) | NYC Open Data `5zhs-2jue` | Local Law 11 of 2012, Admin Code §23-502(d): no registration, no licence, no restriction on use — **and no share-alike**. Attribution kept in `textures/house3/ATTRIBUTION.md` |
 | Central Park aerial photography | USGS NAIP | **Public domain** (US federal work) |
-| Sky cube faces, interior materials | Poly Haven · ambientCG | **CC0-1.0** — the derived PNGs *are* committed (`textures/house3/`), since house3 will not compile without them |
+| Sky cube faces, interior materials | Poly Haven · ambientCG | **CC0-1.0** — the derived PNGs *are* committed (`textures/house3/`), since apt1 will not compile without them |
 | Furniture meshes | Poly Haven | **CC0-1.0** — fetched, not stored |
 | Bed and nightstand meshes | Objaverse (@elba) | **CC-BY-4.0**, verified per object — fetched, not stored |
 | Kitchen appliances | RoboCasa via NVIDIA's HuggingFace mirror | **CC-BY-4.0** — fetched, not stored |

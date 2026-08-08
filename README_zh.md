@@ -33,7 +33,7 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 ## 目录
 
 - [里面有什么](#里面有什么) · [现有机器人](#现有机器人) · [户型与实拍](#户型)
-- [house3 — 232 米高空，正对中央公园](#house3--232-米高空正对中央公园)
+- [apt1 — 232 米高空，正对中央公园](#apt1--232-米高空正对中央公园)
 - [设计原则](#设计原则) · [网格只是外衣](#网格只是外衣)
 - [目录结构](#目录结构)
 - [快速开始](#快速开始)
@@ -50,7 +50,7 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 |---|---|---|---|
 | **house1** | 大平层三室两厅双卫，单层 | 12 个空间 / 364 ㎡ | 参照真实户型图复刻；客餐一体、主卧套间（衣帽间+主卫带独立浴缸）、中西厨分离。全屋无高差 |
 | **house2** | 门厅/客厅/厨房、主卧/书房/卫生间、阁楼工作间/储藏，**三层** | 11 个空间 / 381 ㎡ | 为高差建的。人形的爬楼、跨层导航、以及「摔在楼梯上」这类真实失败模式，在平地上一个都测不到 |
-| **house3** | 曼哈顿满层一户，**62 层**——玄关/画廊/大客厅/餐厅/厨房/主卧套间/客卧 | 13 个空间 / 345 ㎡ | 为**窗外**建的。三面落地玻璃、脚下 232 米空气、正前方是中央公园的真实航拍。考的是「视觉信息极强但绝大部分够不着」这种情形 |
+| **apt1** | 曼哈顿满层一户，**62 层**——玄关/画廊/大客厅/餐厅/厨房/主卧套间/客卧 | 13 个空间 / 345 ㎡ | 为**窗外**建的。三面落地玻璃、脚下 232 米空气、正前方是中央公园的真实航拍。考的是「视觉信息极强但绝大部分够不着」这种情形 |
 
 ### 现有机器人
 
@@ -138,16 +138,16 @@ BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
 
 ![三层楼俯视](docs/images/house2/A1-三层楼-顶视.png)
 
-### house3 — 232 米高空，正对中央公园
+### apt1 — 232 米高空，正对中央公园
 
-![曼哈顿大平层，隐去天花](docs/images/house3/A1-户型俯视图.png)
+![曼哈顿大平层，隐去天花](docs/images/apt1/A1-户型俯视图.png)
 
-house1 考平层导航，house2 考爬楼，**house3 考的是窗户**。三面落地玻璃，楼板离街面 232.5 米，
+house1 考平层导航，house2 考爬楼，**apt1 考的是窗户**。三面落地玻璃，楼板离街面 232.5 米，
 而透过玻璃看到的一切都**够不着**——走多远都改变不了。
 
 | 大客厅整面观景墙 | 从入户门望出去的 15 米轴线 |
 |---|---|
-| ![观景墙](docs/images/house3/V2-大客厅-整面观景墙.png) | ![贯通轴线](docs/images/house3/V1-贯通轴线-从入户门望公园.png) |
+| ![观景墙](docs/images/apt1/V2-大客厅-整面观景墙.png) | ![贯通轴线](docs/images/apt1/V1-贯通轴线-从入户门望公园.png) |
 
 **这片景色没有一层是画上去的贴图。** 它分四层搭出来，每层从哪儿开始是**算视差算出来的**——
 横移 8 米，120 米处的楼在画面上移动 61 像素，600 米处移动 12 像素，3 公里外只移动 2.4 像素。
@@ -170,7 +170,7 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 
 | 相机在中线偏西 3 米 | 同朝向，东移 6 米 |
 |---|---|
-| ![视差左](docs/images/house3/P1-视差对照-左.png) | ![视差右](docs/images/house3/P2-视差对照-右.png) |
+| ![视差左](docs/images/apt1/P1-视差对照-左.png) | ![视差右](docs/images/apt1/P2-视差对照-右.png) |
 
 #### 这栋楼本身，以及它挨着谁
 
@@ -180,27 +180,27 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 
 | 本楼外景 | 越过窗框往正下方看 | 中央公园全宽 |
 |---|---|---|
-| ![本楼外景](docs/images/house3/X1-本楼外景.png) | ![俯瞰](docs/images/house3/X2-越过窗框俯瞰公园.png) | ![公园全景](docs/images/house3/X3-公园全景.png) |
+| ![本楼外景](docs/images/apt1/X1-本楼外景.png) | ![俯瞰](docs/images/apt1/X2-越过窗框俯瞰公园.png) | ![公园全景](docs/images/apt1/X3-公园全景.png) |
 
 #### 屋里
 
 平面是一条贯通轴线：入户门 → 画廊 → 大客厅在同一条轴上，形成 15 米通视，尽头就是公园。
 画廊是一面 12 米长的挂画墙；大客厅向餐厅与厨房敞开。
 
-![大客厅、餐厅与厨房](docs/images/house3/A2-客厅餐厅厨房.png)
+![大客厅、餐厅与厨房](docs/images/apt1/A2-客厅餐厅厨房.png)
 
 | 画廊 12 米展线 | 餐厅 | 厨房中岛 |
 |---|---|---|
-| ![画廊](docs/images/house3/V3-画廊-12米展线.png) | ![餐厅](docs/images/house3/V4-餐厅望公园.png) | ![厨房](docs/images/house3/V8-厨房中岛.png) |
+| ![画廊](docs/images/apt1/V3-画廊-12米展线.png) | ![餐厅](docs/images/apt1/V4-餐厅望公园.png) | ![厨房](docs/images/apt1/V8-厨房中岛.png) |
 
 | 主卧转角窗 | 客卧望中城 | 出生点，机器狗眼高 |
 |---|---|---|
-| ![主卧](docs/images/house3/V5-主卧转角窗.png) | ![客卧](docs/images/house3/V6-客卧望中城.png) | ![狗视角](docs/images/house3/V7-狗视角-玄关出生点.png) |
+| ![主卧](docs/images/apt1/V5-主卧转角窗.png) | ![客卧](docs/images/apt1/V6-客卧望中城.png) | ![狗视角](docs/images/apt1/V7-狗视角-玄关出生点.png) |
 
 最后那张才是整个场景的意义所在：0.38 米高度上，机器狗看到的主要是地板、踢脚线和家具底面，
 外加一条它永远够不着的天空。同一个房间，换成人形 1.25 米的相机就是另一个房间。
 
-屋里的家具，house3 是第一个穿上**真实网格外衣**而不是全靠基本体拼的场景。
+屋里的家具，apt1 是第一个穿上**真实网格外衣**而不是全靠基本体拼的场景。
 怎么在**不改变任何一次碰撞**的前提下把网格挂上去，见[网格只是外衣](#网格只是外衣)。
 
 ### 机器人视角
@@ -260,12 +260,12 @@ python make_docs_images.py E1 G3  # 只出指定几张
 **封顶。** 有天花板，机器人抬头看到的是屋顶不是天空；天花板单独归一个 geom group，
 出俯视图时整层关掉即可。
 
-**窗外有世界。** 近处树木草地 → 中景楼房 → 远处城市天际线背景板。house3 里这块背景板
+**窗外有世界。** 近处树木草地 → 中景楼房 → 远处城市天际线背景板。apt1 里这块背景板
 被换成了一路到底的真实数据。
 
 ### 网格只是外衣
 
-house1 和 house2 的每件家具都是基本体拼出来的。house3 继续这么拼——然后再把**下载来的网格
+house1 和 house2 的每件家具都是基本体拼出来的。apt1 继续这么拼——然后再把**下载来的网格
 当外衣套上去**。底下的盒子仍然是碰撞真相，网格是纯视觉的（`contype="0" conaffinity="0"`）。
 
 让这件事安全的规矩是一条**包含性不变式**：每张网格都缩到完全装进它所装饰的盒子里，
@@ -307,9 +307,9 @@ scenes/
   house2/layout.py  三层小楼：多出楼层、楼梯、平台、梯井隔墙、栏板
   house2/shots.py
   house2/楼梯设计.md ⭐ 楼梯尺寸怎么推出来的、依据哪条规范、做错过什么
-  house3/layout.py  62 层曼哈顿大平层：玻璃幕墙、窗景四层、真家具
-  house3/shots.py
-  house3/nyc_massing.py  ⭐ 2716 栋真实曼哈顿建筑（由 make_view.py --nyc 生成，入库）
+  apt1/layout.py  62 层曼哈顿大平层：玻璃幕墙、窗景四层、真家具
+  apt1/shots.py
+  apt1/nyc_massing.py  ⭐ 2716 栋真实曼哈顿建筑（由 make_view.py --nyc 生成，入库）
 decor/              ⭐ 真家具网格——脚本入库，资产字节永不入库
   manifest.py       拉什么 + 可执行的许可白名单
   fetch.py          下载 → 转换 → 减面 → 写 decor.lock.json 与 ATTRIBUTION.md
@@ -323,7 +323,7 @@ robots/
   g1/               宇树 G1 人形，29 自由度（由 import_from_menagerie.py 从 Menagerie 导入）
 furniture.py        参数化家具构件库（椅子/桌子/灯具/花瓶/绿植…）
 make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-make_view.py        house3 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
+make_view.py        apt1 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
 fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
 make_house.py       布局 + 机器人 → <场景>-<机器人>.xml（MJCF）
 check_scene.py      ⭐ 场景自检：查产物不查声明，生成之后必跑
@@ -344,9 +344,9 @@ pip install mujoco numpy pillow
 # 看一眼（场景已经生成好了，直接就能开）
 python -m mujoco.viewer --mjcf=house1-go2.xml    # 单层大平层，四足那份
 python -m mujoco.viewer --mjcf=house2-g1.xml     # 三层小楼带楼梯，人形那份
-python -m mujoco.viewer --mjcf=house3-g1.xml    # 62 层俯瞰中央公园，人形那份
+python -m mujoco.viewer --mjcf=apt1-g1.xml    # 62 层俯瞰中央公园，人形那份
 
-python walkthrough.py --scene house3            # 自己走进去看（第一人称）
+python walkthrough.py --scene apt1            # 自己走进去看（第一人称）
 ```
 
 改了屋子要重新生成：
@@ -359,9 +359,9 @@ python check_scene.py                          # ⭐ 生成之后必跑
 ALICE_SCENE=house2 python make_docs_images.py  # 重出配图
 ```
 
-下面这些是可选的。house3 的贴图和那 2716 栋楼**已经入库**，clone 下来直接就能编译；
+下面这些是可选的。apt1 的贴图和那 2716 栋楼**已经入库**，clone 下来直接就能编译；
 只有想改它们时才需要重跑。**家具网格是例外**——字节永不入库，所以裸 clone 上
-house3 的家具会一直是素盒子，直到你把它们拉下来：
+apt1 的家具会一直是素盒子，直到你把它们拉下来：
 
 ```bash
 pip install trimesh fast-simplification           # 只有下载/转换那一侧要它
@@ -442,14 +442,14 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 BSD-3-Clause，见 `robots/go2/GO2_MODEL_LICENSE` 与 `robots/g1/G1_MODEL_LICENSE`；
 G1 我们改了什么、为什么改，写在 `robots/g1/G1_MODEL_UPSTREAM.md`。
 
-house3 的窗景是拿**数据**搭的，不是从谁的数据集里拷字节出来。只有派生出来的坐标表
-（`scenes/house3/nyc_massing.py`）入库，其余一律在你自己机器上拉：
+apt1 的窗景是拿**数据**搭的，不是从谁的数据集里拷字节出来。只有派生出来的坐标表
+（`scenes/apt1/nyc_massing.py`）入库，其余一律在你自己机器上拉：
 
 | 是什么 | 来源 | 条款 |
 |---|---|---|
 | 2716 栋建筑轮廓（只存包围盒） | NYC Open Data `5zhs-2jue` | Local Law 11 of 2012，Admin Code §23-502(d)：无注册、无许可、无使用限制，**且无 share-alike**。署名留在 `textures/house3/ATTRIBUTION.md` |
 | 中央公园航拍 | USGS NAIP | **公共领域**（美国联邦作品） |
-| 天空六面、室内材质 | Poly Haven · ambientCG | **CC0-1.0**——派生出来的 PNG **入库**（`textures/house3/`），否则 house3 编译不过 |
+| 天空六面、室内材质 | Poly Haven · ambientCG | **CC0-1.0**——派生出来的 PNG **入库**（`textures/house3/`），否则 apt1 编译不过 |
 | 家具网格 | Poly Haven | **CC0-1.0**——拉取，不入库 |
 | 床与床头柜网格 | Objaverse（@elba） | **CC-BY-4.0**，逐件核过——拉取，不入库 |
 | 厨房电器 | RoboCasa（经 NVIDIA 的 HuggingFace 镜像） | **CC-BY-4.0**——拉取，不入库 |

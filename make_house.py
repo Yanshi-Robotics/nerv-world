@@ -188,7 +188,7 @@ def _wall_geoms(room_key: str) -> list[str]:
         #    不转的话墙面贴图会被拉成竖条纹。house1/house2 用的是程序化噪点，
         #    条纹读起来像"拉毛墙面"所以一直没人发现；换成有纹理的石膏就露馅了。
         #    ⛔ 转过来会改变老场景的产物，所以由 layout 的 `WALL_FACE_FIX` 开关控制，
-        #       默认关（house1/house2 逐字节不变），house3 打开。
+        #       默认关（house1/house2 逐字节不变），apt1 打开。
         face_fix = getattr(L, "WALL_FACE_FIX", False) and room.get("wall_mat")
         wquat = (_FACE_NS if horizontal else _FACE_EW) if face_fix else None
         for i, (a, b, z0, z1) in enumerate(rects):
@@ -439,7 +439,7 @@ def _stair_rails(flight: dict) -> list[str]:
 def _lights() -> list[str]:
     """每间屋一盏吸顶灯 —— 封了顶之后天光进不来，室内全靠这些灯，没灯就是一片黑。
 
-    场景可以声明 `LIGHTS` 自己排灯位（house3 那种朝北大平层要的是"沿窗墙一排天光"，
+    场景可以声明 `LIGHTS` 自己排灯位（apt1 那种朝北大平层要的是"沿窗墙一排天光"，
     不是"一房一盏"）。声明了就整份接管，不再走下面的默认规则。
     ⚠️ 灯数没有 8 盏上限那回事——实测 mjMAXLIGHT = 100，house1 的 14 盏一直正常。
     """
@@ -488,7 +488,7 @@ def _assets(robot_key: str) -> list[str]:
     # 贴图（file 路径相对本 XML 所在目录）
     for name in _BASE_TEXTURES:
         out.append(f'    <texture type="2d" name="tex_{name}" file="textures/{name}.png"/>')
-    # 场景自己的额外贴图（house3 的公园航拍、城市底图、塔楼立面等）。
+    # 场景自己的额外贴图（apt1 的公园航拍、城市底图、塔楼立面等）。
     # ⛔ 名字必须和 _BASE_TEXTURES 不撞——不撞 = 对 house1/house2 零回归面。
     # ⚠️ type 默认 "2d"，但**允许字典自己覆盖**（塔楼立面要 type="cube"，
     #    因为 2d 贴图在竖着的基本体上会被沿局部 Z 拉成条纹）。
@@ -605,7 +605,7 @@ def _city_backdrop() -> list[str]:
     ⚠️ size 一律写成 (板宽, 板高, 板厚)——那是**局部**尺寸。转过去之后世界里的
        长宽高会换位，别拿世界坐标去核对这三个数。
     """
-    if not L.CITY_BACKDROP:              # house3 用的是 VIEW 那套四层窗景，不出这个
+    if not L.CITY_BACKDROP:              # apt1 用的是 VIEW 那套四层窗景，不出这个
         return []
     cb = L.CITY_BACKDROP
     d, w, h, z = cb["dist"], cb["width"], cb["height"], cb["z"]
@@ -693,7 +693,7 @@ def _glazing() -> list[str]:
     """落地窗的玻璃 —— ⛔ **必须参与碰撞**，这不是装饰。
 
     ⚠️ 血的道理：`walkthrough.PROBE_H = 1.0` 在胸高打横射线来挡人，落地窗洞口打不到东西，
-       人物就直接走出去了。在 house1 那是下 5 cm 台阶到草地；在 house3 是**232 米自由落体**，
+       人物就直接走出去了。在 house1 那是下 5 cm 台阶到草地；在 apt1 是**232 米自由落体**，
        而且机器人有同样的自由——窗洞在老场景里本来就没有碰撞几何。
        那里现实中就是有玻璃，补上它既是物理事实，也修好了 walkthrough 自检第 2 项。
     """
@@ -945,7 +945,7 @@ def build(robot_key: str) -> str:
     _stat = getattr(L, "STATISTIC", {"center": "0 -1 1", "extent": 6})
     parts.append(f'  <statistic center="{_stat["center"]}" extent="{_stat["extent"]:g}"/>')
     parts.append('')
-    # 场景可以覆盖这几项。house3 必须覆盖 zfar（默认 60×extent 6 = 360 m，脚下 1200 m 的
+    # 场景可以覆盖这几项。apt1 必须覆盖 zfar（默认 60×extent 6 = 360 m，脚下 1200 m 的
     # 地面板会被裁掉一半，看起来像大气雾霾、其实是裁剪 bug）和 shadowclip（默认 1×extent = 6 m
     # 的阴影体，装不下 23×15 m 的公寓，大半个屋子根本没影子——这就是"MuJoCo 阴影不行"的误解来源）。
     V = getattr(L, "VISUAL", {})
@@ -1022,7 +1022,7 @@ def build(robot_key: str) -> str:
     if backdrop:
         parts.extend(backdrop)
         parts.append('')
-    view = _view()                       # 高层窗景四层（house3 用；老场景没声明就是空的）
+    view = _view()                       # 高层窗景四层（apt1 用；老场景没声明就是空的）
     if view:
         parts.extend(view)
         parts.append('')

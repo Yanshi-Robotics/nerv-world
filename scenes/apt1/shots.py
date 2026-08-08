@@ -1,4 +1,4 @@
-"""house3 的配图机位。
+"""apt1 的配图机位。
 
 ⛔ 每个坐标都从 layout 算出来，**不写裸数字**（house2 立的规矩）：
    户型一改，机位跟着走，不会出现"图还是老的、屋子已经变了"。
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from scenes import manifest as _SCENES
 
-_L = _SCENES.load_layout("house3")
+_L = _SCENES.load_layout("apt1")
 
 DOG_EYE = 0.38          # 四足机器狗的眼高
 HUMAN_EYE = 1.25        # 人形机器人的眼高

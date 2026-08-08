@@ -375,7 +375,7 @@ FURNITURE: list[dict] = [
     # ⛔ 这一排整体东移 0.45 m（2026-08-07）。原来贴着西墙排，正好堵在
     #    「中厨-洗衣房」那道门（x=4.0 竖墙、y∈[-5.55, -4.45]）前面，
     #    门口净通行宽只剩 0.30 m，机器人（要 0.60 m）进不来。
-    #    和 cl_e、house3 的 dr_closet_e 是同一个物种，由 check_door_passable 一起抓出来。
+    #    和 cl_e、apt1 的 dr_closet_e 是同一个物种，由 check_door_passable 一起抓出来。
     {"name": "washer", "room": "laundry", "type": "box",
      "pos": (5.05, -6.30, 0.45), "size": (0.68, 0.70, 0.90), "rgba": (0.92, 0.92, 0.94, 1), "mat": "mat_steel"},
     {"name": "washer_door", "room": "laundry", "type": "cylinder",
@@ -499,7 +499,7 @@ FURNITURE: list[dict] = [
     # ⛔ 东墙这排柜子只占门北边那一段。原来是 y∈[1.15, 4.35] 的通柜，而「过道-衣帽间」
     #    的门开在 x=-5.5 竖墙、y∈[1.45, 2.55] —— 柜子把门**整个封死**，衣帽间进不去，
     #    而当时全部自检都是绿的（没有任何一项拿门和家具对过账）。
-    #    2026-08-07 由新增的 check_door_passable 抓出来，和 house3 的 dr_closet_e 是同一个物种。
+    #    2026-08-07 由新增的 check_door_passable 抓出来，和 apt1 的 dr_closet_e 是同一个物种。
     {"name": "cl_e", "room": "closet", "type": "box",
      "pos": (-5.80, 3.55, 1.15), "size": (0.58, 1.60, 2.30), "rgba": (0.72, 0.63, 0.52, 1)},
     {"name": "cl_rail_w", "room": "closet", "type": "box",
