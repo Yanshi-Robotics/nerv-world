@@ -20,9 +20,9 @@ even for commercial purposes, all without asking permission"）。署名不是�
 是版本相关的——先按只有 albedo 做，需要再说。
 
 用法：
-    python fetch_assets.py              # 下载缺的
-    python fetch_assets.py --force      # 全部重下
-    python fetch_assets.py --verify     # 只校验 SHA-256，不下载
+    python tools/fetch_assets.py              # 下载缺的
+    python tools/fetch_assets.py --force      # 全部重下
+    python tools/fetch_assets.py --verify     # 只校验 SHA-256，不下载
 """
 from __future__ import annotations
 
@@ -37,8 +37,12 @@ import zipfile
 
 from PIL import Image
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = os.path.join(HERE, "textures", "house3")
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    这条规矩是为了 review 时一眼看得出有没有漏改：任何落点错误都会在
+#    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
+OUT_DIR = os.path.join(ROOT, "textures", "house3")
 LOCK = os.path.join(OUT_DIR, "materials.lock.json")
 GET = "https://ambientcg.com/get?file={id}_{res}-PNG.zip"
 TARGET_PX = 1024        # 1K 足够：室内材质在画面上很少超过这个采样率，2K 是纯浪费

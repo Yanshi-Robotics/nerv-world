@@ -5,8 +5,8 @@
 地板换石材）就全过时，而且没人记得当初相机在哪。机位写进代码 = 图和场景永远对得上。
 
 用法：
-    python make_docs_images.py            # 全出，写到 docs/images/
-    python make_docs_images.py A1 E1      # 只出指定的几张
+    python tools/make_docs_images.py            # 全出，写到 docs/images/
+    python tools/make_docs_images.py A1 E1      # 只出指定的几张
 
 两类镜头：
   俯视（关掉天花板那一组 geom）—— 看清户型与家具摆位
@@ -21,7 +21,14 @@ import mujoco
 import numpy as np
 from PIL import Image
 
-from scenes import manifest as SCENES
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    ⚠️ 这个 sys.path 是必需的：本文件原来一行都没有，能 import 到 scenes 纯属
+#    "脚本住仓根、sys.path[0] 恰好是仓根"的巧合。搬进 tools/ 之后就得显式插。
+sys.path.insert(0, ROOT)
+
+from scenes import manifest as SCENES  # noqa: E402
 
 # ⚠️ 2026-08-02 资产库改多场景：layout 不再躺在仓根，产物也改名 <场景>-<机器人>.xml。
 #    这个文件 2026-07-26 就因为目录一动没跟着改而把配图写到仓库外面（脚本照常打印
@@ -29,16 +36,10 @@ from scenes import manifest as SCENES
 SCENE_KEY = os.environ.get("ALICE_SCENE", SCENES.DEFAULT_SCENE)
 L = SCENES.load_layout(SCENE_KEY)
 
-HERE = os.path.dirname(os.path.abspath(__file__))
 # 场景按 (场景, 机器人) 分文件。出配图用哪台机器人都行——房子是同一间，
 # 差别只在里面站着谁；这些图要么关掉天花板俯视、要么是机器人视角（各用各的相机）。
-SCENE_FOR = lambda robot: os.path.join(HERE, SCENES.scene_filename(SCENE_KEY, robot))
+SCENE_FOR = lambda robot: os.path.join(ROOT, SCENES.scene_filename(SCENE_KEY, robot))
 SCENE = SCENE_FOR("go2")
-# ⚠️ 写到**本仓**的 docs/images。2026-07-26 场景目录扁平化时这里没跟着改（还是
-#    os.path.dirname(HERE)，那是场景还在 domus01/ 子目录时的写法），结果配图被写到了
-#    仓库外面的上一级目录去——脚本照常打印"完成"，README 的图却一张没更新。
-#    教训：目录一动，所有 ".." 都要重新数一遍。
-OUT_DIR = os.path.join(HERE, "docs", "images")
 
 # ⚠️ 这两个高度必须和 robots/manifest.py 里那两台机器人**实际**的相机高度对得上，
 #    不然配图说"人形看到的"其实是个不存在的机位（v0.3 之前这里写 1.55 m，
@@ -50,7 +51,7 @@ SHOTS = SCENES.load_sibling(SCENE_KEY, "shots")
 # ⚠️ 2026-07-26 场景目录扁平化时这里没跟着改（还是 os.path.dirname(HERE)，那是场景
 #    还在 domus01/ 子目录时的写法），配图被写到了仓库外面——脚本照常打印"完成"，
 #    README 的图却一张没更新。**目录一动，所有 ".." 重新数一遍。**
-OUT_DIR = os.path.join(HERE, "docs", "images", SCENE_KEY)
+OUT_DIR = os.path.join(ROOT, "docs", "images", SCENE_KEY)
 
 
 def _model_with_camera(pos, yaw_deg: float):
@@ -61,7 +62,10 @@ def _model_with_camera(pos, yaw_deg: float):
     cam = (f'<camera name="probe" pos="{pos[0]:g} {pos[1]:g} {pos[2]:g}" '
            f'xyaxes="{right[0]:.6f} {right[1]:.6f} 0 0 0 1"/>')
     src = open(SCENE, encoding="utf-8").read().replace("</worldbody>", f"  {cam}\n</worldbody>")
-    tmp = os.path.join(HERE, "_docs_probe.xml")   # 必须与场景 xml 同目录，贴图相对路径才对
+    # ⛔ 必须与场景 xml **同目录**（现在是 build/）：贴图与网格的相对路径全按主模型
+    #    所在目录解析，探针放错地方 MuJoCo 会直接报"找不到贴图"。
+    #    ⭐ 从 SCENE 自己派生，⛔ 别写死 "build"、也别写仓根 —— 产物再挪它自动跟着走。
+    tmp = os.path.join(os.path.dirname(SCENE), "_docs_probe.xml")
     open(tmp, "w", encoding="utf-8").write(src)
     try:
         return mujoco.MjModel.from_xml_path(tmp)
@@ -102,7 +106,7 @@ def _model_looking_at(pos, target):
            f'xyaxes="{right[0]:.6f} {right[1]:.6f} {right[2]:.6f} '
            f'{up[0]:.6f} {up[1]:.6f} {up[2]:.6f}"/>')
     src = open(SCENE, encoding="utf-8").read().replace("</worldbody>", f"  {cam}\n</worldbody>")
-    tmp = os.path.join(HERE, "_docs_probe.xml")
+    tmp = os.path.join(os.path.dirname(SCENE), "_docs_probe.xml")
     open(tmp, "w", encoding="utf-8").write(src)
     try:
         return mujoco.MjModel.from_xml_path(tmp)
@@ -147,7 +151,7 @@ def main() -> None:
             continue
         Image.fromarray(render_exterior(pos, target)).save(os.path.join(OUT_DIR, fn))
         print(f"  {tag}  {fn:<30} 外景 {note}")
-    print(f"完成（场景 {SCENE_KEY}）。改了场景就重跑：ALICE_SCENE=<场景> python make_docs_images.py")
+    print(f"完成（场景 {SCENE_KEY}）。改了场景就重跑：ALICE_SCENE=<场景> python tools/make_docs_images.py")
 
 
 if __name__ == "__main__":

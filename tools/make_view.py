@@ -19,10 +19,10 @@
    PNG 加载器写死 `bitdepth = 8`）。**没有 HDR、没有 EXR、没有 JPEG。**
 
 用法：
-    python make_view.py --naip            # ⭐ 抓真实航拍（USGS NAIP，公共领域）—— 效果最好
-    python make_view.py --procedural      # 程序化生成（不联网，NAIP 抓不到时的兜底）
-    python make_view.py --facades         # 塔楼立面贴图（窗格），不联网
-    python make_view.py --calib           # 生成天空盒六面标定图（每面一个大字母）
+    python tools/make_view.py --naip            # ⭐ 抓真实航拍（USGS NAIP，公共领域）—— 效果最好
+    python tools/make_view.py --procedural      # 程序化生成（不联网，NAIP 抓不到时的兜底）
+    python tools/make_view.py --facades         # 塔楼立面贴图（窗格），不联网
+    python tools/make_view.py --calib           # 生成天空盒六面标定图（每面一个大字母）
 
 ⛔ 关于 ODbL 防火墙（将来接 OSM / NYC Open Data 时必读）：
    提交进仓的只能是**渲染出来的图片**（ODbL §4.3 的"产出作品"，只需署名、没有 share-alike）
@@ -43,7 +43,11 @@ import urllib.request
 import numpy as np
 from PIL import Image, ImageDraw
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    这条规矩是为了 review 时一眼看得出有没有漏改：任何落点错误都会在
+#    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
 
 # 这个脚本只服务一个场景，名字散在四五处过，提成常量。
 SCENE_KEY = "apt1"       # `scenes/<这里>/nyc_massing.py` 的落点
@@ -52,7 +56,7 @@ SCENE_KEY = "apt1"       # `scenes/<这里>/nyc_massing.py` 的落点
 #    **资产命名空间**，不是场景 key。详见 README「建造顺序」那一节。
 TEX_SUBDIR = "house3"
 
-OUT_DIR = os.path.join(HERE, "textures", TEX_SUBDIR)
+OUT_DIR = os.path.join(ROOT, "textures", TEX_SUBDIR)
 
 RNG = np.random.default_rng(20260805)   # 固定种子：每次生成一致，便于复现和 diff
 
@@ -639,9 +643,9 @@ def main() -> None:
     if a.nyc or a.all:
         print("抓真实纽约建筑群（NYC Open Data，Local Law 11：无使用限制）")
         rows = nyc_massing()
-        dst = os.path.join(HERE, "scenes", SCENE_KEY, "nyc_massing.py")
+        dst = os.path.join(ROOT, "scenes", SCENE_KEY, "nyc_massing.py")
         with open(dst, "w", encoding="utf-8") as fh:
-            fh.write('"""曼哈顿真实建筑体块 —— ⛔ 本文件由 `python make_view.py --nyc` 生成，请勿手改。\n\n'
+            fh.write('"""曼哈顿真实建筑体块 —— ⛔ 本文件由 `python tools/make_view.py --nyc` 生成，请勿手改。\n\n'
                      "来源：NYC Open Data 建筑轮廓（数据集 5zhs-2jue，DoITT 航测）。\n"
                      "许可：纽约市 Local Law 11 of 2012（Admin Code §23-502(d)）——无注册/无许可/\n"
                      "      无使用限制，**没有 share-alike**；再发布须注明来源、版本与改动。\n"

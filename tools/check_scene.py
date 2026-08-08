@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """场景自检 —— 生成之后、用之前跑一遍。
 
-    python check_scene.py                 # 检查全部已登记场景
-    python check_scene.py --scene house2
+    python tools/check_scene.py                 # 检查全部已登记场景
+    python tools/check_scene.py --scene house2
 
 **为什么要有它**：这个仓和它的前身都没有任何自动检查，全靠人看截图。
 结果是同一类错误反复出现，而且都是"看起来没问题"的那种：
@@ -45,8 +45,11 @@ import math
 import os
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = HERE          # 仓根（Step 4 脚本搬进 tools/ 后这里会变成 dirname(HERE)）
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    这条规矩是为了 review 时一眼看得出有没有漏改：任何落点错误都会在
+#    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
 sys.path.insert(0, ROOT)
 
 from scenes import manifest as SCENES  # noqa: E402

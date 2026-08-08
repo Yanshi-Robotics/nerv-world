@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """第一人称漫游 —— 像玩 Minecraft 那样走进屋里看。
 
-    python walkthrough.py                      # 默认场景
-    python walkthrough.py --scene house2       # 三层小楼，可以踩着楼梯上楼
-    python walkthrough.py --scene house2 --fly # 飞行模式（穿墙、自由升降）
+    python tools/walkthrough.py                      # 默认场景
+    python tools/walkthrough.py --scene house2       # 三层小楼，可以踩着楼梯上楼
+    python tools/walkthrough.py --scene house2 --fly # 飞行模式（穿墙、自由升降）
 
 鼠标转头，WASD 走路，空格跳，Shift 跑。默认是**走路模式**：脚下踩实、撞墙走不过去、
 台阶自动迈上去——所以楼梯是真能一级一级走上三楼的，不是飞上去。
@@ -36,8 +36,12 @@ import math
 import os
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    这条规矩是为了 review 时一眼看得出有没有漏改：任何落点错误都会在
+#    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
+sys.path.insert(0, ROOT)
 
 from scenes import manifest as SCENES  # noqa: E402
 
@@ -207,7 +211,7 @@ def selftest(scene_key: str, eye_h: float) -> int:
 
     os.environ.setdefault("MUJOCO_GL", "egl")
     layout = SCENES.load_layout(scene_key)
-    path = os.path.join(HERE, SCENES.scene_filename(scene_key, "g1"))
+    path = os.path.join(ROOT, SCENES.scene_filename(scene_key, "g1"))
     m = mujoco.MjModel.from_xml_path(path)
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
@@ -315,10 +319,10 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     import numpy as np
 
     layout = SCENES.load_layout(scene_key)
-    path = os.path.join(HERE, SCENES.scene_filename(scene_key, robot))
+    path = os.path.join(ROOT, SCENES.scene_filename(scene_key, robot))
     if not os.path.exists(path):
         print(f"找不到 {os.path.basename(path)}，先生成：\n"
-              f"    python make_house.py --scene {scene_key} --robot {robot}", file=sys.stderr)
+              f"    python tools/make_house.py --scene {scene_key} --robot {robot}", file=sys.stderr)
         return 1
 
     m = mujoco.MjModel.from_xml_path(path)

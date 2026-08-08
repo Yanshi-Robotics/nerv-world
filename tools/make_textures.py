@@ -7,7 +7,7 @@
 ⚠️ 能力边界（如实说）：这些是**程序化生成的漫反射贴图**，没有法线/粗糙度贴图，
    也没有全局光照——做得到"精致的风格化游戏场景"，做不到 GTA 那种美术手工资产的水平。
 
-用法： python make_textures.py        # 生成/覆盖 textures/*.png
+用法： python tools/make_textures.py        # 生成/覆盖 textures/*.png
 """
 from __future__ import annotations
 
@@ -16,8 +16,12 @@ import os
 import numpy as np
 from PIL import Image
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = os.path.join(HERE, "textures")
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+#    这条规矩是为了 review 时一眼看得出有没有漏改：任何落点错误都会在
+#    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
+OUT_DIR = os.path.join(ROOT, "textures")
 
 RNG = np.random.default_rng(20260725)   # 固定种子：每次生成的贴图一致，便于复现
 

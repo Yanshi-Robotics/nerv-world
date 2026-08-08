@@ -14,9 +14,9 @@
 机器人清单见 `robots/manifest.py`。
 
 用法：
-    python make_house.py                 # 全部机器人各生成一份
-    python make_house.py --robot g1      # 只生成人形那份
-    python make_house.py --robot go2 --out 别处.xml
+    python tools/make_house.py                 # 全部机器人各生成一份
+    python tools/make_house.py --robot g1      # 只生成人形那份
+    python tools/make_house.py --robot go2 --out 别处.xml
 
 ⚠️ 单位换算只在这里做一次：layout.py 写的是**全长**，MJCF 的 box/cylinder size 要**半长**。
 """
@@ -27,8 +27,14 @@ import importlib.util
 import math
 import os
 import re
+import sys
 
-from scenes import manifest as SCENES
+HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
+ROOT = os.path.dirname(HERE)                          # 仓根
+# ⛔ tools/ 里不许再出现裸 HERE 做路径拼接 —— HERE 只用来推导 ROOT。
+sys.path.insert(0, ROOT)
+
+from scenes import manifest as SCENES  # noqa: E402
 
 # 当前正在生成的场景的 layout 模块。build() 会按 --scene 换掉它。
 # ⚠️ 之所以是模块级变量而不是参数：本文件里几十个 _xxx_geom() 帮手都读 L.*，
@@ -44,8 +50,7 @@ def use_scene(scene_key: str) -> None:
 # 机器人清单住在仓根的 robots/manifest.py（跨场景共用），按路径加载——
 # 仓根不是包，import 不到，只能按路径加载。
 _spec = importlib.util.spec_from_file_location(
-    "alice_robots", os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "robots", "manifest.py"))
+    "alice_robots", os.path.join(ROOT, "robots", "manifest.py"))
 ROBOTS = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(ROBOTS)
 
 # 离屏渲染缓冲上限（决定最大可渲染分辨率）。留足 1080p，够出写真与报告插图。
@@ -1108,7 +1113,7 @@ def main() -> None:
     ap.add_argument("--scene", default="", help=f"只生成这个场景（{'/'.join(SCENES.keys())}）；不给=全部")
     ap.add_argument("--out", default="", help="指定输出文件（只在 --robot + --scene 都单指定时有意义）")
     args = ap.parse_args()
-    here = os.path.dirname(os.path.abspath(__file__))
+    here = ROOT
     robot_keys = [args.robot] if args.robot else list(ROBOTS.ROBOTS)
     scene_keys = [args.scene] if args.scene else SCENES.keys()
     if args.out and (len(robot_keys) != 1 or len(scene_keys) != 1):
