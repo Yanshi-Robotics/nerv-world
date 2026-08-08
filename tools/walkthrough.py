@@ -4,11 +4,13 @@
     python tools/walkthrough.py                      # 默认场景
     python tools/walkthrough.py --scene house2       # 三层小楼，可以踩着楼梯上楼
     python tools/walkthrough.py --scene house2 --fly # 飞行模式（穿墙、自由升降）
+    python tools/walkthrough.py --mouse-sens 40      # 鼠标转视角调慢一点
 
 鼠标转头，WASD 走路，空格跳，Shift 跑。默认是**走路模式**：脚下踩实、撞墙走不过去、
 台阶自动迈上去——所以楼梯是真能一级一级走上三楼的，不是飞上去。
 
     鼠标        转头（光标已锁进窗口，按 Esc 放出来）
+                （嫌快/嫌慢：--mouse-sens <度>，默认 77 = 横扫满窗口转 77°）
     W A S D     前进 / 左移 / 后退 / 右移
     空格        跳
     Shift       按住跑
@@ -45,6 +47,13 @@ sys.path.insert(0, ROOT)
 
 from scenes import manifest as SCENES  # noqa: E402
 
+# 机器人清单住仓根的 robots/manifest.py（跨场景共用），按路径加载——仓根不是包，import 不到。
+# ⭐ 和 tools/make_house.py 用的是同一份、同一种加载方式，⛔ 别在这里另抄一份出生高度。
+import importlib.util  # noqa: E402
+_rspec = importlib.util.spec_from_file_location(
+    "alice_robots_wt", os.path.join(ROOT, "robots", "manifest.py"))
+ROBOTS = importlib.util.module_from_spec(_rspec); _rspec.loader.exec_module(ROBOTS)
+
 # 眼高与 robots/manifest.py 里那两台机器人的实际相机高度一致。
 EYE_HUMAN = 1.25
 EYE_DOG = 0.38
@@ -52,7 +61,14 @@ EYE_DOG = 0.38
 WALK_SPEED = 2.4        # m/s，常速走
 RUN_MULT = 2.2          # 按住 Shift 的倍率
 FLY_SPEED = 4.5         # m/s，飞行模式
-MOUSE_SENS = 0.12       # 度/像素
+# ⭐ 鼠标灵敏度：单位是「鼠标横扫**整个窗口宽度**转多少度」，⛔ 不是"度/像素"。
+#    2026-08-08 改的，两件事一起：
+#    ① **默认减半**（原来 0.12 度/像素 × 1280 px 窗口 = 满窗扫一下转 154°，Jeff 嫌太飘）；
+#    ② ⭐ **改成与分辨率无关**。原来按像素算，换个屏幕/换个窗口大小手感就变——
+#       高分屏上同样的手部动作会多出一倍像素，转得就快一倍。按窗口宽度归一化之后，
+#       "手划过屏幕一半 = 转多少度"在任何屏幕上都一样。
+#    想微调用 `--mouse-sens`（数字越小越稳）。
+MOUSE_SENS_DEG_PER_SCREEN = 77.0
 PITCH_LIMIT = 89.0
 
 BODY_RADIUS = 0.28      # 玩家"胖"多少：撞墙判定用的水平半径
@@ -84,10 +100,13 @@ JUMP_V = 3.2
 class Player:
     """玩家状态与移动规则。抽出来是为了能在无窗口环境下自测方向和碰撞。"""
 
-    def __init__(self, layout, eye_h: float, floor: int = 0, fly: bool = False):
+    def __init__(self, layout, eye_h: float, floor: int = 0, fly: bool = False,
+                 mouse_sens: float = MOUSE_SENS_DEG_PER_SCREEN, screen_w: float = 1280.0):
         self.layout = layout
         self.eye_h = eye_h
         self.fly = fly
+        self.mouse_sens = mouse_sens     # 满窗横扫转多少度
+        self.screen_w = screen_w         # 当前窗口宽度(px)，开窗后会被实际值覆盖
         self.yaw = math.degrees(getattr(layout, "START_YAW", 0.0))
         self.pitch = 0.0
         self.vz = 0.0
@@ -138,8 +157,14 @@ class Player:
 
     # ── 视角 ────────────────────────────────────────────────────────────
     def look(self, dx: float, dy: float) -> None:
-        self.yaw -= dx * MOUSE_SENS
-        self.pitch = max(-PITCH_LIMIT, min(PITCH_LIMIT, self.pitch - dy * MOUSE_SENS))
+        """dx/dy 是鼠标位移（像素）。⭐ 除以窗口宽度先归一化，再乘"满屏转多少度"。
+
+        ⚠️ 俯仰用**同一个**系数（不是按窗口高度归一化）——否则窄窗口里上下比左右灵敏，
+           手感会拧巴。FPS 的惯例就是两轴同灵敏度。
+        """
+        k = self.mouse_sens / max(1.0, self.screen_w)
+        self.yaw -= dx * k
+        self.pitch = max(-PITCH_LIMIT, min(PITCH_LIMIT, self.pitch - dy * k))
 
     # ── 移动 ────────────────────────────────────────────────────────────
     def move(self, probe, ax: float, ay: float, dt: float, running: bool, up: float) -> None:
@@ -200,6 +225,34 @@ class Player:
             self.on_ground = False
 
 
+def park_robot(m, d, layout, robot_key: str) -> None:
+    """把产物里那台机器人搬到它的**停机位**（layout 的 `ROBOT_HOME_XY`，即「保姆间」）。
+
+    ⛔ 为什么必须在运行期做：产物 XML 里的机器人站在**世界原点** —— 它的 body pos 写在
+       共用的 `robots/<key>/<key>.xml` 里、被 `<include>` 原样插进来，生成器碰不到；
+       而 `make_house.py` 有意不依赖 mujoco，算不出 `nq` 也就写不出 `<keyframe>`。
+       **摆位本来就是运行期的事**：另一个消费方（anima-zero 的 `sim-house-nav/sim.py`）
+       也是自己写 qpos 的，做法和这里一模一样。
+
+    ⚠️ 2026-08-08 之前这一步**根本没有**，那台机器人一直杵在原点：apt1 撞进画廊长凳
+       22.7 cm、house1 撞进冰箱和两面墙（96 个接触点），house2 纯粹因为原点恰好是空地
+       才看着正常。是 Jeff 走进去撞见了才发现的——**没有任何一项自检管过这件事**。
+
+    ⛔ 和 `START_POS_XY` 不是一回事：那是**任务出生点**（消费方跑导航从那儿起步），
+       这是**停机位**。两者有意分开，见 layout 里那段注释。
+    """
+    home = getattr(layout, "ROBOT_HOME_XY", None)
+    if home is None:
+        return
+    floor = getattr(layout, "ROBOT_HOME_FLOOR", 0)
+    floor_z = getattr(layout, "FLOOR_Z", None)
+    base = float(floor_z(floor)) if floor_z else 0.0
+    z = base + float(ROBOTS.get(robot_key)["start_height"])
+    yaw = float(getattr(layout, "ROBOT_HOME_YAW", 0.0))
+    d.qpos[0:3] = [home[0], home[1], z]
+    d.qpos[3:7] = [math.cos(yaw / 2.0), 0.0, 0.0, math.sin(yaw / 2.0)]
+
+
 def selftest(scene_key: str, eye_h: float) -> int:
     """无窗口自测：方向、碰撞、踩地、上楼梯。
 
@@ -214,6 +267,7 @@ def selftest(scene_key: str, eye_h: float) -> int:
     path = os.path.join(ROOT, SCENES.scene_filename(scene_key, "g1"))
     m = mujoco.MjModel.from_xml_path(path)
     d = mujoco.MjData(m)
+    park_robot(m, d, layout, "g1")
     mujoco.mj_forward(m, d)
 
     def probe(origin, direction) -> float:
@@ -313,7 +367,8 @@ def selftest(scene_key: str, eye_h: float) -> int:
 
 
 def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
-               fly: bool, xray: bool = False) -> int:
+               fly: bool, xray: bool = False,
+               mouse_sens: float = MOUSE_SENS_DEG_PER_SCREEN) -> int:
     import glfw
     import mujoco
     import numpy as np
@@ -327,16 +382,21 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
 
     m = mujoco.MjModel.from_xml_path(path)
     d = mujoco.MjData(m)
+    park_robot(m, d, layout, robot)
     mujoco.mj_forward(m, d)
 
     if not glfw.init():
         print("glfw 起不来——这个脚本要有显示器（远程的话记得开 X11 转发）", file=sys.stderr)
         return 1
-    window = glfw.create_window(1280, 800, f"alice-house · {scene_key}", None, None)
+    win_w, win_h = 1280, 800
+    window = glfw.create_window(win_w, win_h, f"alice-house · {scene_key}", None, None)
     glfw.make_context_current(window)
     glfw.swap_interval(1)
 
-    player = Player(layout, eye_h, floor, fly)
+    # ⚠️ 用 glfw 报的**实际**窗口宽度，不是上面那个请求值：窗口管理器可能给别的尺寸，
+    #    而灵敏度是按窗口宽度归一化的，拿错数手感就不对。
+    win_w = glfw.get_window_size(window)[0] or win_w
+    player = Player(layout, eye_h, floor, fly, mouse_sens=mouse_sens, screen_w=float(win_w))
     cam = mujoco.MjvCamera()
     mujoco.mjv_defaultFreeCamera(m, cam)
     opt = mujoco.MjvOption()
@@ -456,12 +516,16 @@ def main() -> int:
     ap.add_argument("--floor", type=int, default=0, help="从第几层开始（0 起）")
     ap.add_argument("--fly", action="store_true", help="一开始就是飞行模式")
     ap.add_argument("--xray", action="store_true", help="一开始就打开透视")
+    ap.add_argument("--mouse-sens", type=float, default=MOUSE_SENS_DEG_PER_SCREEN,
+                    help=f"鼠标灵敏度：横扫满窗口转多少度（默认 {MOUSE_SENS_DEG_PER_SCREEN:.0f}，"
+                         f"数字越小越稳）")
     ap.add_argument("--selftest", action="store_true", help="无窗口自测方向/碰撞/上楼梯")
     args = ap.parse_args()
 
     if args.selftest:
         return selftest(args.scene, args.eye)
-    return run_viewer(args.scene, args.robot, args.eye, args.floor, args.fly, args.xray)
+    return run_viewer(args.scene, args.robot, args.eye, args.floor, args.fly, args.xray,
+                      mouse_sens=args.mouse_sens)
 
 
 if __name__ == "__main__":

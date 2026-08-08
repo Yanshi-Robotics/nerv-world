@@ -41,6 +41,7 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import math
 import os
 import sys
@@ -62,6 +63,8 @@ REQUIRED_NAMES = [
     "ART_FRAME_T", "ART_FRAME_RGBA", "FRONT_DOOR", "FRONT_DOOR_HANDLE",
     "ROOMS", "DOORS", "WINDOWS", "FURNITURE", "WALL_ARTS",
     "START_POS_XY", "START_YAW",
+    # ⭐ 停机位（「保姆间」）。⛔ 和 START_POS_XY 是两个量，别合并——那是任务出生点。
+    "ROBOT_HOME_XY", "ROBOT_HOME_YAW",
     "CITY_BACKDROP", "OUTDOOR_GROUND", "TRUNK_RGBA", "FOLIAGE_RGBA", "TREES", "BUILDINGS",
     "room_at", "room_label",
 ]
@@ -75,11 +78,32 @@ MULTIFLOOR_NAMES = ["FLOOR_Z", "STOREY_H", "N_FLOORS", "STEP_RISE", "STEP_RUN",
 # 机器人的通行尺寸。⚠️ 不是从 robots/manifest.py 读的：那里是资产事实
 # （模型在哪、出生多高），不含"这台机器人多宽、脚多长"。这两个数只在这里用来做
 # 通行性判断，所以就地具名 + 写清出处，而不是散在检查代码里当魔法数。
+#
+# ⛔⛔ **这张表不是"本仓有哪些机器人"** —— 它是"哪些机器人得走得过去"。
+#    两者不是一回事：扫地机器人的模型住在另一个仓（open-cleaning-robot），
+#    本仓**没有它的产物**。要遍历"有模型的机器人"请用 `_modelled_robots()`。
+#    ⚠️ 2026-08-08 把扫地机器人加进来时就踩了这个：四处 `for robot in ROBOT_CLEARANCE`
+#    当场去找 `apt1-cleaning.xml`，自检红了三条。
 ROBOT_CLEARANCE = {
     # key: (通行宽度 m, 脚长 m, 出处)
-    "g1": (0.60, 0.25, "宇树 G1 肩宽约 0.45 m，走动时手臂摆动取 0.60；脚长实测约 0.25"),
-    "go2": (0.40, 0.10, "宇树 Go2 机身宽约 0.31 m，取 0.40 留余量；足端接近点接触"),
+    # ⚠️ 这三个数是**实测复核过**的（2026-08-08，从编译后的模型量挡路带 0.25–1.35 m 里的水平占地）：
+    #    G1 肩宽 0.446、Go2 机身宽 0.317、扫地机直径 0.349。判据取 max = G1 的 0.60，
+    #    多出来的余量是手臂摆动 + 走偏。补第三台之后判据值**没变**，但把依据记下来了。
+    "g1": (0.60, 0.25, "宇树 G1 肩宽实测 0.446 m，走动时手臂摆动取 0.60；脚长实测约 0.25"),
+    "go2": (0.40, 0.10, "宇树 Go2 机身宽实测 0.317 m，取 0.40 留余量；足端接近点接触"),
+    "cleaning": (0.45, 0.02, "扫地机器人 base_diameter=0.349（open-cleaning-robot 的 "
+                             "src/cr_description/urdf/params.xacro:15），取 0.45 留余量；轮子接近点接触"),
 }
+
+
+def _modelled_robots() -> list[str]:
+    """本仓**有模型、会出产物**的机器人 key。⛔ 别用 `ROBOT_CLEARANCE` 代替它（见上）。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "alice_robots_chk", os.path.join(ROOT, "robots", "manifest.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return list(mod.ROBOTS)
 
 MIN_TREAD_MARGIN = 0.03     # 踏面至少比脚长多这么多，否则盲走一偏就踩空
 MAX_STAIR_SLOPE_DEG = 38.0  # 超过这个坡度人形基本上不去（住宅规范上限约 33–38°）
@@ -130,7 +154,7 @@ def check_loads(key: str, layout) -> list[str]:
     except ImportError:
         return ["(跳过) 没装 mujoco，无法验证产物能否加载"]
     errs: list[str] = []
-    for robot in ROBOT_CLEARANCE:
+    for robot in _modelled_robots():
         path = _scene_path(key, robot)
         if not os.path.exists(path):
             _fail(errs, f"产物不存在：{os.path.basename(path)}（跑 make_house.py --scene {key}）")
@@ -280,6 +304,10 @@ def check_doors(key: str, layout) -> list[str]:
 DOOR_CLEAR_M = 0.60
 # 比这矮的东西不算挡路：地毯、地垫、门槛。G1 抬脚约 0.25 m。
 DOOR_STEPOVER_M = 0.25
+# 底面高于这个的东西不挡路：吊柜、油烟机、挂画——1.38 m 的 G1 从下面钻过去。
+# ⚠️ 2026-08-08 新加。在此之前只判下界（跨得过去），于是 kt_upper / ck_hood 这类
+#    吊柜被当成落地的实心障碍，可通行性会被低估。
+BODY_TOP_M = 1.35
 
 
 def check_door_passable(key: str, layout) -> list[str]:
@@ -331,8 +359,12 @@ def check_door_passable(key: str, layout) -> list[str]:
              it["pos"][1] - sy / 2, it["pos"][1] + sy / 2))
 
     for door in layout.DOORS:
-        if door.get("kind") == "open":
-            continue
+        # ⛔⛔ 这里曾经写着 `if door.get("kind") == "open": continue`，直接跳过整段拆墙的开敞通道。
+        #    2026-08-08 删掉。理由：**开敞洞口恰恰是最容易被家具堵死的那种**——它没有门框拦着，
+        #    沙发就直接顶上去了。apt1「画廊→大客厅」那个 4.00 m 的开口正是 kind="open"，
+        #    沙发组把它塞掉 3.76 m、只剩 0.44 m 的窄缝，而 **G1 只能到达大客厅 2%**
+        #    （北半区 10.4 ㎡ 整块是孤岛）—— 48 项自检却全绿，因为这一行把它跳过去了。
+        #    跳过最大的洞，等于在网上剪了个最大的窟窿。
         c, w, co = door["center"], door["width"], door["coord"]
         horiz = door["orient"] == "h"
         note = door.get("note", "?")
@@ -381,6 +413,265 @@ def _yaw_aabb(it: dict) -> tuple[float, float, float, float]:
     return (px - sx / 2, px + sx / 2, py - sy / 2, py + sy / 2)
 
 
+
+# ── 可通行性（reachability）──────────────────────────────────────────────
+# 判据不是「两件家具之间多宽」，而是「机器人到底走不走得到」。⭐ 这个区别是本项的全部价值：
+# 逐缝报数会被床头柜↔床、餐椅↔餐桌、贴合橱柜炸出上百条假阳性，而且**根本没法自动判断
+# 哪条缝该管**——沙发和茶几之间 0.42 m 是正常客厅，绕得开就没问题。
+# 可通行性直接回答「绕不绕得开」。
+REACH_GRID_M = 0.05         # 栅格边长。0.60 m 的判据下这个精度足够（12 格），全场 ~14 万格
+REACH_MIN_AREA_M2 = 0.25    # 一间屋至少要有这么大的可站立面积才算"进得去"（≈ 一个身位）
+
+
+def _reach_obstacles(layout, floor: int) -> list:
+    """这一层的挡路家具 → (类型, 参数) 列表。挡路带 = 顶面高于跨越高度、底面低于身高。
+
+    ⛔ 高度这两头都要判：
+      · 顶面 ≤ DOOR_STEPOVER_M（0.25）—— 地毯、地垫、门槛，抬脚跨得过去；
+      · 底面 ≥ BODY_TOP_M（1.35）—— 吊柜、油烟机、挂画，1.4 m 的人形从下面钻过去。
+        ⚠️ 上界这一条是 2026-08-08 新加的：在此之前 `check_door_passable` 只判下界，
+        于是 kt_upper / ck_hood 这类吊柜被当成落地的实心障碍。
+    ⭐ 带 yaw 的用**精确 OBB**（记下中心+半长+yaw，判距时把点转进局部系），
+       ⛔ 不用 `_yaw_aabb` 那个保守外接框——对 yaw=200° 的单椅它比真形状大 0.30 m，
+       拿来算可达性会造出假的"堵死"。
+    """
+    out = []
+    for it in getattr(layout, "FURNITURE", []):
+        if it.get("type") not in ("box", "cylinder"):
+            continue
+        if _furn_floor(layout, it) != floor:
+            continue
+        px, py, pz = it["pos"]
+        sx, sy, sz = it["size"]
+        if pz + sz / 2.0 <= DOOR_STEPOVER_M:      # 跨得过去
+            continue
+        if pz - sz / 2.0 >= BODY_TOP_M:           # 钻得过去
+            continue
+        if it["type"] == "cylinder":
+            out.append(("cyl", px, py, sx / 2.0))
+            continue
+        q = it.get("quat")
+        yaw = 2.0 * math.atan2(q[3], q[0]) if q else 0.0
+        out.append(("obb", px, py, sx / 2.0, sy / 2.0, yaw))
+    return out
+
+
+def _obstacle_dist(ob, x: float, y: float) -> float:
+    """点到障碍的水平距离（在里面算 0）。"""
+    if ob[0] == "cyl":
+        _, cx, cy, r = ob
+        return max(0.0, math.hypot(x - cx, y - cy) - r)
+    _, cx, cy, hx, hy, yaw = ob
+    dx, dy = x - cx, y - cy
+    ca, sa = math.cos(-yaw), math.sin(-yaw)
+    lx, ly = dx * ca - dy * sa, dx * sa + dy * ca      # 转进盒子局部系
+    ox, oy = max(abs(lx) - hx, 0.0), max(abs(ly) - hy, 0.0)
+    return math.hypot(ox, oy)
+
+
+def _furn_floor(layout, it: dict) -> int:
+    rooms = getattr(layout, "ROOMS", {})
+    return rooms.get(it.get("room", ""), {}).get("floor", 0)
+
+
+def check_reachability(key: str, layout) -> list[str]:
+    """⭐⭐ 机器人到底走不走得到每间屋 —— 整层的可通行区域必须**只有一个连通块**。
+
+    ⛔ 为什么必须有它（2026-08-08，Jeff 自己走进去才发现的）：
+       `check_door_passable` 只看**门洞前后 0.6 m** 那一小段，而且当时还跳过 `kind="open"`。
+       于是 apt1 的沙发把「画廊→大客厅」那个 4 m 开口堵成 0.44 m，**G1 只能到达大客厅 2%**
+       （北半区 10.4 ㎡ 连落地窗带茶几整块是孤岛，正是作品集封面那个机位），
+       而 48 项自检**全绿**。同一轮还照出 house1 的淋浴间被玻璃整面封死（1.84 ㎡ 的死岛）、
+       次卧只剩 0.30 m 通道。
+       **教训与这个仓反复踩的那条同源：查"存在一条路径"证明不了"这地方走得通"，
+       得反过来查"有没有走不到的地方"。**
+
+    算法（纯 stdlib，不要 mujoco）：
+      ① 自由空间 = 各房间矩形内缩一个墙厚 ∪ 各门洞（含 kind="open" 的整段开口）；
+      ② 扣掉挡路家具（精确 OBB / 圆柱）；
+      ③ 两遍 chamfer 距离变换，取 dt ≥ 机器人半宽的格子 = 可站立；
+      ④ 连通域标记；**每间屋都必须在最大的那个连通块里**，且自身可站立面积够一个身位。
+
+    ⚠️ 只做**同层**连通：跨层靠楼梯，那是 `check_route` 的活。
+    ⚠️ 判据用 `ROBOT_CLEARANCE` 里最宽的那台（G1 0.60），和 `check_door_passable` 同一个数——
+       ⛔ 别在这里另写一个阈值。
+    """
+    rooms = getattr(layout, "ROOMS", {})
+    if not rooms:
+        return []
+    errs: list[str] = []
+    need = max(w for w, _f, _n in ROBOT_CLEARANCE.values())
+    r_cells = (need / 2.0) / REACH_GRID_M
+    t = layout.WALL_THICK
+    floors = sorted({r.get("floor", 0) for r in rooms.values()})
+
+    for floor in floors:
+        here = {n: r for n, r in rooms.items() if r.get("floor", 0) == floor}
+        xs = [v for r in here.values() for v in (r["rect"][0], r["rect"][2])]
+        ys = [v for r in here.values() for v in (r["rect"][1], r["rect"][3])]
+        x0, x1, y0, y1 = min(xs) - t, max(xs) + t, min(ys) - t, max(ys) + t
+        nx = int((x1 - x0) / REACH_GRID_M) + 1
+        ny = int((y1 - y0) / REACH_GRID_M) + 1
+
+        def cx(i):  # noqa: E306
+            return x0 + (i + 0.5) * REACH_GRID_M
+
+        def cy(j):
+            return y0 + (j + 0.5) * REACH_GRID_M
+
+        # ① 自由空间：房间净空 ∪ 门洞
+        free = bytearray(nx * ny)
+        for r in here.values():
+            a, b, c, d = r["rect"]
+            for j in range(max(0, int((b + t - y0) / REACH_GRID_M)),
+                           min(ny, int((d - t - y0) / REACH_GRID_M) + 1)):
+                base = j * nx
+                for i in range(max(0, int((a + t - x0) / REACH_GRID_M)),
+                               min(nx, int((c - t - x0) / REACH_GRID_M) + 1)):
+                    free[base + i] = 1
+        for door in getattr(layout, "DOORS", []):
+            if door.get("floor", floor) != floor and "floor" in door:
+                continue
+            c0, w, co = door["center"], door["width"], door["coord"]
+            horiz = door["orient"] == "h"
+            # 洞口沿墙方向 = 门宽；穿墙方向 = 两侧各一个墙厚（两间屋各自的墙都要打通）
+            ax0, ax1 = (c0 - w / 2, c0 + w / 2) if horiz else (co - t * 1.5, co + t * 1.5)
+            ay0, ay1 = (co - t * 1.5, co + t * 1.5) if horiz else (c0 - w / 2, c0 + w / 2)
+            for j in range(max(0, int((ay0 - y0) / REACH_GRID_M)),
+                           min(ny, int((ay1 - y0) / REACH_GRID_M) + 1)):
+                base = j * nx
+                for i in range(max(0, int((ax0 - x0) / REACH_GRID_M)),
+                               min(nx, int((ax1 - x0) / REACH_GRID_M) + 1)):
+                    free[base + i] = 1
+
+        # ② 扣掉挡路家具：只遍历它自己那一小块窗口，别扫全场
+        for ob in _reach_obstacles(layout, floor):
+            ex = ob[3] if ob[0] == "cyl" else math.hypot(ob[3], ob[4])
+            ocx, ocy = ob[1], ob[2]
+            for j in range(max(0, int((ocy - ex - y0) / REACH_GRID_M)),
+                           min(ny, int((ocy + ex - y0) / REACH_GRID_M) + 2)):
+                base = j * nx
+                yy = cy(j)
+                for i in range(max(0, int((ocx - ex - x0) / REACH_GRID_M)),
+                               min(nx, int((ocx + ex - x0) / REACH_GRID_M) + 2)):
+                    if free[base + i] and _obstacle_dist(ob, cx(i), yy) <= 0.0:
+                        free[base + i] = 0
+
+        # ③ chamfer 距离变换（两遍，(3,4)/3 近似），单位=格
+        BIG = 10 ** 6
+        dt = [0 if free[k] == 0 else BIG for k in range(nx * ny)]
+        for j in range(ny):
+            base = j * nx
+            for i in range(nx):
+                k = base + i
+                if dt[k] == 0:
+                    continue
+                v = dt[k]
+                if i: v = min(v, dt[k - 1] + 3)
+                if j: v = min(v, dt[k - nx] + 3)
+                if i and j: v = min(v, dt[k - nx - 1] + 4)
+                if i < nx - 1 and j: v = min(v, dt[k - nx + 1] + 4)
+                dt[k] = v
+        for j in range(ny - 1, -1, -1):
+            base = j * nx
+            for i in range(nx - 1, -1, -1):
+                k = base + i
+                if dt[k] == 0:
+                    continue
+                v = dt[k]
+                if i < nx - 1: v = min(v, dt[k + 1] + 3)
+                if j < ny - 1: v = min(v, dt[k + nx] + 3)
+                if i < nx - 1 and j < ny - 1: v = min(v, dt[k + nx + 1] + 4)
+                if i and j < ny - 1: v = min(v, dt[k + nx - 1] + 4)
+                dt[k] = v
+        thr = r_cells * 3.0        # chamfer 的单位是 3/格
+        walk = bytearray(1 if dt[k] >= thr else 0 for k in range(nx * ny))
+
+        # ④ 连通域
+        comp = [-1] * (nx * ny)
+        sizes = []
+        for start in range(nx * ny):
+            if not walk[start] or comp[start] >= 0:
+                continue
+            cid = len(sizes)
+            stack, n = [start], 0
+            comp[start] = cid
+            while stack:
+                k = stack.pop()
+                n += 1
+                i, j = k % nx, k // nx
+                for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    ii, jj = i + di, j + dj
+                    if 0 <= ii < nx and 0 <= jj < ny:
+                        kk = jj * nx + ii
+                        if walk[kk] and comp[kk] < 0:
+                            comp[kk] = cid
+                            stack.append(kk)
+            sizes.append(n)
+        if not sizes:
+            _fail(errs, f"{_floor_tag(floors, floor)}整层没有任何可站立的格子（判据 {need:.2f} m）")
+            continue
+        main = max(range(len(sizes)), key=lambda c: sizes[c])
+
+        cell_a = REACH_GRID_M ** 2
+
+        # ⭐⭐ 判据：**整层只准有一个够大的连通块**。
+        # ⛔ 第一版写的是「每间屋只要有一个可站立格子在主连通块里就算过」——太松，
+        #    故障注入当场打脸：把 apt1 的沙发挪回堵门的旧位置，大客厅南缘仍留着一条
+        #    y≈2.50 的窄带连着画廊，于是"有格子在主块里"成立、检查报绿，
+        #    而北边那 10 ㎡（落地窗 + 茶几 + 两把单椅，正是作品集封面那个机位）是**孤岛**。
+        #    ⭐ 这正是本仓那条老教训的又一次现形：**查"存在一条路径"证明不了"这地方走得通"**，
+        #    必须反过来查"有没有走不到的地方"。
+        # ⚠️ 小于一个身位的碎块忽略（栅格化边角、家具缝里的零星格子），否则全是噪声。
+        islands = [(c, n) for c, n in enumerate(sizes)
+                   if c != main and n * cell_a >= REACH_MIN_AREA_M2]
+        for cid, n in sorted(islands, key=lambda kv: -kv[1]):
+            where = collections.Counter()
+            for k in range(nx * ny):
+                if comp[k] == cid:
+                    nm = _room_of(here, x0 + (k % nx + 0.5) * REACH_GRID_M,
+                                  y0 + (k // nx + 0.5) * REACH_GRID_M)
+                    if nm:
+                        where[here[nm].get("label", nm)] += 1
+            spots = "、".join(f"{lb}" for lb, _ in where.most_common(3)) or "屋外"
+            _fail(errs, f"{_floor_tag(floors, floor)}有一块 {n * cell_a:.2f} ㎡ 的地方"
+                        f"**机器人走不进去**（在 {spots}）——和主通行区断开了。"
+                        f"判据：{need:.2f} m 净宽（{_widest_robot()}）")
+
+        # 每间屋自己也得站得下一个身位
+        for name, r in sorted(here.items()):
+            a, b, c, d = r["rect"]
+            own = 0
+            for j in range(max(0, int((b - y0) / REACH_GRID_M)),
+                           min(ny, int((d - y0) / REACH_GRID_M) + 1)):
+                base = j * nx
+                for i in range(max(0, int((a - x0) / REACH_GRID_M)),
+                               min(nx, int((c - x0) / REACH_GRID_M) + 1)):
+                    if walk[base + i]:
+                        own += 1
+            if own * cell_a < REACH_MIN_AREA_M2:
+                _fail(errs, f"{_floor_tag(floors, floor)}「{r.get('label', name)}」({name}) "
+                            f"里几乎站不下机器人：可站立面积只有 {own * cell_a:.2f} ㎡"
+                            f"（判据 {need:.2f} m 宽）")
+    return errs
+
+
+def _room_of(here: dict, x: float, y: float):
+    for nm, r in here.items():
+        a, b, c, d = r["rect"]
+        if a <= x <= c and b <= y <= d:
+            return nm
+    return None
+
+
+def _widest_robot() -> str:
+    k, (w, _f, _n) = max(ROBOT_CLEARANCE.items(), key=lambda kv: kv[1][0])
+    return f"最宽的是 {k}，{w:.2f} m"
+
+
+def _floor_tag(floors: list, floor: int) -> str:
+    return f"{floor} 层：" if len(floors) > 1 else ""
+
 def check_furniture_not_through_wall(key: str, layout) -> list[str]:
     """⭐ 家具不许**捅穿墙体伸进隔壁房间**。
 
@@ -424,7 +715,7 @@ def check_wellformed(key: str, layout) -> list[str]:
     """产物是不是合法 XML —— 不需要 mujoco，生成器一坏立刻红。"""
     import xml.etree.ElementTree as ET
     errs: list[str] = []
-    for robot in ROBOT_CLEARANCE:
+    for robot in _modelled_robots():
         path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
@@ -443,7 +734,7 @@ def check_assets(key: str, layout) -> list[str]:
     """
     import xml.etree.ElementTree as ET
     errs: list[str] = []
-    for robot in ROBOT_CLEARANCE:
+    for robot in _modelled_robots():
         path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
@@ -551,7 +842,7 @@ def check_geom_budget(key: str, layout) -> list[str]:
     except ImportError:
         return ["(跳过) 没装 mujoco"]
     errs: list[str] = []
-    for robot in ROBOT_CLEARANCE:
+    for robot in _modelled_robots():
         path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
@@ -1099,6 +1390,7 @@ CHECKS = [
     ("⭐ 四个接头闭合（梯段 ↔ 平台）", check_joints),
     ("门宽够机器人过", check_doors),
     ("⭐⭐ 门真的走得过去（两侧在屋里 + 净通行宽）", check_door_passable),
+    ("⭐⭐ 每间屋机器人都走得进去（可通行性）", check_reachability),
     ("⭐ 家具没有捅穿墙伸进隔壁", check_furniture_not_through_wall),
     ("⭐ 声明的东西都真的进了产物", check_no_dead_declarations),
     ("挂画没压在门窗洞口上", check_art_clear),

@@ -30,6 +30,8 @@
 | ⛔ 改楼梯 | **先读 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
 | 自己进去看看 | `python tools/walkthrough.py --scene house2`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
 | 场景改完验一下 | `python tools/check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
+| 摆家具怕挡路 | 摆完跑一次 `check_scene.py` 看「可通行性」那项 | 判据是**整层只准有一个连通块**——⛔ 不是"两件家具之间多宽"，那种问法会被床头柜↔床炸出上百条假阳性 |
+| 机器人该站哪 | layout 的 `ROBOT_HOME_XY` / `ROBOT_HOME_YAW`（「保姆间」） | ⛔ 和 `START_POS_XY`（任务出生点）是两个量，别合并 |
 | 知道某台机器人是什么（模型 / 出生高度 / 相机 / 力矩模式） | `robots/manifest.py` | 机器人事实的**单一真相源** |
 | 知道某个策略怎么用（关节序 / 增益 / 观测布局 / 控制周期） | `policies/<名字>/contract.json` | 契约是策略侧的单一真相源，**别抄进 manifest** |
 | 换 README 里的配图 | `tools/make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
@@ -46,7 +48,7 @@
 |---|---|
 | `scenes/manifest.py` | **有哪些地方**（与 `robots/manifest.py` 成对：那边是有哪些身体）。两者正交，交叉组合生成 |
 | `scenes/<场景>/layout.py` | **那个地方的唯一布局定义**：房间矩形、门窗洞、家具摆位、出生点；多层场景另有楼层与楼梯 |
-| `tools/check_scene.py` | 场景自检：能不能被 MuJoCo 加载、**整条上楼路线走不走得通**、四个接头闭不闭合、门够不够宽 |
+| `tools/check_scene.py` | 场景自检：能不能被 MuJoCo 加载、**整条上楼路线走不走得通**、四个接头闭不闭合、门够不够宽、⭐ **每间屋机器人走不走得进去** |
 | `tools/walkthrough.py` | 第一人称漫游（WASD + 鼠标），用来人眼验收；`--selftest` 无窗口自测 |
 | `scenes/furniture.py` | 家具/零件的几何生成函数（所有场景共用） |
 | `tools/make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |

@@ -41,6 +41,8 @@
 """
 from __future__ import annotations
 
+import math
+
 # ---------------------------------------------------------------- 建筑尺度
 WALL_HEIGHT = 3.0      # 墙高(m)，豪宅大平层层高
 WALL_THICK = 0.14      # 墙厚(m)
@@ -86,13 +88,18 @@ ROOMS: dict[str, dict] = {
         "wall_rgba": (0.88, 0.86, 0.82, 1.0), "floor_rgba": (0.60, 0.48, 0.36, 1.0),
         "floor_mat": "mat_wood", "wall_mat": "mat_wall",
     },
+    # ⚠️ 2026-08-08：客卫/次卧的隔墙由 x=-3.0 西移到 -3.35。
+    #    次卧原来净宽只有 2.22 m，而 1.30（床）+ 0.60（书桌）+ 0.60（机器人）= 2.50 ——
+    #    **算术上就摆不下**，实测通道只剩 0.30/0.36 m，G1 可达那间屋的 6%。
+    #    ⛔ 这是三个场景里唯一一处「挪家具解决不了、必须动房间尺寸」的。客卫让出 0.35 之后
+    #    仍有 1.87 m 净宽，够放马桶+台盆+淋浴（淋浴托盘与玻璃已同轮跟着西移收窄）。
     "guest_bath": {                                            # ⑪ 客卫
-        "rect": (-5.5, -10.0, -3.0, -6.0), "label": "客卫",     # 2.5 × 4.0 = 10㎡
+        "rect": (-5.5, -10.0, -3.35, -6.0), "label": "客卫",    # 2.15 × 4.0
         "wall_rgba": (0.78, 0.86, 0.90, 1.0), "floor_rgba": (0.77, 0.79, 0.81, 1.0),
         "floor_mat": "mat_marble_grey", "wall_mat": "mat_tile",
     },
     "second_bedroom": {                                        # ⑩ 次卧
-        "rect": (-3.0, -10.0, -0.5, -6.0), "label": "次卧",     # 2.5 × 4.0 = 10㎡
+        "rect": (-3.35, -10.0, -0.5, -6.0), "label": "次卧",    # 2.85 × 4.0（2026-08-08 加宽 0.35）
         "wall_rgba": (0.85, 0.80, 0.62, 1.0), "floor_rgba": (0.76, 0.64, 0.50, 1.0),
         "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
     },
@@ -181,7 +188,7 @@ WINDOWS: list[dict] = [
     {"room": "kid_bedroom", "side": "s", "center": -7.5, "width": 1.8},
     # 次卧 / 客卫
     {"room": "second_bedroom", "side": "s", "center": -1.8, "width": 1.6},
-    {"room": "guest_bath", "side": "s", "center": -4.3, "width": 0.9},
+    {"room": "guest_bath", "side": "s", "center": -4.45, "width": 0.9},   # 跟着隔墙西移 0.35 后的房间中心
     # 服务区
     {"room": "chinese_kitchen", "side": "e", "center": -5.0, "width": 1.2},
     {"room": "chinese_kitchen", "side": "s", "center": 1.8, "width": 2.4},
@@ -196,7 +203,20 @@ WINDOW_FRAME_T = 0.08
 # ⚠️ 出生点必须避开地垫/地毯这类薄片家具：机器人生成时脚会嵌进去，接触力一冲就把它掀翻
 #    （2026-07-25 实测：原来站在玄关地垫上，一起服务就倒立，倾角 156°）。
 START_POS_XY = (7.30, -0.60)
-START_YAW = 3.14159            # 朝西（-x）
+
+# ---------------------------------------------------------------- 机器人停机位（「保姆间」）
+# ⭐ 这是 Jeff 2026-08-08 定的：那台当比例尺 / 待命的机器人得有个**自己的房间**，
+#    别杵在通行流线正中挡路。
+# ⛔ 它和 START_POS_XY 是**两个不同的量**，别合并：
+#    · START_POS_XY = **任务出生点**，消费方（anima-zero 的 sim-house-nav）读它写 qpos，
+#      导航任务从那儿起步；
+#    · ROBOT_HOME_XY = **停机位**，`tools/walkthrough.py` 把静态机器人摆在这儿。
+#    合并会悄悄改变消费方的行为，而那个仓这一轮一个字都不许动。
+# 选洗衣房：净空 5.22 × 3.72，设备全部贴着东西两墙，房间中央有 r=1.44 m 的空圆；
+# **两道门**分别通中厨与玄关，走得出来而且不是唯一通路。
+ROBOT_HOME_XY = (7.30, -4.60)
+ROBOT_HOME_YAW = math.pi            # 朝西面向两道门
+START_YAW = math.pi            # 朝西（-x）。⚠️ 原来写的是截断的 3.14159，另两个场景都用 math.pi
 # ⚠️ 出生**高度**不在这儿——那是机器人的事（四足狗 0.445 m、人形 0.80 m），
 #    住在 robots/manifest.py 的 start_height。这里只管"这套房子里从哪儿开始"。
 
@@ -395,25 +415,27 @@ FURNITURE: list[dict] = [
 
     # ═══════ ⑩次卧：单人床 + 书桌 + 衣柜 ═══════
     {"name": "sbed_frame", "room": "second_bedroom", "type": "box",
-     "pos": (-2.10, -8.20, 0.18), "size": (1.30, 2.10, 0.36), "rgba": (0.48, 0.34, 0.22, 1)},
+     "pos": (-2.45, -8.20, 0.18), "size": (1.30, 2.10, 0.36), "rgba": (0.48, 0.34, 0.22, 1)},
     {"name": "sbed_mattress", "room": "second_bedroom", "type": "box",
-     "pos": (-2.10, -8.20, 0.45), "size": (1.20, 2.00, 0.22), "rgba": (0.94, 0.92, 0.88, 1), "mat": "mat_fabric"},
+     "pos": (-2.45, -8.20, 0.45), "size": (1.20, 2.00, 0.22), "rgba": (0.94, 0.92, 0.88, 1), "mat": "mat_fabric"},
     {"name": "sbed_pillow", "room": "second_bedroom", "type": "box",
-     "pos": (-2.10, -9.30, 0.62), "size": (0.95, 0.45, 0.15), "rgba": (0.98, 0.98, 0.96, 1)},
+     "pos": (-2.45, -9.30, 0.62), "size": (0.95, 0.45, 0.15), "rgba": (0.98, 0.98, 0.96, 1)},
     {"name": "sbed_blanket", "room": "second_bedroom", "type": "box",
-     "pos": (-2.10, -7.65, 0.59), "size": (1.20, 1.15, 0.09), "rgba": (0.28, 0.50, 0.42, 1)},
+     "pos": (-2.45, -7.65, 0.59), "size": (1.20, 1.15, 0.09), "rgba": (0.28, 0.50, 0.42, 1)},
     {"name": "sbed_headboard", "room": "second_bedroom", "type": "box",
-     "pos": (-2.10, -9.62, 0.58), "size": (1.30, 0.10, 1.16), "rgba": (0.42, 0.30, 0.20, 1)},
+     "pos": (-2.45, -9.62, 0.58), "size": (1.30, 0.10, 1.16), "rgba": (0.42, 0.30, 0.20, 1)},
     {"name": "sdesk", "room": "second_bedroom", "type": "box",
      "pos": (-0.85, -7.10, 0.75), "size": (0.60, 1.30, 0.06), "rgba": (0.55, 0.40, 0.27, 1)},
     {"name": "swardrobe", "room": "second_bedroom", "type": "box",
      "pos": (-0.80, -8.90, 1.05), "size": (0.58, 1.60, 2.10), "rgba": (0.80, 0.74, 0.62, 1)},
 
     # ═══════ ⑪客卫：马桶 + 台盆 + 淋浴 ═══════
+    # ⚠️ 马桶与水箱跟着客卫东墙一起西移 0.35（2026-08-08）：它们原来贴着 x=-3.0 那道墙，
+    #    墙移了不跟就会捅进次卧（check_furniture_not_through_wall 当场抓到 12 / 21 cm）。
     {"name": "gtoilet", "room": "guest_bath", "type": "box",
-     "pos": (-3.45, -6.60, 0.20), "size": (0.44, 0.64, 0.40), "rgba": (0.97, 0.97, 0.96, 1), "mat": "mat_porcelain"},
+     "pos": (-3.80, -6.60, 0.20), "size": (0.44, 0.64, 0.40), "rgba": (0.97, 0.97, 0.96, 1), "mat": "mat_porcelain"},
     {"name": "gtoilet_tank", "room": "guest_bath", "type": "box",
-     "pos": (-3.23, -6.60, 0.55), "size": (0.18, 0.54, 0.70), "rgba": (0.97, 0.97, 0.96, 1), "mat": "mat_porcelain"},
+     "pos": (-3.58, -6.60, 0.55), "size": (0.18, 0.54, 0.70), "rgba": (0.97, 0.97, 0.96, 1), "mat": "mat_porcelain"},
     {"name": "gvanity", "room": "guest_bath", "type": "box",
      "pos": (-5.10, -6.70, 0.40), "size": (0.55, 1.10, 0.80), "rgba": (0.58, 0.53, 0.48, 1)},
     {"name": "gbasin", "room": "guest_bath", "type": "box",
@@ -421,9 +443,15 @@ FURNITURE: list[dict] = [
     {"name": "gmirror", "room": "guest_bath", "type": "box",
      "pos": (-5.38, -6.70, 1.60), "size": (0.04, 1.00, 0.90), "rgba": (0.74, 0.82, 0.87, 1), "mat": "mat_mirror"},
     {"name": "gshower_tray", "room": "guest_bath", "type": "box",
-     "pos": (-4.25, -9.00, 0.05), "size": (2.20, 1.60, 0.10), "rgba": (0.90, 0.91, 0.92, 1), "mat": "mat_porcelain"},
+     "pos": (-4.40, -9.00, 0.05), "size": (2.00, 1.60, 0.10), "rgba": (0.90, 0.91, 0.92, 1), "mat": "mat_porcelain"},
+    # ⛔ 2026-08-08 修：这面玻璃原来是 x∈[-5.35,-3.15]，而房间净空是 x∈[-5.36,-3.14]——
+    #    **左右各只差 1 cm，墙到墙一整面，淋浴间根本没有门**。谁也进不去，机器人当然也进不去
+    #    （实测那 1.84 ㎡ 是个封死的孤岛）。自检没抓到是因为它只查门洞与家具穿墙，
+    #    没有任何一项问过「每间屋、每个角落到底走不走得进去」（已同轮补上 check_reachability）。
+    #    改成宽 1.30 靠西摆：西端进墙 4 cm（本仓惯例允许），东侧留出 0.95 m 的进出口。
+    #    ⛔ 别把玻璃删掉——那样淋浴房就没有形了，Jeff 明确说过家具不许再删。
     {"name": "gshower_glass", "room": "guest_bath", "type": "box",
-     "pos": (-4.25, -8.18, 1.05), "size": (2.20, 0.05, 2.00), "rgba": (0.75, 0.86, 0.90, 0.42), "mat": "mat_glass"},
+     "pos": (-4.85, -8.18, 1.05), "size": (1.10, 0.05, 2.00), "rgba": (0.75, 0.86, 0.90, 0.42), "mat": "mat_glass"},
     {"name": "gshower_head", "room": "guest_bath", "type": "cylinder",
      "pos": (-4.25, -9.60, 2.10), "size": (0.20, 0.20, 0.06), "rgba": (0.80, 0.82, 0.84, 1), "mat": "mat_chrome"},
 
@@ -509,8 +537,10 @@ FURNITURE: list[dict] = [
     # 挂衣跟着 cl_e 一起退到门北边（挂杆是柜子的一部分，不能悬在门口）
     {"name": "cl_clothes_e", "room": "closet", "type": "box",
      "pos": (-6.12, 3.55, 0.70), "size": (0.24, 1.40, 0.80), "rgba": (0.56, 0.48, 0.44, 1)},
+    # ⚠️ 2026-08-08 由 1.30 缩到 1.10：两侧走道原本各 0.61 m，只比 0.60 的判据多 1 cm——
+    #    过得去但没有任何余量。缩 0.20 之后各 0.71 m。⛔ 是缩尺寸不是删家具。
     {"name": "cl_island", "room": "closet", "type": "box",
-     "pos": (-7.50, 2.75, 0.44), "size": (1.30, 0.80, 0.88), "rgba": (0.55, 0.45, 0.34, 1)},
+     "pos": (-7.50, 2.75, 0.44), "size": (1.10, 0.80, 0.88), "rgba": (0.55, 0.45, 0.34, 1)},
 
     # ═══════ ⑳主卫：独立浴缸 + 双台盆 + 马桶 + 淋浴 ═══════
     {"name": "tub_body", "room": "master_bath", "type": "box",
@@ -574,7 +604,10 @@ FURNITURE += (
     + F.table_lamp("mlamp_l", "master_bedroom", -4.45, 8.62, 0.54)
     + F.table_lamp("mlamp_r", "master_bedroom", -1.55, 8.62, 0.54)
     # 书桌椅（次卧）与小孩房的椅子，也换成带腿的
-    + F.chair("sdchair", "second_bedroom", -1.55, -7.10, yaw=180, seat_w=0.42, seat_d=0.42)
+    + F.chair("sdchair", "second_bedroom", -0.85, -7.10, yaw=180, seat_w=0.42, seat_d=0.42)
+    # ⚠️ 书桌椅 x 从 -1.55 塞回桌下 -0.85（桌子中心，2026-08-08）：原来它离桌沿 0.40 m
+    #    是"拉出来"的状态，正好卡在床与书桌之间那条 0.65 m 过道的入口上，把它缩到 0.19 m，
+    #    于是过道成了进不去的死岛。塞回桌下（桌是单块台面板、无腿，塞得进去）过道就通了。
     + F.chair("kchair", "kid_bedroom", -7.00, -7.60, yaw=0, seat_w=0.42, seat_d=0.42,
               rgba=(0.55, 0.70, 0.62, 1.0))
 )

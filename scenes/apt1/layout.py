@@ -223,6 +223,19 @@ FRONT_DOOR_HANDLE = {"pos": (ENFILADE_X + 0.52, Y0 + 0.08, 1.10), "size": (0.04,
 START_POS_XY = (ENFILADE_X, Y0 + 0.90)
 START_YAW = math.pi / 2
 
+# ---------------------------------------------------------------- 机器人停机位（「保姆间」）
+# ⭐ 这是 Jeff 2026-08-08 定的：那台当比例尺 / 待命的机器人得有个**自己的房间**，
+#    别杵在通行流线正中挡路。
+# ⛔ 它和 START_POS_XY 是**两个不同的量**，别合并：
+#    · START_POS_XY = **任务出生点**，消费方（anima-zero 的 sim-house-nav）读它写 qpos，
+#      导航任务从那儿起步；
+#    · ROBOT_HOME_XY = **停机位**，`tools/walkthrough.py` 把静态机器人摆在这儿。
+#    合并会悄悄改变消费方的行为，而那个仓这一轮一个字都不许动。
+# 选洗衣房：净空 1.72 × 6.02，三件设备全挤在南端（y ≤ -6.73），北面 9.3 ㎡ 全空；
+# 一道 0.95 m 的门直通画廊主流线，而它本身**不在任何必经动线上**。
+ROBOT_HOME_XY = (5.20, -4.60)
+ROBOT_HOME_YAW = -math.pi / 2       # 朝南面向门
+
 # ---------------------------------------------------------------- 挂画
 # ⛔ 挂画不许压在门洞/窗洞上 —— 会变成一块悬在过道正中间的板子，而且**从代码上完全看不出来**，
 #    只有渲染了才发现。第一版就把一幅画挂到了贯通轴线的门洞里（渲染出来是一块大黑板挡着公园）。
@@ -584,22 +597,34 @@ FURNITURE: list[dict] = []
 # ── 大客厅：转角沙发朝着落地窗，地毯，茶几，两把单椅 ──────────────────
 FURNITURE += [
     _p("gr_rug", "great_room", "box", (2.30, 4.60, 0.012), (5.20, 3.60, 0.024), (0.62, 0.58, 0.52, 1.0), mat="mat_h3_rug"),
-    _p("gr_sofa_base", "great_room", "box", (2.30, 3.30, 0.21), (3.60, 1.00, 0.42), _LINEN, mat="mat_h3_linen"),
-    _p("gr_sofa_back", "great_room", "box", (2.30, 2.90, 0.55), (3.60, 0.24, 0.68), _LINEN, mat="mat_h3_linen"),
-    _p("gr_sofa_armL", "great_room", "box", (0.55, 3.30, 0.34), (0.26, 1.00, 0.68), _LINEN, mat="mat_h3_linen"),
-    _p("gr_sofa_armR", "great_room", "box", (4.05, 3.30, 0.34), (0.26, 1.00, 0.68), _LINEN, mat="mat_h3_linen"),
+    # ⛔⛔ 沙发组 + 抱枕 + 茶几 + 木碗**整组北移 0.20**（2026-08-08）。⚠️ 要么一起挪，要么都别挪：
+    #    只挪沙发不挪茶几，沙发↔茶几会从 0.425 掉到 0.225。
+    #    根因：大客厅只有**一个**出入口——「画廊→大客厅」那个 4.00 m 的 kind="open" 洞口
+    #    （x∈[0.30,4.30]），而沙发组含扶手横跨 x∈[0.42,4.18]，把洞口塞掉 3.76 m，
+    #    穿过去只落进一条 0.44 m 深的窄缝。实测 **G1 只能到达大客厅 2%**（0.52/37.8 ㎡），
+    #    北半区 10.4 ㎡ 连落地窗带茶几整块是**孤岛**——那正是作品集封面那个机位。
+    #    ⛔ 而 48 项自检全绿，因为 check_door_passable 当时会跳过 kind="open"（已同轮修掉）。
+    #    +0.16 就够到 0.60，取 +0.20 留 4 cm 余量；改完沙发背↔南墙 0.44 → 0.64。
+    _p("gr_sofa_base", "great_room", "box", (2.30, 3.50, 0.21), (3.60, 1.00, 0.42), _LINEN, mat="mat_h3_linen"),
+    _p("gr_sofa_back", "great_room", "box", (2.30, 3.10, 0.55), (3.60, 0.24, 0.68), _LINEN, mat="mat_h3_linen"),
+    _p("gr_sofa_armL", "great_room", "box", (0.55, 3.50, 0.34), (0.26, 1.00, 0.68), _LINEN, mat="mat_h3_linen"),
+    _p("gr_sofa_armR", "great_room", "box", (4.05, 3.50, 0.34), (0.26, 1.00, 0.68), _LINEN, mat="mat_h3_linen"),
+    # ⚠️ 贵妃榻**不跟着北移**：它和 armL、gr_ch2 本来就各贴着 0（转角沙发的正常搭法，
+    #    多出的重叠藏在沙发内部看不出来），跟着挪反而会撞上 gr_ch2。
     _p("gr_chaise", "great_room", "box", (0.10, 4.60, 0.21), (0.95, 1.90, 0.42), _LINEN, mat="mat_h3_linen"),
     # ⭐ 茶几换成真网格：碰撞仍是这个盒子，网格只是套在里面的外衣
     #    （mesh_piece 返回的就是一个普通 box 零件，多带一个 mesh 字段而已）
 ]
-FURNITURE += F.mesh_piece("gr_coffee", "great_room", 2.30, 4.90,
+FURNITURE += F.mesh_piece("gr_coffee", "great_room", 2.30, 5.10,   # 跟沙发一起 +0.20
                           size=(1.35, 1.35, 0.50), mesh="coffee_table")
-FURNITURE += F.mesh_piece("gr_ch1", "great_room", 4.90, 6.20, yaw=200,
+# ⚠️ gr_ch1 西南移 0.30/0.20：它离盆栽只有 **9 mm**、离条案 51 mm，渲染出来就是
+#    「椅子压着盆栽」。不是通行必经，纯观感，顺手修。
+FURNITURE += F.mesh_piece("gr_ch1", "great_room", 4.60, 6.00, yaw=200,
                           size=(0.90, 1.06, 1.10), mesh="armchair")
 FURNITURE += F.mesh_piece("gr_ch2", "great_room", -0.40, 6.20, yaw=-20,
                           size=(0.90, 1.06, 1.10), mesh="armchair")
 # 沙发上的抱枕（真网格）
-FURNITURE += F.mesh_piece("gr_pillows", "great_room", 1.20, 3.05, z=0.72, yaw=8,
+FURNITURE += F.mesh_piece("gr_pillows", "great_room", 1.20, 3.25, z=0.72, yaw=8,   # 跟沙发一起 +0.20
                           size=(1.02, 0.52, 0.50), mesh="pillows")
 # 大客厅其余真网格
 # ⭐ 三处条案/餐边柜（这里、餐厅 dn_sideboard、玄关 fy_console）共用同一件真木柜网格。
@@ -610,7 +635,11 @@ FURNITURE += F.mesh_piece("gr_console", "great_room", 5.80, 4.60, yaw=90,
                           size=_CREDENZA, mesh="console", rgba=_OAK, mat="mat_h3_oak_dark")
 FURNITURE += F.mesh_piece("gr_plant", "great_room", 5.70, 6.60,
                           size=(0.66, 0.70, 1.38), mesh="plant_a")
-FURNITURE += F.mesh_piece("gr_lamp", "great_room", -0.90, 3.00,
+# ⚠️ x 从 -0.90 挪到 -1.23（贴西墙，2026-08-08）：落地灯直径 0.46，原位置在西墙内表面
+#    (-1.46) 与贵妃榻西缘 (-0.375) 之间**正中**，把这条 1.09 m 的走道劈成 0.33 + 0.30 两半，
+#    两边都过不去 —— 大客厅西侧 1.27 ㎡ 因此成了走不进去的孤岛。
+#    贴墙之后东侧留 0.625 m 的净通道。⭐ 这块是 check_reachability 照出来的，肉眼看图看不出来。
+FURNITURE += F.mesh_piece("gr_lamp", "great_room", -1.23, 3.00,
                           size=(0.46, 0.46, 0.98), mesh="floor_lamp")
 
 # ── 餐厅：长桌八椅 + 吊灯下的餐边柜 ────────────────────────────────
@@ -666,7 +695,12 @@ FURNITURE += [
     _p("pb_bench", "primary_bed", "box", (-8.95, 5.90, 0.23), (1.50, 0.42, 0.46), _OAK),
 ]
 # ⭐ 主卧大床换成 Objaverse @elba 的软包床（CC-BY，逐件核过许可）
-FURNITURE += F.mesh_piece("pb_bed", "primary_bed", -8.95, 4.40,
+# ⛔ yaw=180 不能省：这张网格自带的朝向是**床头朝 +y**，不转的话床头板落在 y=5.44（北），
+#    而两个床头柜在 y=3.55（南）——床头柜就摆到床尾去了，pb_bench 这只床尾凳也变成
+#    「贴在床头后 25 cm 的怪盒子」。2026-08-08 Jeff 实地走进去才发现，
+#    因为**自检里没有任何一项管家具的朝向**（只管位置、碰撞、通行）。
+#    转正之后躺床上朝北看落地窗与中央公园，观景公寓本来就该这么摆。
+FURNITURE += F.mesh_piece("pb_bed", "primary_bed", -8.95, 4.40, yaw=180,
                           size=(1.74, 2.10, 0.82), mesh="bed")
 # ⭐ 床头柜（@elba Tumb Astrid，CC-BY）2026-08-07 复活。
 #    ⚠️ 它当年被撤的理由（"5 个材质组的残差互相叠加，收到 0.78 仍有一组探出"）是**假的**：
@@ -700,8 +734,11 @@ FURNITURE += [
 #    这里必须让开门前 0.6 m 的净空区（判据是 check_door_passable）。
 FURNITURE += F.mesh_piece("gl_plant1", "gallery", -5.72, 1.62,
                           size=(0.75, 0.65, 1.31), mesh="plant_b", parts=(3, 7))
+# ⛔ 走廊/画廊里不放任何落地家具（Jeff 2026-08-08 定）：这条 12.6 m 的贯通轴线是全屋主动线，
+#    机器人、机器狗、扫地机都要从这儿过。这里曾有一只 gl_bench 长凳，正卡在世界原点上，
+#    而产物里的机器人恰恰站在原点（摆位是运行期的事，见 AGENTS.md）——两者穿模 22.7 cm。
+#    ⭐ 展品柱 gl_pedestal 贴着北墙（y=1.50，墙内表面 2.13），不占通行带，留。
 FURNITURE += [
-    _p("gl_bench", "gallery", "box", (0.00, 0.10, 0.22), (1.60, 0.42, 0.44), _OAK),
     _p("gl_pedestal", "gallery", "box", (5.40, 1.50, 0.50), (0.36, 0.36, 1.00), (0.92, 0.91, 0.89, 1.0)),
 ]
 FURNITURE += F.mesh_piece("gl_bust", "gallery", 5.40, 1.50, z=1.28,
@@ -716,7 +753,12 @@ FURNITURE += [
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
     _p("fy_lift_r", "foyer", "box", (ENFILADE_X + 1.15, Y0 + 0.05, 1.15), (0.90, 0.05, 2.30),
        (0.66, 0.64, 0.60, 1.0), mat="mat_steel"),
-    _p("fy_runner", "foyer", "box", (ENFILADE_X, -4.40, 0.008), (1.10, 4.60, 0.016), (0.44, 0.40, 0.36, 1.0)),
+    # ⚠️ y 从 -4.40 北移到 -4.00（2026-08-08）：旧位置的南端在 -6.70，而 START_POS_XY 是
+    #    (2.30, -6.60)——出生点整只脚都在毯子上，正好违反上面那条「⛔ 不许踩在地毯上」。
+    #    注释和代码自相矛盾了整整一版，因为没有任何一项自检拿出生点和家具对过账。
+    #    北移后毯边到出生点 0.30 m（G1 脚长 0.25，前脚尖离毯还有 5 cm），北端离玄关北墙
+    #    内表面仍有 0.36 m，不压「玄关→画廊」的洞口。⭐ 出生点与英雄镜头一个字没改。
+    _p("fy_runner", "foyer", "box", (ENFILADE_X, -4.00, 0.008), (1.10, 4.60, 0.016), (0.44, 0.40, 0.36, 1.0)),
 ]
 FURNITURE += F.mesh_piece("fy_vase", "foyer", 0.80, -4.20, z=0.845,
                           size=(0.24, 0.24, 0.33), mesh="vase_b")
@@ -725,7 +767,7 @@ FURNITURE += F.mesh_piece("gr_vase", "great_room", 5.80, 4.60, z=0.86,
 # ⭐ 木碗的碰撞盒按网格自己的真实尺寸写（0.313 × 0.309 × 0.093，见 decor.lock.json）。
 #    ⚠️ 这里曾经是 0.20×0.20×0.11 —— 那是为了迁就旧的缩放 bug 收窄的，
 #    结果碗只有真尺寸的三分之一。盒子比例贴合网格，缩放才不会白缩。
-FURNITURE += F.mesh_piece("gr_bowl", "great_room", 2.30, 4.90, z=0.55,
+FURNITURE += F.mesh_piece("gr_bowl", "great_room", 2.30, 5.10, z=0.55,   # 跟茶几一起 +0.20
                           size=(0.32, 0.32, 0.10), mesh="bowl")
 
 # ── 客卧 ────────────────────────────────────────────────────────
@@ -767,8 +809,7 @@ FURNITURE += [
     _p("ld_washer", "laundry", "box", (4.75, -7.05, 0.44), (0.62, 0.64, 0.88), (0.82, 0.82, 0.83, 1.0), mat="mat_steel"),
     _p("ld_dryer", "laundry", "box", (5.50, -7.05, 0.44), (0.62, 0.64, 0.88), (0.82, 0.82, 0.83, 1.0), mat="mat_steel"),
     _p("ld_counter", "laundry", "box", (5.15, -7.05, 0.90), (1.70, 0.66, 0.05), _STONE),
-    _p("eh_bench", "east_hall", "box", (8.85, 0.50, 0.23), (1.40, 0.40, 0.46), _OAK),
-]
+]  # ⛔ east_hall 是厨房↔书房的过厅，同样不放落地家具（原有的 eh_bench 已删）
 
 # ---------------------------------------------------------------- 房间查询
 _ORDER = list(ROOMS.keys())
