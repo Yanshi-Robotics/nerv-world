@@ -120,10 +120,26 @@ def load_sibling(key: str, module: str):
     return mod
 
 
-def scene_filename(scene_key: str, robot_key: str) -> str:
-    """(场景, 机器人) 对应的产物文件名。
+# ⭐ 产物住哪一层 —— 全仓唯一真相源（`make_house.py` 读它来算 `../` 前缀）。
+# ⛔ 改它会同时改变：产物落点、产物里 `<include>` 与 `<texture file>` 的 `../` 层数、
+#    以及 `robots/*/[key].xml` 里 `meshdir` 的 `../` 层数（那三处必须同时对上，
+#    因为它们共用同一个基准：**主模型 XML 所在目录**）。改之前先读 `make_house._root_rel`。
+OUT_SUBDIR = "build"
 
-    ⚠️ 消费方（anima-zero 的世界服务）按同样的规则去找，两边别各写各的——
-    改名要两边一起改。
+
+def scene_filename(scene_key: str, robot_key: str) -> str:
+    """(场景, 机器人) 对应的产物 —— **相对仓根**的路径，含 `build/` 目录。
+
+    ⭐ 唯一正确的用法是 `os.path.join(<资产库仓根>, scene_filename(...))`。
+       仓内 15 处调用点与仓外消费方（anima-zero 的世界服务）都是这么写的，所以
+       v0.10 把产物挪进 `build/` 时，**消费方一个字都不用改**。
+
+    ⛔ 名字里的 "filename" 是历史包袱：v0.10 起返回的是 `build/apt1-g1.xml` 这种
+       **带目录**的相对路径，不是裸文件名。⛔ **别改名** —— 消费方按这个名字调它，
+       改名就是一次跨仓破坏；名字得给兼容性让路。
+    ⛔ **别在这里开第二个函数**（`scene_basename()` 之类）：两个函数就会有两份规则，
+       而这里是产物名规则的**唯一真相源**。要裸文件名就自己 `os.path.basename()`。
+    ⚠️ 固定用正斜杠（返回值会被拼进错误信息和文档）；Windows 上
+       `os.path.join(root, "build/x.xml")` 照样打得开。
     """
-    return f"{scene_key}-{robot_key}.xml"
+    return f"{OUT_SUBDIR}/{scene_key}-{robot_key}.xml"

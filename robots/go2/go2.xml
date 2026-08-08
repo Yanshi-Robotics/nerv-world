@@ -1,6 +1,10 @@
 <mujoco model="go2">
-  <compiler angle="radian" meshdir="robots/go2/meshes" autolimits="true"/>
-  <!-- meshdir 相对**主模型文件**（仓根的 house-go2.xml）解析，所以从仓根算起。
+  <compiler angle="radian" meshdir="../robots/go2/meshes" autolimits="true"/>
+  <!-- ⛔ meshdir 相对**主模型文件所在目录**解析，而主模型是 `build/<场景>-go2.xml`——
+       所以要带一层 `../` 先退回仓根。层数由 `scenes/manifest.py` 的 OUT_SUBDIR 决定，
+       它俩必须对上。⚠️ 对不上不会静默：`check_scene.py` 的「产物能被 MuJoCo 加载」
+       会当场编译失败（找不到网格），那就是守这条的闸门。
+       ⭐ 也正因为如此，本文件**不能单独当主模型加载**——它从来就只为被 include 而设计。
        以前靠一个叫 assets 的 symlink 兜着，两台机器人就撞名了（都想叫 assets）。-->
 
   <option cone="elliptic" impratio="100"/>

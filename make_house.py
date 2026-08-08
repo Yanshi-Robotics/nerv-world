@@ -26,6 +26,7 @@ import argparse
 import importlib.util
 import math
 import os
+import re
 
 from scenes import manifest as SCENES
 
@@ -483,11 +484,14 @@ def _assets(robot_key: str) -> list[str]:
         out.append('    <texture type="skybox" builtin="gradient" rgb1="0.52 0.68 0.88" '
                    'rgb2="0.88 0.92 0.96" width="512" height="1024"/>')
     else:
-        attrs = " ".join(f'{k}="{v}"' for k, v in L.SKYBOX.items())
+        # ⭐ 属性名以 file 开头的就是路径，过一遍 _root_rel（layout 里写的是仓根相对）
+        attrs = " ".join(f'{k}="{_root_rel(v) if k.startswith("file") else v}"'
+                         for k, v in L.SKYBOX.items())
         out.append(f'    <texture type="skybox" {attrs}/>')
-    # 贴图（file 路径相对本 XML 所在目录）
+    # 贴图（file 路径相对**本 XML 所在目录**，即 build/ —— 所以要 _root_rel 退回仓根）
     for name in _BASE_TEXTURES:
-        out.append(f'    <texture type="2d" name="tex_{name}" file="textures/{name}.png"/>')
+        out.append(f'    <texture type="2d" name="tex_{name}" '
+                   f'file="{_root_rel(f"textures/{name}.png")}"/>')
     # 场景自己的额外贴图（apt1 的公园航拍、城市底图、塔楼立面等）。
     # ⛔ 名字必须和 _BASE_TEXTURES 不撞——不撞 = 对 house1/house2 零回归面。
     # ⚠️ type 默认 "2d"，但**允许字典自己覆盖**（塔楼立面要 type="cube"，
@@ -495,7 +499,8 @@ def _assets(robot_key: str) -> list[str]:
     #    别把 type 硬写在 f-string 里再 join 一遍字典——会出两个 type 属性，XML 直接解析失败。
     for t in getattr(L, "TEXTURES_EXTRA", []):
         d = {"type": "2d", **t}
-        attrs = " ".join(f'{k}="{v}"' for k, v in d.items())
+        attrs = " ".join(f'{k}="{_root_rel(v) if k.startswith("file") else v}"'
+                         for k, v in d.items())
         out.append(f'    <texture {attrs}/>')
     # 材质：texrepeat 控制平铺密度（数字越大格子越小）
     mats = [
@@ -749,20 +754,76 @@ def _glazing() -> list[str]:
 _FIT_EPS = 0.99
 
 
+_ROOT_PREFIX = "../" * len(SCENES.OUT_SUBDIR.strip("/").split("/"))
+
+
+def _root_rel(p: str) -> str:
+    """把一条**仓根相对**的路径，翻译成"从产物 XML 所在目录看"的相对路径。
+
+    ⭐ 存在的理由是分层：`layout.py` 里写的贴图路径永远是**仓根相对**的
+       （`textures/house3/park_aerial.png`），产物住哪一层是**生成器的部署细节**。
+       漏进 layout 就等于每个新场景作者都得知道 `build/` 有几层深——
+       正是 AGENTS.md 那条「目录一动，所有 `..` 重新数一遍」红线在防的事。
+
+    ⛔ **只给 `<include>` 与 `<texture file*>` 用**：它们相对**主模型 XML 所在目录**解析。
+       `<mesh file>` 走的是 `meshdir`，用 `_decor_prefix()`——**两者规则不同，别照抄**。
+    ⚠️ 判据是"属性名以 `file` 开头的就是路径"（`fileright`/`fileup`… 都算），
+       `check_scene.py` 的贴图存在性检查用的是同一条规则。
+    """
+    return _ROOT_PREFIX + p
+
+
+def _assert_meshdir_agrees(robot_key: str) -> None:
+    """机器人 XML 声明的 meshdir，必须和 `robots/manifest.py` 说的指向同一个目录。
+
+    ⛔ 同一个 meshdir 在两处各存一份，**语义有意不同**（别去"统一"它们）：
+       · `robots/manifest.py` 存**仓根相对**的 `robots/g1/meshes` —— "网格住哪儿"是这台
+         机器人的 durable 事实，和产物住哪一层无关；`_decor_prefix()` 数的是它。
+       · `robots/<key>/<key>.xml` 存**从产物目录看**的 `../robots/g1/meshes` —— 多出来的
+         `../` 是 `build/` 那一层的补偿，由 `SCENES.OUT_SUBDIR` 决定。
+    ⭐ 这个仓被"同一个量存两处、没人逼它们对账"咬过两次（decor.lock 的包围盒、
+       check_scene 的项数），所以这里当场读 XML 核对。
+
+    ⛔ 必须在**每份产物**都跑：它以前挂在 `_decor_prefix()` 里，而那个函数只有**有装饰网格
+       的场景**才会调到——house1/house2 没有装饰，于是漏检了三分之二的产物，
+       实测把 meshdir 改错后它们照常生成成功。检查要挂在无条件路径上。
+    """
+    md = ROBOTS.get(robot_key)["meshdir"].strip("/")
+    xml_path = ROBOTS.path(robot_key, "xml")
+    m = re.search(r'<compiler[^>]*\bmeshdir="([^"]*)"', open(xml_path, encoding="utf-8").read())
+    if not m:
+        raise ValueError(f"{xml_path} 里没找到 <compiler meshdir=...>，无法核对")
+    declared = os.path.normpath(os.path.join(SCENES.OUT_SUBDIR, m.group(1))).replace(os.sep, "/")
+    if declared != md:
+        raise ValueError(
+            f"⛔ meshdir 对不上：{os.path.basename(xml_path)} 声明 {m.group(1)!r}，"
+            f"从产物目录 {SCENES.OUT_SUBDIR!r} 解析出来是 {declared!r}，"
+            f"而 robots/manifest.py 说是 {md!r}。改了 OUT_SUBDIR 就要同轮改机器人 XML 的 meshdir。")
+
+
 def _decor_prefix(robot_key: str) -> str:
     """`<mesh file>` 要爬几层 `../` 才回到仓根。
 
     ⛔ `<compiler meshdir>` 是**整个编译模型全局**的，而且它来自 `<include>` 进来的
-       机器人 XML（`robots/g1/g1.xml` 写着 `meshdir="robots/g1/meshes"`，相对**主模型文件**解析）。
-       所以直接写 `<mesh file="decor/x.obj">` 会被找成 `robots/g1/meshes/decor/x.obj`。
+       机器人 XML，相对**主模型文件所在目录**解析。所以直接写
+       `<mesh file="decor/x.obj">` 会被找成 `<meshdir>/decor/x.obj`。
        在 include 之后再写一个 compiler 会把机器人自己的网格弄丢；写在前面则被覆盖。
     ⚠️ 而 `<texture file>` 走的是 `texturedir`（没设 → 相对主模型目录），**两者解析规则不同**，
-       所以贴图**不带**这个前缀。别照抄隔壁那一行。
+       所以贴图不带这个前缀、走 `_root_rel()`。别照抄隔壁那一行。
+
+    ⭐ 同一个 meshdir 在两个地方各存了一份，**语义有意不同**，别去"统一"它们：
+       · `robots/manifest.py` 的 `meshdir` = **仓根相对**（`robots/g1/meshes`）——
+         "网格住哪儿"是这台机器人的durable 事实，和产物住哪一层无关。本函数数的是它。
+       · `robots/<key>/<key>.xml` 的 `meshdir` = **从产物目录看**（`../robots/g1/meshes`）——
+         多出来的 `../` 是 `build/` 那一层的补偿，由 `SCENES.OUT_SUBDIR` 决定。
+       ⛔ 两处必须指向同一个真实目录。这个仓被"同一个量存两处、没人逼它们对账"咬过两次
+          （decor.lock 的包围盒、check_scene 的项数），所以下面**当场读 XML 交叉核对**。
     ✅ `..` 本身可用，已实测（载入 8738 顶点的机器人网格验证过）。
     """
     md = ROBOTS.get(robot_key)["meshdir"].strip("/")
     if os.path.isabs(md) or ".." in md.split("/"):
-        raise ValueError(f"{robot_key} 的 meshdir={md!r} 不是干净的相对路径，算不出 ../ 前缀")
+        raise ValueError(f"{robot_key} 的 meshdir={md!r} 不是仓根相对的干净路径，算不出 ../ 前缀")
+
     return "../" * len(md.split("/"))
 
 
@@ -876,7 +937,7 @@ def _mesh_assets(robot_key: str) -> list[str]:
             if p.get("png") and (key, i) not in seen_tex:
                 seen_tex.add((key, i))
                 out.append(f'    <texture type="2d" name="dt_{key}_{i}" '
-                           f'file="{lock.rel_path(key, p["png"])}" colorspace="sRGB"/>')
+                           f'file="{_root_rel(lock.rel_path(key, p["png"]))}" colorspace="sRGB"/>')
                 out.append(f'    <material name="dmat_{key}_{i}" texture="dt_{key}_{i}" '
                            f'specular="0.15" shininess="0.25" reflectance="0.02"/>')
     return out
@@ -936,7 +997,9 @@ def build(robot_key: str) -> str:
     parts.append(f'  <!-- 机器人：{r["label"]}（清单见 ../robots/manifest.py） -->')
     # 机器人的 XML 与网格都住在 robots/<key>/，从这里按相对路径 include。
     # meshdir 由机器人自己的 XML 声明（导入脚本写好的），这里不重复声明、免得两处打架。
-    parts.append(f'  <include file="robots/{robot_key}/{os.path.basename(r["xml"])}"/>')
+    _assert_meshdir_agrees(robot_key)   # ⛔ 每份产物都核一次，见该函数的 docstring
+    parts.append('  <include file="'
+                 + _root_rel(f'robots/{robot_key}/{os.path.basename(r["xml"])}') + '"/>')
     parts.append('')
     # ⚠️ 必须显式声明场景尺度：MuJoCo 默认按模型包围盒自动算 extent，而我们为了"窗外有风景"
     # 加了 60m 草地和几十米高的远楼，包围盒被撑到几十米 → 近裁剪面(znear ∝ extent)跟着变大，
@@ -1050,6 +1113,15 @@ def main() -> None:
     scene_keys = [args.scene] if args.scene else SCENES.keys()
     if args.out and (len(robot_keys) != 1 or len(scene_keys) != 1):
         ap.error("--out 只能配合 --robot + --scene 一起用（一次只写一个文件）")
+    if args.out:
+        # ⛔ 产物里的相对路径（`../textures`、`../robots`、`../../../decor`）是按
+        #    "住在仓根下**恰好一层**"算死的。落到别的深度，XML 长得一模一样、写文件也
+        #    照常成功，只有 MuJoCo 去加载时才报"找不到网格/贴图"——典型的静默产出坏文件。
+        #    这里当场拦住，别让人拿着一份看着正常的坏产物去排查。
+        d = os.path.relpath(os.path.dirname(os.path.abspath(args.out)), here)
+        if d.startswith("..") or os.sep in d or d == ".":
+            ap.error(f"--out 必须落在仓根下**恰好一层**的目录里（现在是 {d!r}）——"
+                     f"产物里的 ../ 层数按那一层算死了。默认落点是 {SCENES.OUT_SUBDIR}/。")
 
     for scene_key in scene_keys:
         use_scene(scene_key)
@@ -1062,6 +1134,8 @@ def _generate(here: str, scene_key: str, robot_keys: list[str], out_override: st
     for key in robot_keys:
         out_path = out_override or os.path.join(here, scene_filename(scene_key, key))
         xml = build(key)
+        # 产物住 build/，裸 clone 上第一次跑时那个目录还不存在
+        os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(xml)
         print(f"生成 {out_path}  ← {ROBOTS.get(key)['label']}")

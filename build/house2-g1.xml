@@ -1,7 +1,7 @@
 <mujoco model="sim_house_nav_g1">
   <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->
   <!-- 机器人：人形机器人（宇树 G1，29 自由度）（清单见 ../robots/manifest.py） -->
-  <include file="robots/g1/g1.xml"/>
+  <include file="../robots/g1/g1.xml"/>
 
   <statistic center="0 -1 1" extent="6"/>
 
@@ -14,26 +14,26 @@
 
   <asset>
     <texture type="skybox" builtin="gradient" rgb1="0.52 0.68 0.88" rgb2="0.88 0.92 0.96" width="512" height="1024"/>
-    <texture type="2d" name="tex_wood_floor" file="textures/wood_floor.png"/>
-    <texture type="2d" name="tex_wood_floor_light" file="textures/wood_floor_light.png"/>
-    <texture type="2d" name="tex_tile_white" file="textures/tile_white.png"/>
-    <texture type="2d" name="tex_tile_grey" file="textures/tile_grey.png"/>
-    <texture type="2d" name="tex_marble" file="textures/marble.png"/>
-    <texture type="2d" name="tex_marble_dark" file="textures/marble_dark.png"/>
-    <texture type="2d" name="tex_marble_warm" file="textures/marble_warm.png"/>
-    <texture type="2d" name="tex_marble_grey" file="textures/marble_grey.png"/>
-    <texture type="2d" name="tex_marble_greige" file="textures/marble_greige.png"/>
-    <texture type="2d" name="tex_carpet" file="textures/carpet.png"/>
-    <texture type="2d" name="tex_fabric" file="textures/fabric.png"/>
-    <texture type="2d" name="tex_fabric_blue" file="textures/fabric_blue.png"/>
-    <texture type="2d" name="tex_wall_paint" file="textures/wall_paint.png"/>
-    <texture type="2d" name="tex_city_skyline" file="textures/city_skyline.png"/>
-    <texture type="2d" name="tex_art0" file="textures/art0.png"/>
-    <texture type="2d" name="tex_art1" file="textures/art1.png"/>
-    <texture type="2d" name="tex_art2" file="textures/art2.png"/>
-    <texture type="2d" name="tex_art3" file="textures/art3.png"/>
-    <texture type="2d" name="tex_oven_glass" file="textures/oven_glass.png"/>
-    <texture type="2d" name="tex_appliance_panel" file="textures/appliance_panel.png"/>
+    <texture type="2d" name="tex_wood_floor" file="../textures/wood_floor.png"/>
+    <texture type="2d" name="tex_wood_floor_light" file="../textures/wood_floor_light.png"/>
+    <texture type="2d" name="tex_tile_white" file="../textures/tile_white.png"/>
+    <texture type="2d" name="tex_tile_grey" file="../textures/tile_grey.png"/>
+    <texture type="2d" name="tex_marble" file="../textures/marble.png"/>
+    <texture type="2d" name="tex_marble_dark" file="../textures/marble_dark.png"/>
+    <texture type="2d" name="tex_marble_warm" file="../textures/marble_warm.png"/>
+    <texture type="2d" name="tex_marble_grey" file="../textures/marble_grey.png"/>
+    <texture type="2d" name="tex_marble_greige" file="../textures/marble_greige.png"/>
+    <texture type="2d" name="tex_carpet" file="../textures/carpet.png"/>
+    <texture type="2d" name="tex_fabric" file="../textures/fabric.png"/>
+    <texture type="2d" name="tex_fabric_blue" file="../textures/fabric_blue.png"/>
+    <texture type="2d" name="tex_wall_paint" file="../textures/wall_paint.png"/>
+    <texture type="2d" name="tex_city_skyline" file="../textures/city_skyline.png"/>
+    <texture type="2d" name="tex_art0" file="../textures/art0.png"/>
+    <texture type="2d" name="tex_art1" file="../textures/art1.png"/>
+    <texture type="2d" name="tex_art2" file="../textures/art2.png"/>
+    <texture type="2d" name="tex_art3" file="../textures/art3.png"/>
+    <texture type="2d" name="tex_oven_glass" file="../textures/oven_glass.png"/>
+    <texture type="2d" name="tex_appliance_panel" file="../textures/appliance_panel.png"/>
     <material name="mat_wood" texture="tex_wood_floor" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_wood_light" texture="tex_wood_floor_light" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_tile" texture="tex_tile_white" texrepeat="4 4" specular="0.35" shininess="0.55" reflectance="0.12"/>

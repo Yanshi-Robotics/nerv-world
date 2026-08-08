@@ -90,8 +90,10 @@ def main() -> int:
             print(f"⚠️ 没找到 body «{CAM_BODY}»，相机没装上。上游结构变了，拒绝产出半成品。")
             return 1
 
-    # ③ meshdir：产物被仓根的 house-g1.xml include，路径要从**仓根**算起（不是从本目录）
-    s = s.replace('meshdir="assets"', 'meshdir="robots/g1/meshes"')
+    # ③ meshdir：产物是 `build/<场景>-g1.xml`，而 meshdir 相对**主模型文件所在目录**解析，
+    #    所以要带一层 `../` 先退回仓根。⛔ 层数由 scenes/manifest.py 的 OUT_SUBDIR 决定，
+    #    改了那个就要改这里；对不上时 check_scene 的「产物能被 MuJoCo 加载」会当场编译失败。
+    s = s.replace('meshdir="assets"', 'meshdir="../robots/g1/meshes"')
     s = ('<!-- 本文件由 import_from_menagerie.py 从 MuJoCo Menagerie 的 unitree_g1 生成，请勿手改。\n'
          '     改了什么、为什么改，见那个脚本的文件头。上游许可见同目录 G1_MODEL_LICENSE。-->\n') + s
 

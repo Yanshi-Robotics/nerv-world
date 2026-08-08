@@ -1,7 +1,7 @@
 <mujoco model="sim_house_nav_g1">
   <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->
   <!-- 机器人：人形机器人（宇树 G1，29 自由度）（清单见 ../robots/manifest.py） -->
-  <include file="robots/g1/g1.xml"/>
+  <include file="../robots/g1/g1.xml"/>
 
   <statistic center="0 0 1.4" extent="6"/>
 
@@ -13,40 +13,40 @@
   </visual>
 
   <asset>
-    <texture type="skybox" fileright="textures/house3/sky_fileright.png" fileleft="textures/house3/sky_fileleft.png" fileup="textures/house3/sky_fileup.png" filedown="textures/house3/sky_filedown.png" filefront="textures/house3/sky_filefront.png" fileback="textures/house3/sky_fileback.png"/>
-    <texture type="2d" name="tex_wood_floor" file="textures/wood_floor.png"/>
-    <texture type="2d" name="tex_wood_floor_light" file="textures/wood_floor_light.png"/>
-    <texture type="2d" name="tex_tile_white" file="textures/tile_white.png"/>
-    <texture type="2d" name="tex_tile_grey" file="textures/tile_grey.png"/>
-    <texture type="2d" name="tex_marble" file="textures/marble.png"/>
-    <texture type="2d" name="tex_marble_dark" file="textures/marble_dark.png"/>
-    <texture type="2d" name="tex_marble_warm" file="textures/marble_warm.png"/>
-    <texture type="2d" name="tex_marble_grey" file="textures/marble_grey.png"/>
-    <texture type="2d" name="tex_marble_greige" file="textures/marble_greige.png"/>
-    <texture type="2d" name="tex_carpet" file="textures/carpet.png"/>
-    <texture type="2d" name="tex_fabric" file="textures/fabric.png"/>
-    <texture type="2d" name="tex_fabric_blue" file="textures/fabric_blue.png"/>
-    <texture type="2d" name="tex_wall_paint" file="textures/wall_paint.png"/>
-    <texture type="2d" name="tex_city_skyline" file="textures/city_skyline.png"/>
-    <texture type="2d" name="tex_art0" file="textures/art0.png"/>
-    <texture type="2d" name="tex_art1" file="textures/art1.png"/>
-    <texture type="2d" name="tex_art2" file="textures/art2.png"/>
-    <texture type="2d" name="tex_art3" file="textures/art3.png"/>
-    <texture type="2d" name="tex_oven_glass" file="textures/oven_glass.png"/>
-    <texture type="2d" name="tex_appliance_panel" file="textures/appliance_panel.png"/>
-    <texture type="2d" name="tex_h3_park" file="textures/house3/park_aerial.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_city" file="textures/house3/city_ground.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_oak" file="textures/house3/h3_oak.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_oak_dark" file="textures/house3/h3_oak_dark.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_marble" file="textures/house3/h3_marble.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_marble_blk" file="textures/house3/h3_marble_blk.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_travertine" file="textures/house3/h3_travertine.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_linen" file="textures/house3/h3_linen.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_rug" file="textures/house3/h3_rug.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_plaster" file="textures/house3/h3_plaster.png" colorspace="sRGB"/>
-    <texture type="2d" name="tex_h3_onyx" file="textures/house3/h3_onyx.png" colorspace="sRGB"/>
-    <texture type="cube" name="tex_h3_fac_glass" gridsize="3 4" gridlayout=".U..LFRB.D.." file="textures/house3/facade_glass.png" colorspace="sRGB"/>
-    <texture type="cube" name="tex_h3_fac_stone" gridsize="3 4" gridlayout=".U..LFRB.D.." file="textures/house3/facade_limestone.png" colorspace="sRGB"/>
+    <texture type="skybox" fileright="../textures/house3/sky_fileright.png" fileleft="../textures/house3/sky_fileleft.png" fileup="../textures/house3/sky_fileup.png" filedown="../textures/house3/sky_filedown.png" filefront="../textures/house3/sky_filefront.png" fileback="../textures/house3/sky_fileback.png"/>
+    <texture type="2d" name="tex_wood_floor" file="../textures/wood_floor.png"/>
+    <texture type="2d" name="tex_wood_floor_light" file="../textures/wood_floor_light.png"/>
+    <texture type="2d" name="tex_tile_white" file="../textures/tile_white.png"/>
+    <texture type="2d" name="tex_tile_grey" file="../textures/tile_grey.png"/>
+    <texture type="2d" name="tex_marble" file="../textures/marble.png"/>
+    <texture type="2d" name="tex_marble_dark" file="../textures/marble_dark.png"/>
+    <texture type="2d" name="tex_marble_warm" file="../textures/marble_warm.png"/>
+    <texture type="2d" name="tex_marble_grey" file="../textures/marble_grey.png"/>
+    <texture type="2d" name="tex_marble_greige" file="../textures/marble_greige.png"/>
+    <texture type="2d" name="tex_carpet" file="../textures/carpet.png"/>
+    <texture type="2d" name="tex_fabric" file="../textures/fabric.png"/>
+    <texture type="2d" name="tex_fabric_blue" file="../textures/fabric_blue.png"/>
+    <texture type="2d" name="tex_wall_paint" file="../textures/wall_paint.png"/>
+    <texture type="2d" name="tex_city_skyline" file="../textures/city_skyline.png"/>
+    <texture type="2d" name="tex_art0" file="../textures/art0.png"/>
+    <texture type="2d" name="tex_art1" file="../textures/art1.png"/>
+    <texture type="2d" name="tex_art2" file="../textures/art2.png"/>
+    <texture type="2d" name="tex_art3" file="../textures/art3.png"/>
+    <texture type="2d" name="tex_oven_glass" file="../textures/oven_glass.png"/>
+    <texture type="2d" name="tex_appliance_panel" file="../textures/appliance_panel.png"/>
+    <texture type="2d" name="tex_h3_park" file="../textures/house3/park_aerial.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_city" file="../textures/house3/city_ground.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_oak" file="../textures/house3/h3_oak.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_oak_dark" file="../textures/house3/h3_oak_dark.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_marble" file="../textures/house3/h3_marble.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_marble_blk" file="../textures/house3/h3_marble_blk.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_travertine" file="../textures/house3/h3_travertine.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_linen" file="../textures/house3/h3_linen.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_rug" file="../textures/house3/h3_rug.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_plaster" file="../textures/house3/h3_plaster.png" colorspace="sRGB"/>
+    <texture type="2d" name="tex_h3_onyx" file="../textures/house3/h3_onyx.png" colorspace="sRGB"/>
+    <texture type="cube" name="tex_h3_fac_glass" gridsize="3 4" gridlayout=".U..LFRB.D.." file="../textures/house3/facade_glass.png" colorspace="sRGB"/>
+    <texture type="cube" name="tex_h3_fac_stone" gridsize="3 4" gridlayout=".U..LFRB.D.." file="../textures/house3/facade_limestone.png" colorspace="sRGB"/>
     <material name="mat_wood" texture="tex_wood_floor" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_wood_light" texture="tex_wood_floor_light" texrepeat="3 3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <material name="mat_tile" texture="tex_tile_white" texrepeat="4 4" specular="0.35" shininess="0.55" reflectance="0.12"/>
@@ -91,201 +91,201 @@
 
     <!-- ===== 装饰网格资产（decor/manifest.py 登记，decor.lock.json 落账）===== -->
     <mesh name="dm_coffee_table_0_1_0081" file="../../../decor/assets/coffee_table/p0.obj" scale="1.00813 1.00813 1.00813"/>
-    <texture type="2d" name="dt_coffee_table_0" file="decor/assets/coffee_table/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_coffee_table_0" file="../decor/assets/coffee_table/p0.png" colorspace="sRGB"/>
     <material name="dmat_coffee_table_0" texture="dt_coffee_table_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_armchair_0_1_0637" file="../../../decor/assets/armchair/p0.obj" scale="1.06369 1.06369 1.06369"/>
-    <texture type="2d" name="dt_armchair_0" file="decor/assets/armchair/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_armchair_0" file="../decor/assets/armchair/p0.png" colorspace="sRGB"/>
     <material name="dmat_armchair_0" texture="dt_armchair_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_armchair_1_1_0637" file="../../../decor/assets/armchair/p1.obj" scale="1.06369 1.06369 1.06369"/>
-    <texture type="2d" name="dt_armchair_1" file="decor/assets/armchair/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_armchair_1" file="../decor/assets/armchair/p1.png" colorspace="sRGB"/>
     <material name="dmat_armchair_1" texture="dt_armchair_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_pillows_0_1_0742" file="../../../decor/assets/pillows/p0.obj" scale="1.07418 1.07418 1.07418"/>
-    <texture type="2d" name="dt_pillows_0" file="decor/assets/pillows/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_pillows_0" file="../decor/assets/pillows/p0.png" colorspace="sRGB"/>
     <material name="dmat_pillows_0" texture="dt_pillows_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_pillows_1_1_0742" file="../../../decor/assets/pillows/p1.obj" scale="1.07418 1.07418 1.07418"/>
-    <texture type="2d" name="dt_pillows_1" file="decor/assets/pillows/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_pillows_1" file="../decor/assets/pillows/p1.png" colorspace="sRGB"/>
     <material name="dmat_pillows_1" texture="dt_pillows_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_console_0_0_9898" file="../../../decor/assets/console/p0.obj" scale="0.989793 0.989793 0.989793"/>
-    <texture type="2d" name="dt_console_0" file="decor/assets/console/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_console_0" file="../decor/assets/console/p0.png" colorspace="sRGB"/>
     <material name="dmat_console_0" texture="dt_console_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_console_1_0_9898" file="../../../decor/assets/console/p1.obj" scale="0.989793 0.989793 0.989793"/>
-    <texture type="2d" name="dt_console_1" file="decor/assets/console/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_console_1" file="../decor/assets/console/p1.png" colorspace="sRGB"/>
     <material name="dmat_console_1" texture="dt_console_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_console_2_0_9898" file="../../../decor/assets/console/p2.obj" scale="0.989793 0.989793 0.989793"/>
-    <texture type="2d" name="dt_console_2" file="decor/assets/console/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_console_2" file="../decor/assets/console/p2.png" colorspace="sRGB"/>
     <material name="dmat_console_2" texture="dt_console_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_a_0_1_0119" file="../../../decor/assets/plant_a/p0.obj" scale="1.01188 1.01188 1.01188"/>
-    <texture type="2d" name="dt_plant_a_0" file="decor/assets/plant_a/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_a_0" file="../decor/assets/plant_a/p0.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_0" texture="dt_plant_a_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_a_1_1_0119" file="../../../decor/assets/plant_a/p1.obj" scale="1.01188 1.01188 1.01188"/>
-    <texture type="2d" name="dt_plant_a_1" file="decor/assets/plant_a/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_a_1" file="../decor/assets/plant_a/p1.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_1" texture="dt_plant_a_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_a_2_1_0119" file="../../../decor/assets/plant_a/p2.obj" scale="1.01188 1.01188 1.01188"/>
-    <texture type="2d" name="dt_plant_a_2" file="decor/assets/plant_a/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_a_2" file="../decor/assets/plant_a/p2.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_2" texture="dt_plant_a_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_a_3_1_0119" file="../../../decor/assets/plant_a/p3.obj" scale="1.01188 1.01188 1.01188"/>
-    <texture type="2d" name="dt_plant_a_3" file="decor/assets/plant_a/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_a_3" file="../decor/assets/plant_a/p3.png" colorspace="sRGB"/>
     <material name="dmat_plant_a_3" texture="dt_plant_a_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_floor_lamp_0_1_0196" file="../../../decor/assets/floor_lamp/p0.obj" scale="1.0196 1.0196 1.0196"/>
-    <texture type="2d" name="dt_floor_lamp_0" file="decor/assets/floor_lamp/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_floor_lamp_0" file="../decor/assets/floor_lamp/p0.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_0" texture="dt_floor_lamp_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_floor_lamp_1_1_0196" file="../../../decor/assets/floor_lamp/p1.obj" scale="1.0196 1.0196 1.0196"/>
-    <texture type="2d" name="dt_floor_lamp_1" file="decor/assets/floor_lamp/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_floor_lamp_1" file="../decor/assets/floor_lamp/p1.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_1" texture="dt_floor_lamp_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_floor_lamp_2_1_0196" file="../../../decor/assets/floor_lamp/p2.obj" scale="1.0196 1.0196 1.0196"/>
-    <texture type="2d" name="dt_floor_lamp_2" file="decor/assets/floor_lamp/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_floor_lamp_2" file="../decor/assets/floor_lamp/p2.png" colorspace="sRGB"/>
     <material name="dmat_floor_lamp_2" texture="dt_floor_lamp_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_dining_chair_0_1_0156" file="../../../decor/assets/dining_chair/p0.obj" scale="1.01558 1.01558 1.01558"/>
-    <texture type="2d" name="dt_dining_chair_0" file="decor/assets/dining_chair/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_dining_chair_0" file="../decor/assets/dining_chair/p0.png" colorspace="sRGB"/>
     <material name="dmat_dining_chair_0" texture="dt_dining_chair_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_chandelier_0_1_0206" file="../../../decor/assets/chandelier/p0.obj" scale="1.02061 1.02061 1.02061"/>
-    <texture type="2d" name="dt_chandelier_0" file="decor/assets/chandelier/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_chandelier_0" file="../decor/assets/chandelier/p0.png" colorspace="sRGB"/>
     <material name="dmat_chandelier_0" texture="dt_chandelier_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_chandelier_1_1_0206" file="../../../decor/assets/chandelier/p1.obj" scale="1.02061 1.02061 1.02061"/>
     <mesh name="dm_vase_a_0_1_0386" file="../../../decor/assets/vase_a/p0.obj" scale="1.03861 1.03861 1.03861"/>
-    <texture type="2d" name="dt_vase_a_0" file="decor/assets/vase_a/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_vase_a_0" file="../decor/assets/vase_a/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_a_0" texture="dt_vase_a_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_0_0_9943" file="../../../decor/assets/rc_fridge/p0.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_0" file="decor/assets/rc_fridge/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_0" file="../decor/assets/rc_fridge/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_0" texture="dt_rc_fridge_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_1_0_9943" file="../../../decor/assets/rc_fridge/p1.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_1" file="decor/assets/rc_fridge/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_1" file="../decor/assets/rc_fridge/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_1" texture="dt_rc_fridge_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_2_0_9943" file="../../../decor/assets/rc_fridge/p2.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_2" file="decor/assets/rc_fridge/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_2" file="../decor/assets/rc_fridge/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_2" texture="dt_rc_fridge_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_3_0_9943" file="../../../decor/assets/rc_fridge/p3.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_3" file="decor/assets/rc_fridge/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_3" file="../decor/assets/rc_fridge/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_3" texture="dt_rc_fridge_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_4_0_9943" file="../../../decor/assets/rc_fridge/p4.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_4" file="decor/assets/rc_fridge/p4.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_4" file="../decor/assets/rc_fridge/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_4" texture="dt_rc_fridge_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_5_0_9943" file="../../../decor/assets/rc_fridge/p5.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_5" file="decor/assets/rc_fridge/p5.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_5" file="../decor/assets/rc_fridge/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_5" texture="dt_rc_fridge_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_6_0_9943" file="../../../decor/assets/rc_fridge/p6.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_6" file="decor/assets/rc_fridge/p6.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_6" file="../decor/assets/rc_fridge/p6.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_6" texture="dt_rc_fridge_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_7_0_9943" file="../../../decor/assets/rc_fridge/p7.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_7" file="decor/assets/rc_fridge/p7.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_7" file="../decor/assets/rc_fridge/p7.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_7" texture="dt_rc_fridge_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_fridge_8_0_9943" file="../../../decor/assets/rc_fridge/p8.obj" scale="0.994315 0.994315 0.994315"/>
-    <texture type="2d" name="dt_rc_fridge_8" file="decor/assets/rc_fridge/p8.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_fridge_8" file="../decor/assets/rc_fridge/p8.png" colorspace="sRGB"/>
     <material name="dmat_rc_fridge_8" texture="dt_rc_fridge_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_0_0_9963" file="../../../decor/assets/rc_stove/p0.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_0" file="decor/assets/rc_stove/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_0" file="../decor/assets/rc_stove/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_0" texture="dt_rc_stove_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_1_0_9963" file="../../../decor/assets/rc_stove/p1.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_1" file="decor/assets/rc_stove/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_1" file="../decor/assets/rc_stove/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_1" texture="dt_rc_stove_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_2_0_9963" file="../../../decor/assets/rc_stove/p2.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_2" file="decor/assets/rc_stove/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_2" file="../decor/assets/rc_stove/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_2" texture="dt_rc_stove_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_3_0_9963" file="../../../decor/assets/rc_stove/p3.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_3" file="decor/assets/rc_stove/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_3" file="../decor/assets/rc_stove/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_3" texture="dt_rc_stove_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_4_0_9963" file="../../../decor/assets/rc_stove/p4.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_4" file="decor/assets/rc_stove/p4.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_4" file="../decor/assets/rc_stove/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_4" texture="dt_rc_stove_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_5_0_9963" file="../../../decor/assets/rc_stove/p5.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_5" file="decor/assets/rc_stove/p5.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_5" file="../decor/assets/rc_stove/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_5" texture="dt_rc_stove_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_6_0_9963" file="../../../decor/assets/rc_stove/p6.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_6" file="decor/assets/rc_stove/p6.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_6" file="../decor/assets/rc_stove/p6.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_6" texture="dt_rc_stove_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_7_0_9963" file="../../../decor/assets/rc_stove/p7.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_7" file="decor/assets/rc_stove/p7.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_7" file="../decor/assets/rc_stove/p7.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_7" texture="dt_rc_stove_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_8_0_9963" file="../../../decor/assets/rc_stove/p8.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_8" file="decor/assets/rc_stove/p8.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_8" file="../decor/assets/rc_stove/p8.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_8" texture="dt_rc_stove_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_stove_9_0_9963" file="../../../decor/assets/rc_stove/p9.obj" scale="0.996266 0.996266 0.996266"/>
-    <texture type="2d" name="dt_rc_stove_9" file="decor/assets/rc_stove/p9.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_stove_9" file="../decor/assets/rc_stove/p9.png" colorspace="sRGB"/>
     <material name="dmat_rc_stove_9" texture="dt_rc_stove_9" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_sink_0_1_0179" file="../../../decor/assets/rc_sink/p0.obj" scale="1.01789 1.01789 1.01789"/>
-    <texture type="2d" name="dt_rc_sink_0" file="decor/assets/rc_sink/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_sink_0" file="../decor/assets/rc_sink/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_0" texture="dt_rc_sink_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_sink_1_1_0179" file="../../../decor/assets/rc_sink/p1.obj" scale="1.01789 1.01789 1.01789"/>
-    <texture type="2d" name="dt_rc_sink_1" file="decor/assets/rc_sink/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_sink_1" file="../decor/assets/rc_sink/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_1" texture="dt_rc_sink_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_sink_2_1_0179" file="../../../decor/assets/rc_sink/p2.obj" scale="1.01789 1.01789 1.01789"/>
-    <texture type="2d" name="dt_rc_sink_2" file="decor/assets/rc_sink/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_sink_2" file="../decor/assets/rc_sink/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_sink_2" texture="dt_rc_sink_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_0_1_0062" file="../../../decor/assets/rc_hood/p0.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_0" file="decor/assets/rc_hood/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_0" file="../decor/assets/rc_hood/p0.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_0" texture="dt_rc_hood_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_1_1_0062" file="../../../decor/assets/rc_hood/p1.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_1" file="decor/assets/rc_hood/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_1" file="../decor/assets/rc_hood/p1.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_1" texture="dt_rc_hood_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_2_1_0062" file="../../../decor/assets/rc_hood/p2.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_2" file="decor/assets/rc_hood/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_2" file="../decor/assets/rc_hood/p2.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_2" texture="dt_rc_hood_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_3_1_0062" file="../../../decor/assets/rc_hood/p3.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_3" file="decor/assets/rc_hood/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_3" file="../decor/assets/rc_hood/p3.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_3" texture="dt_rc_hood_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_4_1_0062" file="../../../decor/assets/rc_hood/p4.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_4" file="decor/assets/rc_hood/p4.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_4" file="../decor/assets/rc_hood/p4.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_4" texture="dt_rc_hood_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_rc_hood_5_1_0062" file="../../../decor/assets/rc_hood/p5.obj" scale="1.00618 1.00618 1.00618"/>
-    <texture type="2d" name="dt_rc_hood_5" file="decor/assets/rc_hood/p5.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_rc_hood_5" file="../decor/assets/rc_hood/p5.png" colorspace="sRGB"/>
     <material name="dmat_rc_hood_5" texture="dt_rc_hood_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_0_1_0092" file="../../../decor/assets/bed/p0.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_0" file="decor/assets/bed/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_0" file="../decor/assets/bed/p0.png" colorspace="sRGB"/>
     <material name="dmat_bed_0" texture="dt_bed_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_1_1_0092" file="../../../decor/assets/bed/p1.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_1" file="decor/assets/bed/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_1" file="../decor/assets/bed/p1.png" colorspace="sRGB"/>
     <material name="dmat_bed_1" texture="dt_bed_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_2_1_0092" file="../../../decor/assets/bed/p2.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_2" file="decor/assets/bed/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_2" file="../decor/assets/bed/p2.png" colorspace="sRGB"/>
     <material name="dmat_bed_2" texture="dt_bed_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_3_1_0092" file="../../../decor/assets/bed/p3.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_3" file="decor/assets/bed/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_3" file="../decor/assets/bed/p3.png" colorspace="sRGB"/>
     <material name="dmat_bed_3" texture="dt_bed_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_4_1_0092" file="../../../decor/assets/bed/p4.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_4" file="decor/assets/bed/p4.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_4" file="../decor/assets/bed/p4.png" colorspace="sRGB"/>
     <material name="dmat_bed_4" texture="dt_bed_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_5_1_0092" file="../../../decor/assets/bed/p5.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_5" file="decor/assets/bed/p5.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_5" file="../decor/assets/bed/p5.png" colorspace="sRGB"/>
     <material name="dmat_bed_5" texture="dt_bed_5" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_6_1_0092" file="../../../decor/assets/bed/p6.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_6" file="decor/assets/bed/p6.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_6" file="../decor/assets/bed/p6.png" colorspace="sRGB"/>
     <material name="dmat_bed_6" texture="dt_bed_6" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_7_1_0092" file="../../../decor/assets/bed/p7.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_7" file="decor/assets/bed/p7.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_7" file="../decor/assets/bed/p7.png" colorspace="sRGB"/>
     <material name="dmat_bed_7" texture="dt_bed_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bed_8_1_0092" file="../../../decor/assets/bed/p8.obj" scale="1.00922 1.00922 1.00922"/>
-    <texture type="2d" name="dt_bed_8" file="decor/assets/bed/p8.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bed_8" file="../decor/assets/bed/p8.png" colorspace="sRGB"/>
     <material name="dmat_bed_8" texture="dt_bed_8" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_nightstand_0_0_9882" file="../../../decor/assets/nightstand/p0.obj" scale="0.988195 0.988195 0.988195"/>
     <mesh name="dm_nightstand_1_0_9882" file="../../../decor/assets/nightstand/p1.obj" scale="0.988195 0.988195 0.988195"/>
-    <texture type="2d" name="dt_nightstand_1" file="decor/assets/nightstand/p1.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_nightstand_1" file="../decor/assets/nightstand/p1.png" colorspace="sRGB"/>
     <material name="dmat_nightstand_1" texture="dt_nightstand_1" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_nightstand_2_0_9882" file="../../../decor/assets/nightstand/p2.obj" scale="0.988195 0.988195 0.988195"/>
-    <texture type="2d" name="dt_nightstand_2" file="decor/assets/nightstand/p2.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_nightstand_2" file="../decor/assets/nightstand/p2.png" colorspace="sRGB"/>
     <material name="dmat_nightstand_2" texture="dt_nightstand_2" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_nightstand_3_0_9882" file="../../../decor/assets/nightstand/p3.obj" scale="0.988195 0.988195 0.988195"/>
-    <texture type="2d" name="dt_nightstand_3" file="decor/assets/nightstand/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_nightstand_3" file="../decor/assets/nightstand/p3.png" colorspace="sRGB"/>
     <material name="dmat_nightstand_3" texture="dt_nightstand_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_nightstand_4_0_9882" file="../../../decor/assets/nightstand/p4.obj" scale="0.988195 0.988195 0.988195"/>
-    <texture type="2d" name="dt_nightstand_4" file="decor/assets/nightstand/p4.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_nightstand_4" file="../decor/assets/nightstand/p4.png" colorspace="sRGB"/>
     <material name="dmat_nightstand_4" texture="dt_nightstand_4" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_b_3_0_9953" file="../../../decor/assets/plant_b/p3.obj" scale="0.995331 0.995331 0.995331"/>
-    <texture type="2d" name="dt_plant_b_3" file="decor/assets/plant_b/p3.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_b_3" file="../decor/assets/plant_b/p3.png" colorspace="sRGB"/>
     <material name="dmat_plant_b_3" texture="dt_plant_b_3" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_plant_b_7_0_9953" file="../../../decor/assets/plant_b/p7.obj" scale="0.995331 0.995331 0.995331"/>
-    <texture type="2d" name="dt_plant_b_7" file="decor/assets/plant_b/p7.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_plant_b_7" file="../decor/assets/plant_b/p7.png" colorspace="sRGB"/>
     <material name="dmat_plant_b_7" texture="dt_plant_b_7" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bust_0_1_0566" file="../../../decor/assets/bust/p0.obj" scale="1.05658 1.05658 1.05658"/>
-    <texture type="2d" name="dt_bust_0" file="decor/assets/bust/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bust_0" file="../decor/assets/bust/p0.png" colorspace="sRGB"/>
     <material name="dmat_bust_0" texture="dt_bust_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_vase_b_0_1_0563" file="../../../decor/assets/vase_b/p0.obj" scale="1.05634 1.05634 1.05634"/>
-    <texture type="2d" name="dt_vase_b_0" file="decor/assets/vase_b/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_vase_b_0" file="../decor/assets/vase_b/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_b_0" texture="dt_vase_b_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_vase_c_0_1_0423" file="../../../decor/assets/vase_c/p0.obj" scale="1.04228 1.04228 1.04228"/>
-    <texture type="2d" name="dt_vase_c_0" file="decor/assets/vase_c/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_vase_c_0" file="../decor/assets/vase_c/p0.png" colorspace="sRGB"/>
     <material name="dmat_vase_c_0" texture="dt_vase_c_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
     <mesh name="dm_bowl_0_1_0119" file="../../../decor/assets/bowl/p0.obj" scale="1.01191 1.01191 1.01191"/>
-    <texture type="2d" name="dt_bowl_0" file="decor/assets/bowl/p0.png" colorspace="sRGB"/>
+    <texture type="2d" name="dt_bowl_0" file="../decor/assets/bowl/p0.png" colorspace="sRGB"/>
     <material name="dmat_bowl_0" texture="dt_bowl_0" specular="0.15" shininess="0.25" reflectance="0.02"/>
   </asset>
 

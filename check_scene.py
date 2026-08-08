@@ -46,7 +46,8 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+ROOT = HERE          # 仓根（Step 4 脚本搬进 tools/ 后这里会变成 dirname(HERE)）
+sys.path.insert(0, ROOT)
 
 from scenes import manifest as SCENES  # noqa: E402
 
@@ -96,6 +97,16 @@ def _fail(msgs: list[str], text: str) -> None:
     msgs.append(text)
 
 
+def _scene_path(key: str, robot: str) -> str:
+    """产物的绝对路径。⭐ **全文件只有这一处拼产物路径** —— 目录再动只改这里。
+
+    ⚠️ `scene_filename()` 返回的是**含 `build/` 的仓根相对路径**（不是裸文件名），
+       所以这里 join 的是仓根。这个仓的红线之一是「目录一动，所有 `..` 重新数一遍」，
+       而把同一个拼接抄 11 遍正是它最容易翻车的形态。
+    """
+    return os.path.join(ROOT, SCENES.scene_filename(key, robot))
+
+
 def check_contract(key: str, layout) -> list[str]:
     errs: list[str] = []
     for name in REQUIRED_NAMES:
@@ -117,7 +128,7 @@ def check_loads(key: str, layout) -> list[str]:
         return ["(跳过) 没装 mujoco，无法验证产物能否加载"]
     errs: list[str] = []
     for robot in ROBOT_CLEARANCE:
-        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        path = _scene_path(key, robot)
         if not os.path.exists(path):
             _fail(errs, f"产物不存在：{os.path.basename(path)}（跑 make_house.py --scene {key}）")
             continue
@@ -411,7 +422,7 @@ def check_wellformed(key: str, layout) -> list[str]:
     import xml.etree.ElementTree as ET
     errs: list[str] = []
     for robot in ROBOT_CLEARANCE:
-        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
         try:
@@ -430,7 +441,7 @@ def check_assets(key: str, layout) -> list[str]:
     import xml.etree.ElementTree as ET
     errs: list[str] = []
     for robot in ROBOT_CLEARANCE:
-        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
         root = ET.parse(path).getroot()
@@ -447,7 +458,10 @@ def check_assets(key: str, layout) -> list[str]:
             for attr, v in tex.items():
                 if not attr.startswith("file") or not v:
                     continue
-                if not os.path.exists(os.path.join(HERE, v)):
+                # ⭐ 按 MuJoCo 自己的规则解析：`<texture file>` 走 texturedir（本仓没设），
+                #    即相对**这份 XML 所在的目录**。⛔ 别写成仓根——那是在这里复制一份
+                #    MuJoCo 的规则，产物换一层目录就悄悄判错（产物 v0.10 挪进了 build/）。
+                if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(path), v))):
                     _fail(errs, f"{os.path.basename(path)}：贴图文件不存在 {v}")
         # ⛔ 天空盒有且只能有一个：两个是编译错误，零个是一片黑虚空
         skies = [t for t in asset.findall("texture") if t.get("type") == "skybox"]
@@ -535,7 +549,7 @@ def check_geom_budget(key: str, layout) -> list[str]:
         return ["(跳过) 没装 mujoco"]
     errs: list[str] = []
     for robot in ROBOT_CLEARANCE:
-        path = os.path.join(HERE, SCENES.scene_filename(key, robot))
+        path = _scene_path(key, robot)
         if not os.path.exists(path):
             continue
         n = mujoco.MjModel.from_xml_path(path).ngeom
@@ -558,7 +572,7 @@ def check_void(key: str, layout) -> list[str]:
         import numpy as np
     except ImportError:
         return ["(跳过) 没装 mujoco/numpy"]
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     if not os.path.exists(path):
         return []
     m = mujoco.MjModel.from_xml_path(path)
@@ -616,7 +630,7 @@ def check_decor_inside_box(key: str, layout) -> list[str]:
         import numpy as np
     except ImportError:
         return ["(跳过) 没装 mujoco/numpy"]
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     if not os.path.exists(path):
         return []
     m = mujoco.MjModel.from_xml_path(path)
@@ -670,7 +684,7 @@ def check_decor_ray_invariance(key: str, layout) -> list[str]:
         import numpy as np
     except ImportError:
         return ["(跳过) 没装 mujoco/numpy"]
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     if not os.path.exists(path):
         return []
     m = mujoco.MjModel.from_xml_path(path)
@@ -829,7 +843,7 @@ def check_art_clear(key: str, layout) -> list[str]:
 def check_no_dead_declarations(key: str, layout) -> list[str]:
     """layout 里声明了东西，产物里就必须找得到 —— 抓"死代码把声明吃掉"这一类 bug。"""
     errs: list[str] = []
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     if not os.path.exists(path):
         return []
     xml = open(path, encoding="utf-8").read()
@@ -874,7 +888,7 @@ def check_route(key: str, layout) -> list[str]:
         return ["(跳过) 没装 mujoco/numpy，无法做射线连通性验证"]
 
     errs: list[str] = []
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     if not os.path.exists(path):
         return [f"产物不存在：{os.path.basename(path)}"]
     m = mujoco.MjModel.from_xml_path(path)
@@ -960,7 +974,7 @@ def check_no_open_drop(key: str, layout) -> list[str]:
         return ["(跳过) 没装 mujoco/numpy"]
 
     errs: list[str] = []
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     m = mujoco.MjModel.from_xml_path(path)
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
@@ -1043,7 +1057,7 @@ def check_headroom(key: str, layout) -> list[str]:
     except ImportError:
         return ["(跳过) 没装 mujoco/numpy"]
 
-    path = os.path.join(HERE, SCENES.scene_filename(key, "g1"))
+    path = _scene_path(key, "g1")
     m = mujoco.MjModel.from_xml_path(path)
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
