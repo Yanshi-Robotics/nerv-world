@@ -420,7 +420,7 @@
     <geom name="great_room_wfn2_bot" type="box" size="1.07165 0.085 0.025" pos="4.7333 7.43 0.05" rgba="0.16 0.16 0.17 1"/>
     <geom name="great_room_ww0" type="box" size="2.65 1.65 0.07" pos="-1.53 4.85 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
     <geom name="great_room_we0" type="box" size="2.65 1.65 0.07" pos="6.13 4.85 1.65" quat="0.5 0.5 0.5 0.5" material="mat_h3_wall"/>
-    <geom name="furn_gr_rug" type="box" size="2.6 1.8 0.012" pos="2.3 4.6 0.012" material="mat_h3_rug"/>
+    <geom name="furn_gr_rug" type="box" size="2.6 1.8 0.012" pos="2.3 4.6 0.012" material="mat_h3_rug" contype="0" conaffinity="0"/>
     <geom name="furn_gr_sofa_base" type="box" size="1.8 0.5 0.21" pos="2.3 3.5 0.21" material="mat_h3_linen"/>
     <geom name="furn_gr_sofa_back" type="box" size="1.8 0.12 0.34" pos="2.3 3.1 0.55" material="mat_h3_linen"/>
     <geom name="furn_gr_sofa_armL" type="box" size="0.13 0.5 0.34" pos="0.55 3.5 0.34" material="mat_h3_linen"/>
@@ -654,7 +654,7 @@
     <geom name="furn_fy_console" type="box" size="1.22 0.26 0.34" pos="0.8 -4.2 0.34" quat="0.707107 0 0 0.707107" rgba="0.52 0.4 0.28 1" group="4"/>
     <geom name="furn_fy_lift_l" type="box" size="0.45 0.025 1.15" pos="1.15 -7.34 1.15" material="mat_steel"/>
     <geom name="furn_fy_lift_r" type="box" size="0.45 0.025 1.15" pos="3.45 -7.34 1.15" material="mat_steel"/>
-    <geom name="furn_fy_runner" type="box" size="0.55 2.3 0.008" pos="2.3 -4 0.008" rgba="0.44 0.4 0.36 1"/>
+    <geom name="furn_fy_runner" type="box" size="0.55 2.3 0.008" pos="2.3 -4 0.008" rgba="0.44 0.4 0.36 1" contype="0" conaffinity="0"/>
     <geom name="furn_fy_vase" type="box" size="0.12 0.12 0.165" pos="0.8 -4.2 0.845" rgba="0.62 0.6 0.58 1" group="4"/>
 
     <!-- ===== 洗衣房 ===== -->

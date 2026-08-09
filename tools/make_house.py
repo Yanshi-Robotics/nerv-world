@@ -337,18 +337,29 @@ def _furniture_geom(item: dict) -> str:
     #    导航和雷达全变，而**编译不报错**。是本仓的射线不变性自检当场抓到的
     #    （3 条射线穿过茶几打到了后面）。
     hide_box = _has_mesh_coat(item)
+    # ⭐ walkover = 「脚可以踩过去当它不存在」的薄铺装（地毯、门垫）。
+    #    2026-08-09 实测：G1 的盲策略（无外感知）踩上 1.6 cm 的地毯盒当场步态崩坏——
+    #    玄关轴线 vx=0.6 走 5 秒只挪 0.35 m、原地趔趄漂移；把毯的碰撞关掉立刻恢复 2.82 m。
+    #    house1 那条「⛔ 不许踩在地毯上（机器人 156° 翻了）」教训的行走版。
+    #    真机器人本来就踩着毯走，仿真里让脚踩地板、毯只管看，反而更接近真实。
+    #    ⚠️ mj_ray 不看 contype，毯照样挡射线——但它平贴地面（顶面 ≤2.4 cm），
+    #    胸高的水平雷达射线从它上方过，读数不受影响。
+    walkover = bool(item.get("walkover"))
     zb = _zbase(item["room"])
     px, py, pz = item["pos"]
     item = {**item, "pos": (px, py, pz + zb)}
     if item["type"] in ("cylinder", "sphere"):
         look = f'material="{mat}"' if mat else f'rgba="{_rgba(item["rgba"])}"'
+        if walkover:
+            look += _DECOR
         rot = _rot_attr(eu, qt)
         # cylinder 的 size = (半径, 半高)；sphere 只要半径；layout 里一律写 (直径, 直径, 高)
         dims = f'{_half(sx):g}' if item["type"] == "sphere" else f'{_half(sx):g} {_half(sz):g}'
         return (f'    <geom name="furn_{item["name"]}" type="{item["type"]}" size="{dims}" '
                 f'pos="{item["pos"][0]:g} {item["pos"][1]:g} {item["pos"][2]:g}"{rot} {look}/>')
     return _box(f'furn_{item["name"]}', item["pos"], item["size"], item["rgba"],
-                mat=mat, euler=eu, quat=qt, group=HIDDEN_BOX_GROUP if hide_box else 0)
+                mat=mat, euler=eu, quat=qt, group=HIDDEN_BOX_GROUP if hide_box else 0,
+                extra=_DECOR if walkover else "")
 
 
 def _ceiling_geom(room_key: str) -> str:

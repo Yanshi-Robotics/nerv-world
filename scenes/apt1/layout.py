@@ -594,11 +594,18 @@ _CLOSET = (0.40, 0.37, 0.34, 1.0)       # 衣帽间通柜的深色柜门
 _CREDENZA = (2.44, 0.52, 0.68)
 
 
-def _p(name, room, typ, pos, size, rgba, mat="", yaw=0.0):
-    """本文件内摆件用的小助手（和 furniture._p 同构，避免为一块板去调整个家具函数）。"""
+def _p(name, room, typ, pos, size, rgba, mat="", yaw=0.0, walkover=False):
+    """本文件内摆件用的小助手（和 furniture._p 同构，避免为一块板去调整个家具函数）。
+
+    walkover=True = 「脚可以踩过去当它不存在」的薄铺装（地毯/门垫）：生成器发成
+    contype=0 conaffinity=0。⛔ 盲策略踩上 1.6 cm 的毯盒当场步态崩坏（2026-08-09 实测，
+    玄关轴线 5 秒只挪 0.35 m；关掉碰撞恢复 2.82 m）——毯只管看，脚踩地板。
+    """
     d = {"name": name, "room": room, "type": typ, "pos": pos, "size": size, "rgba": rgba}
     if mat:
         d["mat"] = mat
+    if walkover:
+        d["walkover"] = True
     if abs(yaw) > 1e-6:
         a = math.radians(yaw) / 2.0
         d["quat"] = (math.cos(a), 0.0, 0.0, math.sin(a))
@@ -609,7 +616,7 @@ FURNITURE: list[dict] = []
 
 # ── 大客厅：转角沙发朝着落地窗，地毯，茶几，两把单椅 ──────────────────
 FURNITURE += [
-    _p("gr_rug", "great_room", "box", (2.30, 4.60, 0.012), (5.20, 3.60, 0.024), (0.62, 0.58, 0.52, 1.0), mat="mat_h3_rug"),
+    _p("gr_rug", "great_room", "box", (2.30, 4.60, 0.012), (5.20, 3.60, 0.024), (0.62, 0.58, 0.52, 1.0), mat="mat_h3_rug", walkover=True),
     # ⛔⛔ 沙发组 + 抱枕 + 茶几 + 木碗**整组北移 0.20**（2026-08-08）。⚠️ 要么一起挪，要么都别挪：
     #    只挪沙发不挪茶几，沙发↔茶几会从 0.425 掉到 0.225。
     #    根因：大客厅只有**一个**出入口——「画廊→大客厅」那个 4.00 m 的 kind="open" 洞口
@@ -797,7 +804,10 @@ FURNITURE += [
     #    注释和代码自相矛盾了整整一版，因为没有任何一项自检拿出生点和家具对过账。
     #    北移后毯边到出生点 0.30 m（G1 脚长 0.25，前脚尖离毯还有 5 cm），北端离玄关北墙
     #    内表面仍有 0.36 m，不压「玄关→画廊」的洞口。⭐ 出生点与英雄镜头一个字没改。
-    _p("fy_runner", "foyer", "box", (ENFILADE_X, -4.00, 0.008), (1.10, 4.60, 0.016), (0.44, 0.40, 0.36, 1.0)),
+    # ⭐ walkover（2026-08-09）：北移让出生点干净只解决了「生在毯上」，没解决「走上毯」——
+    #    G1 沿轴线走 0.3 m 就踩上毯南缘，盲策略当场原地趔趄（5 秒只挪 0.35 m）。
+    #    毯改纯视觉：脚踩地板、毯只管看。gr_rug 同理（它横在大客厅的走位路线上）。
+    _p("fy_runner", "foyer", "box", (ENFILADE_X, -4.00, 0.008), (1.10, 4.60, 0.016), (0.44, 0.40, 0.36, 1.0), walkover=True),
 ]
 FURNITURE += F.mesh_piece("fy_vase", "foyer", 0.80, -4.20, z=0.845,
                           size=(0.24, 0.24, 0.33), mesh="vase_b")

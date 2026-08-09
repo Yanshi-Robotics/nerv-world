@@ -238,8 +238,10 @@ FURNITURE: list[dict] = [
      "pos": (4.24, 6.6, 1.35), "size": (0.06, 2.20, 1.25), "rgba": (0.05, 0.05, 0.07, 1), "mat": "mat_screen"},
     {"name": "tv_console", "room": "living_room", "type": "box",
      "pos": (4.38, 6.6, 0.24), "size": (0.45, 3.00, 0.48), "rgba": (0.28, 0.21, 0.15, 1)},
+    # walkover：盲策略踩上薄毯盒步态崩坏（2026-08-09 apt1 实测；本毯 2026-07-25 还翻过机器人）
     {"name": "rug", "room": "living_room", "type": "cylinder",
-     "pos": (6.6, 6.3, 0.005), "size": (4.00, 4.00, 0.01), "rgba": (0.78, 0.70, 0.60, 1), "mat": "mat_carpet"},
+     "pos": (6.6, 6.3, 0.005), "size": (4.00, 4.00, 0.01), "rgba": (0.78, 0.70, 0.60, 1), "mat": "mat_carpet",
+     "walkover": True},
     {"name": "sofa_seat_e", "room": "living_room", "type": "box",
      "pos": (8.55, 6.3, 0.22), "size": (1.00, 3.40, 0.44), "rgba": (0.62, 0.55, 0.46, 1), "mat": "mat_fabric"},
     {"name": "sofa_back_e", "room": "living_room", "type": "box",
@@ -291,7 +293,8 @@ FURNITURE: list[dict] = [
 
     # ═══════ ④入户玄关：鞋柜 / 换鞋凳 / 挂衣 / 地垫 / 端景台 ═══════
     {"name": "entry_mat", "room": "entry", "type": "box",
-     "pos": (8.7, -0.6, 0.005), "size": (0.90, 1.60, 0.01), "rgba": (0.33, 0.31, 0.30, 1)},
+     "pos": (8.7, -0.6, 0.005), "size": (0.90, 1.60, 0.01), "rgba": (0.33, 0.31, 0.30, 1),
+     "walkover": True},
     # 这只 2.2 m 高的鞋柜原来**两面都穿出去了**：北墙 10 cm、东墙 2.5 cm，
     # 在隔壁墙面上凭空长出半截柜子。x 9.30→9.19、y 1.20→1.09
     # （2026-08-07 由 check_furniture_not_through_wall 抓到）
