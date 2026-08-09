@@ -184,6 +184,64 @@ def _swap_skybox(m, renderer, phase_suffix: str, warns: list[str]) -> None:
     mujoco.mjr_uploadTexture(m, renderer._mjr_context, skyid)
 
 
+def _swap_gridcube(m, renderer, L, tex_name: str, night_file: str, warns: list[str]) -> None:
+    """把一张网格排布的 cube 贴图（塔楼立面那种 gridsize/gridlayout）换成夜间版。
+
+    面序不猜：把**原盘上那张白天网格图**按 layout 声明的 gridlayout 拆成候选格，
+    和 tex_data 里的每个槽位实测匹配出「槽位 → 网格格子」的真实顺序，再按同序写入
+    夜间图的对应格子。四个侧面内容相同（匹配退化）无妨——写进去的也相同。
+    """
+    from PIL import Image
+
+    ti = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_TEXTURE, tex_name)
+    if ti < 0:
+        raise ValueError(f"textures 引用了产物里不存在的贴图 {tex_name!r}")
+    spec = next((t for t in getattr(L, "TEXTURES_EXTRA", ()) if t.get("name") == tex_name), None)
+    if spec is None:
+        raise ValueError(f"layout.TEXTURES_EXTRA 里找不到 {tex_name!r} 的声明（要读它的 gridlayout）")
+    W = int(m.tex_width[ti])
+    H = int(m.tex_height[ti])
+    nch = int(m.tex_nchannel[ti])
+    nslot = H // W
+    adr = int(m.tex_adr[ti])
+    block = m.tex_data[adr: adr + H * W * nch].reshape(nslot, W, W, nch)
+
+    def _cells(path: str) -> list[np.ndarray]:
+        img = np.asarray(Image.open(path).convert("RGB"))
+        cells = []
+        cols = len(spec["gridlayout"]) // int(spec["gridsize"].split()[0])
+        for i, ch in enumerate(spec["gridlayout"]):
+            if ch == ".":
+                continue
+            r, c = divmod(i, cols)
+            cell = img[r * W:(r + 1) * W, c * W:(c + 1) * W]
+            if cell.shape[:2] != (W, W):
+                raise ValueError(f"{path} 的格子尺寸 {cell.shape[:2]} ≠ 槽位 {W}×{W}"
+                                 "——运行期 tex_data 整段覆盖，尺寸必须逐位相同")
+            cells.append(cell)
+        return cells
+
+    day_cells = _cells(os.path.join(_ROOT, spec["file"]))
+    night_cells = _cells(os.path.join(_ROOT, os.path.dirname(spec["file"]), night_file)
+                         if os.sep not in night_file else os.path.join(_ROOT, night_file))
+    if len(day_cells) != nslot:
+        warns.append(f"⚠️ {tex_name}: 网格格数 {len(day_cells)} ≠ 内存槽数 {nslot}，换装跳过")
+        return
+    for s in range(nslot):
+        small = block[s][::8, ::8].astype(float)
+        errs = [float(np.mean(np.abs(c[::8, ::8].astype(float) - small))) for c in day_cells]
+        best = int(np.argmin(errs))
+        if errs[best] > 8.0:
+            warns.append(f"⚠️ {tex_name} 槽 {s} 与白天网格图对不上（err={errs[best]:.1f}），换装跳过")
+            return
+        block[s] = night_cells[best]
+    if renderer is None:
+        warns.append(f"⚠️ 没有 renderer，{tex_name} 写进了 tex_data 但没上传 GPU")
+        return
+    renderer._gl_context.make_current()
+    mujoco.mjr_uploadTexture(m, renderer._mjr_context, ti)
+
+
 def apply(model, renderer, phase: str, scene_key: str = "apt1",
           light_patch: dict | None = None) -> list[str]:
     """把 `phase` 的光照预设写进 model。返回告警列表（空 = 全部如实生效）。
@@ -264,6 +322,8 @@ def apply(model, renderer, phase: str, scene_key: str = "apt1",
             for k in ("specular", "shininess", "reflectance", "emission"):
                 if k in glass:
                     getattr(m, f"mat_{k}")[gi] = float(glass[k])
+        for tex_name, night_file in spec.get("textures", {}).items():
+            _swap_gridcube(m, renderer, L, tex_name, night_file, warns)
         sky = spec.get("sky")
         if sky:
             _swap_skybox(m, renderer, sky, warns)

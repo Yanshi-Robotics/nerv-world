@@ -653,7 +653,101 @@ LIGHTS_BY_TIME: dict[str, dict] = {
                   "shininess": 0.90, "reflectance": 0.20, "emission": 0.03},
     },
 
-    # 晨 / 夜：第 7 步补（天空盒与夜间立面贴图出齐后一起填，别提前写半套）。
+    # 早晨 ≈ 6:40 —— 朝北看不到日出，但厨房东侧转角窗吃得到低角度侧光。
+    # 签名：sky_park_e 从观景墙搬到厨房东窗内侧（⛔ 仍在玻璃里面），暖光横切过中岛；
+    # 其余天光压暗调蓝（黎明的北向天光比白天更蓝更弱），无窗区灯还没开、只给低暖底。
+    "morning": {
+        "label": "早晨 6:40 —— 冷天光，东窗一道暖侧光",
+        "sky": "morning",
+        "headlight": {"diffuse": "0.42 0.45 0.52", "ambient": "0.34 0.37 0.44",
+                      "specular": "0.07 0.07 0.07"},
+        "lights": {
+            "sun_sse": {"diffuse": "0.30 0.25 0.19", "specular": "0.06 0.06 0.06",
+                        "castshadow": True},
+            "sky_park_w": {"diffuse": "0.50 0.60 0.78", "specular": "0.03 0.03 0.03"},
+            "sky_park_c": {"diffuse": "0.50 0.60 0.78", "specular": "0.03 0.03 0.03"},
+            "sky_west": {"diffuse": "0.42 0.52 0.70", "specular": "0.03 0.03 0.03"},
+            # ⭐ 签名：搬到厨房东窗内侧（x = X4−0.5 仍在玻璃里面），横切过中岛
+            "sky_park_e": {"pos": f"{X4 - 0.5:g} 4.85 2.20", "dir": "-0.86 -0.20 -0.47",
+                           "diffuse": "1.00 0.84 0.62", "specular": "0.14 0.12 0.09",
+                           "attenuation": "0.34 0.02 0.003"},
+            "amb_gallery_w": {"diffuse": "0.30 0.25 0.19"},
+            "amb_gallery_e": {"diffuse": "0.30 0.25 0.19"},
+        },
+        "lights_off": ("amb_foyer", "amb_core", "amb_dressing"),
+        "materials": {
+            "mat_h3_limestone":  {"emission": 0.16, "rgba": "1.00 0.96 0.92 1"},
+            "mat_h3_glass_dark": {"emission": 0.10, "rgba": "0.54 0.62 0.76 1"},
+            "mat_h3_glass_cool": {"emission": 0.12},
+            "mat_h3_park":       {"emission": 0.30, "rgba": "0.78 0.84 0.82 1"},
+            "mat_h3_city":       {"emission": 0.30, "rgba": "0.80 0.84 0.90 1"},
+        },
+        "glass": {"bind_material": "mat_glass",
+                  "rgba": "0.70 0.78 0.88 0.09", "specular": 0.60,
+                  "shininess": 0.85, "reflectance": 0.12, "emission": 0.02},
+    },
+
+    # 夜晚 ≈ 23:10 —— headlight 压到「刚好托住黑位」的实测下限（再低暗部被 H.264 糊成
+    # 色块，再高洗平 practical 的光晕，而且暖底 = 「屋里灯开着」）；⭐ 白天那 4 盏死灯
+    # 复活成室内 practical（pos 可写，搬去当吊灯/灯槽）。7 盏用满，南带只剩 headlight
+    # ——那半层夜里本来就该暗，单镜要补光走 light_patch。
+    "night": {
+        "label": "夜晚 23:10 —— 窗外灯海，公园黑洞，室内暖岛",
+        "sky": "night",
+        "headlight": {"diffuse": "0.13 0.115 0.10", "ambient": "0.115 0.10 0.09",
+                      "specular": "0.05 0.05 0.05"},
+        "lights": {
+            # 原位原朝向、关阴影，变成一盏极暗的冷「城市光晕」补光（⛔ 方位没动，无穿玻璃风险）
+            "sun_sse": {"diffuse": "0.10 0.12 0.17", "specular": "0.02 0.02 0.02",
+                        "castshadow": False},
+            # 大客厅暗藏灯槽
+            "sky_park_c": {"pos": f"{ENFILADE_X:g} 4.60 3.05", "dir": "0 0 -1",
+                           "diffuse": "0.95 0.72 0.46", "specular": "0.12 0.10 0.07",
+                           "attenuation": "0.38 0.04 0.008"},
+            # 厨房中岛——夜里全屋最亮的一盏（家里的灯塔）
+            "sky_park_e": {"pos": "8.85 4.60 3.05", "dir": "0 0 -1",
+                           "diffuse": "1.05 0.84 0.58", "specular": "0.16 0.13 0.09",
+                           "attenuation": "0.34 0.03 0.006"},
+            # 餐厅吊灯位（白天这一间一盏灯都没有，夜里终于有了）
+            "sky_park_w": {"pos": "-4.00 4.90 3.05", "dir": "0 0 -1",
+                           "diffuse": "0.90 0.66 0.40", "specular": "0.12 0.10 0.07",
+                           "attenuation": "0.42 0.05 0.010"},
+            # 主卧床头
+            "sky_west": {"pos": "-8.80 5.00 3.05", "dir": "0 0 -1",
+                         "diffuse": "0.72 0.52 0.32", "specular": "0.07 0.07 0.07",
+                         "attenuation": "0.50 0.06 0.012"},
+            # 画廊两盏（白天的死灯复活）
+            "amb_gallery_w": {"pos": "-1.00 0.50 3.05", "dir": "0 0 -1",
+                              "diffuse": "0.84 0.62 0.40", "specular": "0.06 0.06 0.06",
+                              "attenuation": "0.38 0.04 0.008"},
+            "amb_gallery_e": {"pos": "3.60 0.50 3.05", "dir": "0 0 -1",
+                              "diffuse": "0.84 0.62 0.40", "specular": "0.06 0.06 0.06",
+                              "attenuation": "0.38 0.04 0.008"},
+        },
+        "lights_off": ("amb_foyer", "amb_core", "amb_dressing"),
+        "materials": {
+            "mat_h3_limestone":  {"emission": 0.55, "rgba": "1.00 0.86 0.62 1"},   # 暖白住宅灯
+            "mat_h3_facade":     {"emission": 0.50, "rgba": "0.86 0.80 0.70 1"},
+            "mat_h3_glass_dark": {"emission": 0.62, "rgba": "0.62 0.68 0.86 1"},   # 冷白办公灯
+            "mat_h3_glass_cool": {"emission": 0.58, "rgba": "0.72 0.82 1.00 1"},
+            # ⭐⭐ 中央公园是黑洞——纽约夜景最强的识别符，比任何一栋楼都重要
+            "mat_h3_park":       {"emission": 0.05, "rgba": "0.14 0.17 0.15 1"},
+            # 街网被钠灯照亮：白天航拍 + 低 emission + 暖暗染色 = 沥青反光
+            "mat_h3_city":       {"emission": 0.20, "rgba": "0.44 0.36 0.26 1"},
+        },
+        "geom_tint": (
+            # ⛔ 公园红线内那批体块必须压黑，否则公园里点着几十盏灯
+            {"where": "inpark", "rgba": (0.10, 0.11, 0.12, 1.0)},
+            {"where": "host", "rgba": (0.34, 0.32, 0.30, 1.0)},   # 本楼外皮不发光
+        ),
+        # 夜里窗格「哪些亮哪些黑」的随机性全在夜间立面贴图里（emission 是乘在贴图上的，
+        # 熄的窗格保持黑、亮的发光——正是要的行为）
+        "textures": {"tex_h3_fac_glass": "facade_glass_night.png",
+                     "tex_h3_fac_stone": "facade_limestone_night.png"},
+        "glass": {"bind_material": "mat_glass",
+                  "rgba": "0.62 0.66 0.76 0.16", "specular": 0.92,
+                  "shininess": 0.94, "reflectance": 0.30, "emission": 0.05},
+    },
 }
 
 # ---------------------------------------------------------------- 旧屋外契约

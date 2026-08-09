@@ -341,12 +341,16 @@ def _horizon_color() -> np.ndarray:
 
 
 # ---------------------------------------------------------------- 塔楼立面
-def facade(kind: str, px: int = 512, floors: int = 4) -> np.ndarray:
+def facade(kind: str, px: int = 512, floors: int = 4, night: bool = False) -> np.ndarray:
     """塔楼的立面贴图（一块 = floors 层楼高）。
 
     ⛔ 这张必须当 **cube 贴图**用，不能当 2d：MuJoCo 的 2d 贴图在基本体上是沿局部 Z 投影的，
        竖着的塔楼会被拉成条纹（本仓的城市背景板当年就栽在这）。
        cube 贴图则六个面各自正确映射——这正是给盒子贴立面该用的工具。
+
+    night=True：夜间版——墙体和竖挺压黑，窗格随机点亮（暖黄住宅光为主、少量冷白
+    办公层）。⭐ 夜里整城只靠材质 emission 均匀提亮会变成「均匀发灰的积木」，
+    真实感全在「哪些窗亮哪些窗黑」的随机性里。⛔ 固定种子：产物必须可复现。
     """
     img = np.zeros((px, px, 3), float)
     if kind == "glass":
@@ -355,8 +359,17 @@ def facade(kind: str, px: int = 512, floors: int = 4) -> np.ndarray:
     else:                                   # limestone：石材 + 打孔窗
         base, win, mull = (176, 168, 154), (72, 74, 78), (196, 190, 178)
         cols, rows = 7, floors * 2
+    if night:
+        # 夜壳：墙体近黑（被城市辉光勾出一点轮廓即可），窗默认灭
+        base = (16, 16, 20) if kind == "glass" else (24, 22, 20)
+        mull = (26, 26, 30)
+        win_off = (13, 15, 20) if kind == "glass" else (14, 14, 16)
+        lit_warm = (236, 206, 150)          # 住宅暖黄
+        lit_cool = (168, 188, 214)          # 办公冷白
+        p_lit = 0.34 if kind == "glass" else 0.22
+        RN = np.random.default_rng(11)      # ⛔ 固定种子
     img[:] = base
-    img += _noise(px, px, 0.25)[..., None] * 6
+    img += _noise(px, px, 0.25)[..., None] * (2 if night else 6)
     cw, rh = px / cols, px / rows
     for r in range(rows):
         for c in range(cols):
@@ -364,8 +377,15 @@ def facade(kind: str, px: int = 512, floors: int = 4) -> np.ndarray:
             # 窗洞占开间的中间一块，四周留窗间墙
             iy, ix = int(rh * 0.22), int(cw * 0.18)
             y1, x1 = int(y0 + rh - iy), int(x0 + cw - ix)
-            shade = 1.0 + 0.16 * math.sin(c * 1.7 + r * 0.9)   # 每格反射不同，免得死板
-            img[y0 + iy:y1, x0 + ix:x1] = np.array(win) * shade
+            if night:
+                if RN.random() < p_lit:
+                    tone = lit_cool if RN.random() < 0.15 else lit_warm
+                    img[y0 + iy:y1, x0 + ix:x1] = np.array(tone) * RN.uniform(0.70, 1.15)
+                else:
+                    img[y0 + iy:y1, x0 + ix:x1] = win_off
+            else:
+                shade = 1.0 + 0.16 * math.sin(c * 1.7 + r * 0.9)   # 每格反射不同，免得死板
+                img[y0 + iy:y1, x0 + ix:x1] = np.array(win) * shade
     # 楼层线 / 竖挺
     for r in range(rows):
         img[int(r * rh):int(r * rh) + max(1, px // 256)] = mull
@@ -374,23 +394,32 @@ def facade(kind: str, px: int = 512, floors: int = 4) -> np.ndarray:
     return img
 
 
-def roof(px: int = 512) -> np.ndarray:
-    """屋顶：砾石 + 设备层 + 女儿墙。"""
-    img = np.full((px, px, 3), 0.0) + np.array([116.0, 114.0, 110.0])
-    img += _noise(px, px, 0.35)[..., None] * 16           # 砾石颗粒
+def roof(px: int = 512, night: bool = False) -> np.ndarray:
+    """屋顶：砾石 + 设备层 + 女儿墙。night=True 压黑并加几粒红色航空障碍灯。"""
+    tone = np.array([22.0, 22.0, 26.0]) if night else np.array([116.0, 114.0, 110.0])
+    img = np.full((px, px, 3), 0.0) + tone
+    img += _noise(px, px, 0.35)[..., None] * (4 if night else 16)   # 砾石颗粒
     c = Image.fromarray(np.clip(img, 0, 255).astype(np.uint8))
     d = ImageDraw.Draw(c)
     b = px // 22
-    d.rectangle([0, 0, px - 1, px - 1], outline=(146, 143, 138), width=b)   # 女儿墙
+    line = (34, 34, 38) if night else (146, 143, 138)
+    d.rectangle([0, 0, px - 1, px - 1], outline=line, width=b)      # 女儿墙
     RR = np.random.default_rng(7)                          # ⛔ 固定种子：产物要可复现
     for _ in range(6):                                     # 冷却塔/机房/水箱
         x, y = RR.integers(b * 2, px - b * 5, 2)
         w, h = RR.integers(px // 12, px // 5, 2)
-        d.rectangle([x, y, x + w, y + h], fill=(96, 96, 100), outline=(140, 140, 144))
+        fill = (30, 30, 34) if night else (96, 96, 100)
+        d.rectangle([x, y, x + w, y + h], fill=fill,
+                    outline=(44, 44, 48) if night else (140, 140, 144))
+    if night:
+        for _ in range(4):                                 # 航空障碍灯
+            x, y = RR.integers(b * 2, px - b * 2, 2)
+            r = max(2, px // 200)
+            d.ellipse([x - r, y - r, x + r, y + r], fill=(255, 62, 54))
     return np.asarray(c).astype(float)
 
 
-def facade_cube(kind: str, px: int = 512) -> np.ndarray:
+def facade_cube(kind: str, px: int = 512, night: bool = False) -> np.ndarray:
     """把立面 + 屋顶拼成 MuJoCo 的 cube 网格图（gridsize="3 4"，layout ".U..LFRB.D.."）。
 
     ⛔ 为什么非拼不可：`type="cube"` 只给一个 `file` 时，MuJoCo 把**同一张图贴到六个面，
@@ -398,7 +427,7 @@ def facade_cube(kind: str, px: int = 512) -> np.ndarray:
        这比任何贴图精度问题都刺眼。给 U 面单独一张屋顶图就解决了。
     ⚠️ 网格按**行优先**读，字符只能取自 `.RLUDFB`；3×4 = 12 个字符，正好是"横向十字"。
     """
-    f, rf = facade(kind, px), roof(px)
+    f, rf = facade(kind, px, night=night), roof(px, night=night)
     grid = np.zeros((px * 3, px * 4, 3), float)
     layout = ".U..LFRB.D.."                    # 行优先：第0行 .U.. / 第1行 LFRB / 第2行 .D..
     for i, ch in enumerate(layout):
@@ -591,6 +620,51 @@ def sky_faces(hdri_id: str, px: int = 2048, roll_deg: float = 180.0) -> dict[str
     return out
 
 
+
+# ---------------------------------------------------------------- 程序化夜空
+def night_sky_faces(px: int = 2048) -> dict[str, np.ndarray]:
+    """曼哈顿的夜空——**不用 HDRI**，程序化合成。三条理由（都实测/物理）：
+    ① 8-bit 色调映射的野外夜空几乎全是 0–8 的死黑，切面后天顶必出 banding；
+    ② 多数夜景 HDRI 带一轮很亮的月亮，落在北边就是「中央公园上空不可能的月亮」；
+    ③ ⭐ 曼哈顿的夜空不是黑的，是被城市照亮的橙灰——野外 HDRI 拍出来像沙漠不像纽约。
+
+    做法：合成等距柱状图（天顶深蓝黑 → 地平线橙灰，南边中城方向最亮），
+    ⛔ 量化前加噪声抖动（否则 8-bit 渐变必 banding），少量高纬星星，
+    再走 `_equirect_face` 同一条切面管线（方向约定与 HDRI 路径逐位一致）。
+    """
+    H, W = 1024, 2048
+    lon = (np.arange(W) + 0.5) / W * 2 * np.pi - np.pi      # lon = atan2(y, x)
+    lat = np.pi / 2 - (np.arange(H) + 0.5) / H * np.pi
+    LT = np.repeat(lat[:, None], W, axis=1)
+    LN = np.repeat(lon[None, :], H, axis=0)
+    zenith = np.array([8.0, 10.0, 16.0])
+    horizon = np.array([58.0, 44.0, 32.0])
+    south_boost = np.array([18.0, 12.0, 6.0])               # 中城方向（南）的辉光
+    # 高度混合：地平线附近权重大，sin^2.2 压向低空
+    t = np.clip(1.0 - np.abs(LT) / (np.pi / 2), 0, 1) ** 2.2
+    # 方位：南 = lon -π/2 最亮
+    az_w = (np.cos(LN + np.pi / 2) * 0.5 + 0.5) ** 1.5
+    eq = zenith[None, None, :] + t[..., None] * (
+        horizon - zenith)[None, None, :] + (t * az_w)[..., None] * south_boost[None, None, :]
+    # 地平线下（贴图上其实被楼和地面挡住）延续地平线色，免得切面边缘出黑边
+    hrow = eq[np.argmin(np.abs(lat))]                       # (W, 3) 地平线那一行
+    eq = np.where((LT < 0)[..., None], hrow[None, :, :], eq)
+    # 星星：只在高纬（城市光害下低空看不到星）
+    RS = np.random.default_rng(20260809)
+    n_star = 400
+    si = RS.integers(0, H // 3, n_star)                     # lat > ~30°
+    sj = RS.integers(0, W, n_star)
+    eq[si, sj] = np.minimum(eq[si, sj] + RS.uniform(50, 100, (n_star, 1)), 255)
+    # ⛔ 抖动再量化：8-bit 深色渐变不抖必 banding
+    eq += np.random.default_rng(3).normal(0, 1.2, eq.shape)
+    eq = np.clip(eq, 0, 255)
+    out = {}
+    for d, attr in SKY_FACE_FOR_DIR.items():
+        up = (0, 0, 1) if d[2] == 0 else (0, 1, 0)
+        out[attr] = _equirect_face(eq, d, up, px)
+    return out
+
+
 # ---------------------------------------------------------------- 天空盒标定
 def calib_faces(face_px: int = 512) -> dict[str, np.ndarray]:
     """六张标定图：每面一个大字母 + 一个向上的箭头。
@@ -678,8 +752,13 @@ def main() -> None:
             return
     if a.sky or a.all:
         suffix = "" if a.sky_phase == "day" else f"_{a.sky_phase}"
-        print(f"生成天空盒六面（Poly Haven 实景天空，CC0，时段={a.sky_phase}）→", OUT_DIR)
-        for attr, arr in sky_faces(a.sky_id, roll_deg=a.sky_roll).items():
+        if a.sky_phase == "night":
+            print(f"生成天空盒六面（程序化曼哈顿夜空，不联网）→", OUT_DIR)
+            faces = night_sky_faces()
+        else:
+            print(f"生成天空盒六面（Poly Haven 实景天空，CC0，时段={a.sky_phase}）→", OUT_DIR)
+            faces = sky_faces(a.sky_id, roll_deg=a.sky_roll)
+        for attr, arr in faces.items():
             _save(f"sky{suffix}_{attr}.png", arr)
         if not a.all:
             return
@@ -687,6 +766,7 @@ def main() -> None:
         print("生成塔楼立面贴图 →", OUT_DIR)
         for kind in ("glass", "limestone"):
             _save(f"facade_{kind}.png", facade_cube(kind))
+            _save(f"facade_{kind}_night.png", facade_cube(kind, night=True))
         if not a.all:
             return
     if a.naip or a.all:
