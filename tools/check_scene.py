@@ -1614,10 +1614,84 @@ def check_headroom(key: str, layout) -> list[str]:
     return errs
 
 
+
+def check_time_presets(key: str, layout) -> list[str]:
+    """四时段光照预设（LIGHTS_BY_TIME）的静态自洽。⛔ 纯 Python 不碰 mujoco——
+    本仓缺依赖时多项是「跳过 ⚠️」语义，这一项必须在裸环境也能真红。
+
+    预设是「产物之上的一层受约束补丁」：引用的灯名/材质名/贴图文件必须已存在、
+    不能凭空创造；灯数不超渲染预算；sun_sse 不许挪方位（阴影贴图坑）；
+    glass alpha 不许 ≤0.02（mj_ray 挖空坑）；day 必须是空 dict（产物即白天真相）。
+    没声明 LIGHTS_BY_TIME 的场景不受此检（约束随声明而生）。
+    """
+    presets = getattr(layout, "LIGHTS_BY_TIME", None)
+    if presets is None:
+        return []
+    errs: list[str] = []
+    budget = getattr(layout, "LIGHT_BUDGET", 7)
+    xml = open(_scene_path(key, "g1"), encoding="utf-8").read()   # 灯/材质名两台机器人产物相同，核一份即可
+    import re as _re
+    light_names = set(_re.findall(r'<light name="([^"]+)"', xml))
+    mat_names = set(_re.findall(r'<material name="([^"]+)"', xml))
+    if presets.get("day"):
+        _fail(errs, "day 预设必须是空 dict——「产物即白天真相」是定义不是口头承诺")
+    for phase, spec in presets.items():
+        if not spec:
+            continue
+        lights = spec.get("lights", {})
+        if len(lights) > budget:
+            _fail(errs, f"{phase}: {len(lights)} 盏灯超预算 {budget}"
+                        "（渲染器只点亮 headlight+7 盏，多的静默不亮）")
+        for name, attrs in lights.items():
+            if name not in light_names:
+                _fail(errs, f"{phase}: 灯 {name!r} 不在产物里——预设不能凭空创造")
+            if name == "sun_sse" and ("pos" in attrs or "dir" in attrs):
+                _fail(errs, f"{phase}: ⛔ sun_sse 的方位不许动（方向光穿玻璃 = 阴影贴图坑），"
+                            "只准调色/强度/castshadow")
+        for name in spec.get("lights_off", ()):
+            if name not in light_names:
+                _fail(errs, f"{phase}: lights_off 里的 {name!r} 不在产物里")
+        for name in spec.get("materials", {}):
+            if name not in mat_names:
+                _fail(errs, f"{phase}: 材质 {name!r} 不在产物里")
+        glass = spec.get("glass")
+        if glass:
+            try:
+                alpha = float(str(glass["rgba"]).split()[3])
+            except Exception:
+                alpha = -1.0
+            if alpha <= 0.02:
+                _fail(errs, f"{phase}: ⛔ 玻璃 alpha={alpha} ≤0.02"
+                            "（alpha=0 曾让 mj_ray 挖空碰撞盒——232 米自由落体坑）")
+            if glass.get("bind_material") not in mat_names:
+                _fail(errs, f"{phase}: glass.bind_material 不在产物里")
+        sky = spec.get("sky")
+        if sky:
+            for a in ("fileright", "fileleft", "fileup", "filedown", "filefront", "fileback"):
+                pth = os.path.join(ROOT, "textures", "house3", f"sky_{sky}_{a}.png")
+                if not os.path.isfile(pth):
+                    _fail(errs, f"{phase}: 天空盒面缺文件 {os.path.relpath(pth, ROOT)}"
+                                "（先跑 tools/make_view.py --sky --sky-phase <时段>）")
+        for tex_name, night_file in spec.get("textures", {}).items():
+            decl = next((t for t in getattr(layout, "TEXTURES_EXTRA", ())
+                         if t.get("name") == tex_name), None)
+            if decl is None:
+                _fail(errs, f"{phase}: textures 引用了 TEXTURES_EXTRA 没有的 {tex_name!r}")
+                continue
+            pth = os.path.join(ROOT, os.path.dirname(decl["file"]), night_file)
+            if not os.path.isfile(pth):
+                _fail(errs, f"{phase}: 换装贴图缺文件 {os.path.relpath(pth, ROOT)}")
+        for tint in spec.get("geom_tint", ()):
+            if tint.get("where") not in getattr(layout, "GEOM_BANDS", {}):
+                _fail(errs, f"{phase}: geom_tint 的 where={tint.get('where')!r} 不在 GEOM_BANDS 里")
+    return errs
+
+
 CHECKS = [
     ("layout 契约完整", check_contract),
     ("产物是合法 XML", check_wellformed),
     ("⭐ 引用的材质/贴图都真的存在", check_assets),
+    ("⭐ 四时段光照预设自洽（声明了才检）", check_time_presets),
     ("⭐⭐ decor.lock 自洽（offset±half ⇄ size）", check_lock_reconciles),
     ("⛔ geom 数没超渲染缓冲", check_geom_budget),
     ("产物能被 MuJoCo 加载", check_loads),
