@@ -565,6 +565,97 @@ VISUAL = {
     "headlight_specular": "0.08 0.08 0.08",
 }
 
+# ---------------------------------------------------------------- 四时段光照（渲染期）
+# ⭐ 这一段**不进产物**。产物 = 白天，是白天的唯一真相源；晨/昏/夜由消费方在加载后
+#    写 mjModel 字段实现（应用逻辑只有一份：scenes/apply_time_preset.py）。
+#    ⛔ 别在产物里找晨/昏/夜的答案，也别为这三段重跑生成器。
+#
+# ⛔⛔ **渲染器只点亮 headlight + 前 7 盏 active 的模型灯**（2026-08-09 实测：
+#    逐盏关灯量画面 delta，第 8 盏起受影响像素 = 0.000%）。`mjMAXLIGHT=100` 是
+#    mjvScene 的容量、不是渲染能力——上面 LIGHTS 注释里「house1 的 14 盏一直正常」
+#    是错的（后 4 盏从来没亮过）。所以：
+#    ① 每个 phase 的 `lights` 最多 LIGHT_BUDGET 项；
+#    ② ⛔ 这里不许出现新灯名——运行期加不了灯，写错只会静默不亮；
+#    ③ 产物第 0 盏是 robots/*/g1.xml 里那盏**无名**方向光（diffuse 0.7、castshadow
+#      默认开，实测占 68% 像素、是 apt1 事实上的主光），晨/昏/夜一律把它关掉。
+LIGHT_BUDGET = 7
+LIGHT0_IS_ROBOT_LIGHT = True     # ⛔ 消费方靠这个标志知道要 light_active[0]=0
+
+PHASES = ("day", "morning", "dusk", "night")
+
+# 按位置筛窗外体块的「带」（geom 级染色用；名字前缀 sky_nyc 是 make_view --nyc 的产物约定）。
+# ⛔ 阈值全部从 layout 常量算，不写裸数字。
+GEOM_BANDS = {
+    "uws":    {"prefix": "sky_nyc", "x_max": -PARK_W / 2.0, "y_min": PARK_NEAR_Y},
+    "ues":    {"prefix": "sky_nyc", "x_min": PARK_W / 2.0, "y_min": PARK_NEAR_Y},
+    "inpark": {"prefix": "sky_nyc", "x_abs_max": PARK_W / 2.0 - 40.0, "y_min": PARK_NEAR_Y + 40.0},
+    "host":   {"names": ("host_facade", "host_ledge")},
+    # 12 栋点名近塔（中央公园大厦、220 CPS 那批）：名单从 _TOWERS 推导，⛔ 不抄第二份
+    "neartw": {"names": tuple(f"sky_{t[0]}" for t in _TOWERS)},
+}
+
+# 每段的形状：属性名沿用上面 LIGHTS 那套 MuJoCo 词汇，好并排 diff。
+# `lights` 只能引用产物里已有的灯名/材质名/geom 名——预设不能凭空创造任何东西，
+# 它只是产物之上的一层受约束补丁。`sky` 指 textures/house3/ 里带时段后缀的六面
+# （None = 沿用白天那套；晨/昏/夜的天空盒在 make_view.py --sky-phase 出齐前先空着）。
+LIGHTS_BY_TIME: dict[str, dict] = {
+    # ⭐ 空 dict = 什么都不改 = 「产物即白天真相」的机器化表达
+    "day": {},
+
+    # 黄昏 ≈ 19:35 —— 朝北看不到落日本身，但 ① 上西区西立面被染金、② 西侧落地窗
+    # 正对西方，窗内就是金光。主光 = sky_west 压低改金、几乎水平向东扫，
+    # 在地板拉长条。⛔ sun_sse 的 pos/dir 一个字不改（不许穿玻璃，见 LIGHTS 注释），
+    # 只调色和强度。北向天光整排改玫瑰紫——反日落的天空不是蓝的。
+    "dusk": {
+        "label": "黄昏 19:35 —— 对岸染金，西窗金光扫进主卧",
+        "sky": "dusk",                     # textures/house3/sky_dusk_file*.png（qwantani_dusk_2_puresky）
+        "headlight": {"diffuse": "0.40 0.375 0.40", "ambient": "0.32 0.295 0.33",
+                      "specular": "0.07 0.07 0.07"},
+        "lights": {
+            # 深琥珀，只落进书房/客卧/主卫——原位原朝向，零风险
+            "sun_sse": {"diffuse": "0.34 0.20 0.09", "specular": "0.05 0.05 0.05",
+                        "castshadow": True},
+            # 反日落的玫瑰紫天光
+            "sky_park_w": {"diffuse": "0.66 0.52 0.56", "specular": "0.03 0.03 0.03"},
+            "sky_park_c": {"diffuse": "0.66 0.52 0.56", "specular": "0.03 0.03 0.03"},
+            "sky_park_e": {"diffuse": "0.70 0.54 0.54", "specular": "0.03 0.03 0.03"},
+            # ⭐⭐ 主光：西玻璃内侧、压到 2.1 m、几乎水平向东，金光在地板拉长条。
+            #    ⛔ 它本来就在玻璃里面（x = X0+0.3 > X0），不穿玻璃。
+            "sky_west": {"pos": f"{X0 + 0.3:g} 4.00 2.10", "dir": "0.90 -0.16 -0.40",
+                         "diffuse": "1.00 0.62 0.30", "specular": "0.18 0.12 0.06",
+                         "attenuation": "0.30 0.02 0.002"},
+            "amb_gallery_w": {"diffuse": "0.40 0.31 0.21"},
+            "amb_gallery_e": {"diffuse": "0.40 0.31 0.21"},
+        },
+        "lights_off": ("amb_foyer", "amb_core", "amb_dressing"),
+        "materials": {
+            "mat_h3_limestone":  {"emission": 0.30, "rgba": "1.00 0.90 0.74 1"},
+            "mat_h3_facade":     {"emission": 0.26, "rgba": "0.92 0.84 0.72 1"},
+            "mat_h3_glass_dark": {"emission": 0.22, "rgba": "0.66 0.62 0.66 1"},
+            "mat_h3_glass_cool": {"emission": 0.26, "rgba": "0.92 0.86 0.86 1"},
+            "mat_h3_park":       {"emission": 0.20, "rgba": "0.60 0.50 0.42 1"},   # 暮色树冠，压暗偏赭
+            "mat_h3_city":       {"emission": 0.34, "rgba": "0.92 0.74 0.58 1"},
+        },
+        "geom_tint": (
+            # ⭐⭐ 全片主视觉：上西区被落日染金；上东区背光偏冷紫——反差即日落方向感
+            {"where": "uws", "rgba": (1.00, 0.66, 0.32, 1.0)},
+            {"where": "ues", "rgba": (0.62, 0.56, 0.62, 1.0)},
+            # 近塔挡在日落方向，暮色里该是偏暗的剪影（我们只看得到它们的东/北面=背光面）
+            {"where": "neartw", "rgba": (0.46, 0.40, 0.42, 1.0)},
+            # ⛔ 本楼外皮单独压回（mat_h3_facade 是共享材质，别跟着整城发光）
+            {"where": "host", "rgba": (0.72, 0.68, 0.64, 1.0)},
+        ),
+        # 玻璃绑进产物里那个使用者数为 0 的 mat_glass 空槽位（specular/reflectance 有了，
+        # 金光能在玻璃上拖一道）。⛔ alpha 绝不为 0；且实测绑了材质后 mj_ray 对 alpha
+        # 彻底免疫——比不绑更安全。
+        "glass": {"bind_material": "mat_glass",
+                  "rgba": "0.86 0.72 0.58 0.11", "specular": 0.75,
+                  "shininess": 0.90, "reflectance": 0.20, "emission": 0.03},
+    },
+
+    # 晨 / 夜：第 7 步补（天空盒与夜间立面贴图出齐后一起填，别提前写半套）。
+}
+
 # ---------------------------------------------------------------- 旧屋外契约
 # ⛔ 不是忘了填。窗景走上面的 SKYBOX + GROUND_SLABS + SKYLINE + HOST_TOWER 四层；
 #    这几个名字留着是因为 check_scene 的契约要求它们存在，空值 = 生成器什么也不出。
