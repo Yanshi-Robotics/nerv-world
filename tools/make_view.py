@@ -533,10 +533,16 @@ PH_TONEMAPPED = "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%
 #    也就是说 up↔down、left↔right 全部对调。照 MuJoCo 文档的字面命名去填，
 #    天空会上下翻转 + 左右镜像，**而渲染出来照样很好看**，只有对着实景才看得出不对。
 #    ⛔ 别"优化"掉这张表，也别照字面重排——要改先重跑 --calib。
+# ⛔ 键是**显示方向**：朝这个世界方向看时，MuJoCo 画的是哪个文件槽。
+#    2026-08-09 用字母标定图 + 彩色方位探针实测重定（旧表四个侧面配反了 180°，
+#    造成两个一直没人发现的 bug：① 白天太阳其实在北边——roll=180 特意躲的东西
+#    被表的 180° 转回来了；② 朝西北看天空有一条脸缝硬边，黄昏光下特别扎眼。
+#    旧表当年只朝北目检过，北面"看着对"是两个错互相抵消的假象）。
+#    面内取向的镜像补偿在 _equirect_face 里（right 取反），两处配套，⛔ 别只改一处。
 SKY_FACE_FOR_DIR = {
-    (+1, 0, 0): "fileleft",     (-1, 0, 0): "fileright",
-    (0, +1, 0): "filefront",    (0, -1, 0): "fileback",
-    (0, 0, +1): "filedown",     (0, 0, -1): "fileup",
+    (+1, 0, 0): "fileright",    (-1, 0, 0): "fileleft",
+    (0, +1, 0): "fileback",     (0, -1, 0): "filefront",
+    (0, 0, +1): "fileup",       (0, 0, -1): "filedown",
 }
 
 
@@ -549,7 +555,10 @@ def _equirect_face(eq: np.ndarray, forward, up, px: int) -> np.ndarray:
     h, w = eq.shape[:2]
     f = np.array(forward, float); f /= np.linalg.norm(f)
     u = np.array(up, float); u -= f * (u @ f); u /= np.linalg.norm(u)
-    r = np.cross(f, u)
+    # ⛔ right 取反 = 镜像补偿：MuJoCo 把天空盒每面**水平镜像**着画（cube 贴图按
+    #    "从外面看"制作）。2026-08-09 彩色方位探针实测：取反后北红/东绿/南蓝/西黄/
+    #    天顶白五向逐位全对。与 SKY_FACE_FOR_DIR 的显示方向表配套，⛔ 别只改一处。
+    r = -np.cross(f, u)
     # 面内网格：[-1,1]²，正好张成 90°
     t = (np.arange(px) + 0.5) / px * 2.0 - 1.0
     gx, gy = np.meshgrid(t, -t)
@@ -628,6 +637,12 @@ def main() -> None:
                     help="⭐ 抓 Poly Haven 的 CC0 实景天空 → 天空盒六面")
     ap.add_argument("--sky-id", default="kloofendal_48d_partly_cloudy_puresky",
                     help="用哪张 HDRI（Poly Haven 的 pure skies 系列，全 CC0）")
+    ap.add_argument("--sky-phase", default="day", choices=("day", "morning", "dusk", "night"),
+                    help="出哪个时段的天空盒。⭐ day 不带后缀（现有引用零改动）；"
+                         "其它时段落成 sky_<时段>_file*.png，供渲染期换装（LIGHTS_BY_TIME）")
+    ap.add_argument("--sky-roll", type=float, default=180.0,
+                    help="等距柱状横向旋转角（度）。⛔ 默认 180 是为南半球 HDRI 定的"
+                         "（太阳摆回南边）；换 HDRI 要按太阳/月亮实际方位重定，别盲用默认")
     ap.add_argument("--facades", action="store_true", help="生成塔楼立面贴图")
     ap.add_argument("--calib", action="store_true",
                     help="生成天空盒六面标定图（每面一个大字母 + 向上箭头）")
@@ -662,9 +677,10 @@ def main() -> None:
         if not a.all:
             return
     if a.sky or a.all:
-        print("生成天空盒六面（Poly Haven 实景天空，CC0）→", OUT_DIR)
-        for attr, arr in sky_faces(a.sky_id).items():
-            _save(f"sky_{attr}.png", arr)
+        suffix = "" if a.sky_phase == "day" else f"_{a.sky_phase}"
+        print(f"生成天空盒六面（Poly Haven 实景天空，CC0，时段={a.sky_phase}）→", OUT_DIR)
+        for attr, arr in sky_faces(a.sky_id, roll_deg=a.sky_roll).items():
+            _save(f"sky{suffix}_{attr}.png", arr)
         if not a.all:
             return
     if a.facades or a.all:
