@@ -1687,11 +1687,45 @@ def check_time_presets(key: str, layout) -> list[str]:
     return errs
 
 
+
+def check_lights_render(key: str, layout) -> list[str]:
+    """⛔ 渲染器只点亮 headlight + 前 7 盏 active 模型灯（2026-08-09 逐盏关灯实测，
+    第 8 盏起受影响像素 = 0.000%）。`mjMAXLIGHT=100` 是 mjvScene 的容量不是渲染能力。
+
+    从**产物**数灯（⛔ 不能数 len(L.LIGHTS)——机器人 include 也带灯，layout 看不见）。
+    超预算的灯不会报错、只是静默不亮——这道门把静默变成红。
+    ⚠️ 本门首次加入时三个场景都超（apt1 11 / house1 14 / house2 13，各有 3–7 盏
+    从来没亮过的死灯，含 house1/2 那盏「让窗外草地亮起来」的 sun）——这是存量 bug，
+    修灯要重排 LIGHTS + 重跑产物 + 重出 README 配图，单独一个 commit 做。
+    """
+    errs: list[str] = []
+    budget = getattr(layout, "LIGHT_BUDGET", 7)
+    import re as _re
+    for robot in ("g1", "go2"):
+        xml = open(_scene_path(key, robot), encoding="utf-8").read()
+        scene_lights = _re.findall(r'<light[^>]*name="([^"]+)"', xml)
+        inc = _re.search(r'<include file="([^"]+)"', xml)
+        robot_lights = 0
+        if inc:
+            rp = os.path.normpath(os.path.join(os.path.dirname(_scene_path(key, robot)),
+                                               inc.group(1)))
+            if os.path.isfile(rp):
+                robot_lights = open(rp, encoding="utf-8").read().count("<light")
+        total = len(scene_lights) + robot_lights
+        if total > 1 + budget:
+            dead = scene_lights[budget - robot_lights + 1 - 1:]
+            _fail(errs, f"{key}-{robot}: 共 {total} 盏灯（场景 {len(scene_lights)} + "
+                        f"机器人 {robot_lights}）> 渲染上限 {1 + budget}；"
+                        f"排在后面的静默不亮：{', '.join(dead)}")
+    return errs
+
+
 CHECKS = [
     ("layout 契约完整", check_contract),
     ("产物是合法 XML", check_wellformed),
     ("⭐ 引用的材质/贴图都真的存在", check_assets),
     ("⭐ 四时段光照预设自洽（声明了才检）", check_time_presets),
+    ("⛔ 灯数没超渲染器上限（headlight+7）", check_lights_render),
     ("⭐⭐ decor.lock 自洽（offset±half ⇄ size）", check_lock_reconciles),
     ("⛔ geom 数没超渲染缓冲", check_geom_budget),
     ("产物能被 MuJoCo 加载", check_loads),
