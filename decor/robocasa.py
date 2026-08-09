@@ -55,7 +55,7 @@ FIXTURES = {
     "rc_hood": ("hoods", "RangeHood002", "抽油烟机"),
 }
 
-_UA = {"User-Agent": "alice-house/0.8 (+https://github.com/jeffliulab/alice-house)"}
+_UA = {"User-Agent": "alice-house/0.8 (+https://github.com/Yanshi-Robotics/alice-house)"}
 
 
 def _zip_path(cat: str) -> str:

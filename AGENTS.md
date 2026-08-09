@@ -10,7 +10,7 @@
 它**不是**：
 
 - **不是应用**：没有运行期服务、没有 API、没有用户输入——它是**别的项目 import 的资产**。
-  主要消费方：[anima-zero](https://github.com/jeffliulab/anima-zero) 的 `sim-house-nav` 世界。
+  主要消费方：[anima-zero](https://github.com/Yanshi-Robotics/anima-zero) 的 `sim-house-nav` 世界。
 - **不是训练仓**：这里只**装**训练产物（ONNX + 契约），训练本身在
   [unitree-g1-locomotion](https://github.com/jeffliulab/unitree-g1-locomotion)。
 - **不是给某一台机器人定制的考题**：场景是「现实」，四足眼高约 0.4 m、人形约 1.25 m，

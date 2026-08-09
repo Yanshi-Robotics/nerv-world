@@ -65,7 +65,7 @@ MATERIALS = [
 
 # ⚠️ ambientCG 会用 403 拒掉默认的 `Python-urllib/3.x` User-Agent。
 #    带一个能说明来路的 UA 是基本礼貌，也是它接受请求的前提。
-UA = "alice-house/0.8 (+https://github.com/jeffliulab/alice-house) scene-asset-fetcher"
+UA = "alice-house/0.8 (+https://github.com/Yanshi-Robotics/alice-house) scene-asset-fetcher"
 
 
 def _get(url: str, timeout: int = 300, tries: int = 3) -> bytes:

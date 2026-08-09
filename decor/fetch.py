@@ -35,7 +35,7 @@ ASSET_DIR = os.path.join(HERE, "assets")
 LOCK = os.path.join(HERE, "decor.lock.json")
 ATTRIB = os.path.join(HERE, "ATTRIBUTION.md")
 
-UA = "alice-house/0.8 (+https://github.com/jeffliulab/alice-house) scene-asset-fetcher"
+UA = "alice-house/0.8 (+https://github.com/Yanshi-Robotics/alice-house) scene-asset-fetcher"
 PH_FILES = "https://api.polyhaven.com/files/{id}"
 PH_INFO = "https://api.polyhaven.com/info/{id}"
 OBJ_PATHS = "https://huggingface.co/datasets/allenai/objaverse/resolve/main/object-paths.json.gz"

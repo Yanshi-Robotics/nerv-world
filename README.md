@@ -456,7 +456,7 @@ textures/ · docs/images/<scene>/  generated textures · README screenshots
 ## Quick Start
 
 ```bash
-git clone https://github.com/jeffliulab/alice-house.git
+git clone https://github.com/Yanshi-Robotics/alice-house.git
 cd alice-house
 pip install mujoco numpy pillow
 
@@ -512,7 +512,7 @@ into two disconnected pieces — it reported **green**: walking around, there *w
 To actually **make a robot walk**: `policies/` holds trained ONNX policies with a
 `contract.json` next to each (joint order, gains, observation layout — all of it). Feed a policy
 a velocity command `(vx, vy, wz)` and it returns joint targets. For a working deployer, see
-`world/sim-house-nav/sim.py` in [anima-zero](https://github.com/jeffliulab/anima-zero).
+`world/sim-house-nav/sim.py` in [anima-zero](https://github.com/Yanshi-Robotics/anima-zero).
 
 ## One File per (Place, Robot)
 

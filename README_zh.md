@@ -417,7 +417,7 @@ textures/ · docs/images/<场景>/   生成的贴图 · README 配图
 ## 快速开始
 
 ```bash
-git clone https://github.com/jeffliulab/alice-house.git
+git clone https://github.com/Yanshi-Robotics/alice-house.git
 cd alice-house
 pip install mujoco numpy pillow
 
@@ -468,7 +468,7 @@ python tools/make_house.py && python tools/check_scene.py     # 重新生成并�
 
 想让机器人**真的走起来**：`policies/` 下是训练好的 ONNX 策略，配 `contract.json`
 （关节顺序、增益、观测格式全在里面）。喂它速度指令 `(vx, vy, wz)`，它吐关节目标角度。
-一个跑通的部署器可以参考 [anima-zero](https://github.com/jeffliulab/anima-zero)
+一个跑通的部署器可以参考 [anima-zero](https://github.com/Yanshi-Robotics/anima-zero)
 的 `world/sim-house-nav/sim.py`。
 
 ## 一个「场景 × 机器人」一份文件
