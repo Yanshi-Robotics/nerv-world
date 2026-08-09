@@ -84,6 +84,16 @@ ROBOTS: dict[str, dict] = {
         #    置零，所以 (0, 0.2] 这一段**策略一次都没见过**，发过去是分布外输入。
         #    现在的两个取值都是安全的：直走 0.6、转弯 0.0。日后若想加"慢速挪一点"这种原语，
         #    要么给 0，要么给 ≥ 0.2，⛔ 不许填 0.1 这类"看起来更温柔"的值。
+        # ⭐ 上面两段注释的**机器可读版**（消费方的命令校验器读这三个字段，缺了会硬报错）。
+        #    出处：产出本策略的训练 run `unitree_rl_lab/logs/rsl_rl/
+        #    unitree_g1_29dof_velocity_turnaligned/2026-07-27_07-41-40_s2e5-aligned-s42/`——
+        #    ranges 在 params/env.yaml（lin_vel_x/lin_vel_y/ang_vel_z），
+        #    死区在 params/velocity_variants_env_cfg.py 的 LIN_VEL_DEADBAND = 0.2
+        #    （legged_gym 全家同值）。⚠️ 换策略必须连这三个字段一起换，别沿用。
+        "command_ranges": {"vx": (-0.5, 1.0), "vy": (-0.3, 0.3), "wz": (-0.8, 0.8)},
+        "lin_cmd_deadband": 0.2,
+        # 脚部 body 名（落脚事件检测按 body 子树取 geom 集合，⛔ 不按名字猜 geom id）
+        "foot_bodies": ("left_ankle_roll_link", "right_ankle_roll_link"),
         "policy_dir": "policies/g1-29dof-turn",
         # ⛔ 训练侧是 **ImplicitActuator（隐式 PD）** → 部署侧必须把 kd 写进 model.dof_damping
         #    让 MuJoCo 半隐式积分去施加，力矩只发 kp·(q*−q)。
