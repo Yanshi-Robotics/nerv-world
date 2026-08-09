@@ -77,6 +77,8 @@
     <light name="light_laundry" pos="6.75 -5 2.85" dir="0 0 -1" diffuse="0.62 0.61 0.58" specular="0.05 0.05 0.05" attenuation="0.55 0.06 0.010"/>
     <light name="sun" pos="10 -18 22" dir="-0.35 0.62 -0.70" directional="true" diffuse="0.55 0.54 0.50" specular="0.10 0.10 0.10"/>
 
+    <camera name="film" pos="0 -1 1" xyaxes="1 0 0 0 0 1"/>
+
     <!-- ===== 主卫 ===== -->
     <geom name="master_bath_floor" type="box" size="2 2.75 0.025" pos="-7.5 7.25 -0.025" material="mat_marble_grey"/>
     <geom name="master_bath_ceiling" type="box" size="2 2.75 0.05" pos="-7.5 7.25 3.05" rgba="0.95 0.95 0.93 1" group="1"/>

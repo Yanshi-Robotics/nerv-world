@@ -302,6 +302,8 @@
     <light name="amb_core" pos="-0.6 -4.4 3.1" dir="0 0 -1" diffuse="0.86 0.80 0.71" specular="0.03 0.03 0.03" castshadow="false" cutoff="88" attenuation="0.60 0.07 0.012"/>
     <light name="amb_dressing" pos="-9.0 0.5 3.1" dir="0 0 -1" diffuse="0.86 0.80 0.71" specular="0.03 0.03 0.03" castshadow="false" cutoff="88" attenuation="0.60 0.07 0.012"/>
 
+    <camera name="film" pos="0 0 1.4" xyaxes="1 0 0 0 0 1"/>
+
     <!-- ===== 主卧 ===== -->
     <geom name="primary_bed_floor" type="box" size="2.55 2.65 0.025" pos="-8.95 4.85 -0.025" material="mat_h3_oak"/>
     <geom name="primary_bed_ceiling" type="box" size="2.55 2.65 0.05" pos="-8.95 4.85 3.35" rgba="0.96 0.96 0.94 1" group="1"/>

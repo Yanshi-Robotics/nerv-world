@@ -1160,6 +1160,14 @@ def build(robot_key: str) -> str:
     parts.append('  <worldbody>')
     parts.extend(_lights())
     parts.append('')
+    # ⭐ 电影机位探针：给录像/出图工具用的具名相机。消费方按名字 mj_name2id 取到它之后
+    #    逐帧改写 cam_pos / cam_quat / cam_fovy（挂在 worldbody 上 ⇒ cam_bodyid=0，
+    #    写进去的就是世界坐标）——任意位置 + 俯仰 + 荷兰角 + 变焦都从这一只相机出。
+    #    ⚠️ 写完 model 字段必须调 mj_camlight(m, d) 才会刷进 data.cam_xpos；
+    #       只写 model 的话相机纹丝不动、画面却照常渲（实测过的静默坑）。
+    #    初始位姿只是占位（场景统计中心、朝北），⛔ 别依赖它——每一帧都该被改写。
+    parts.append(f'    <camera name="film" pos="{_stat["center"]}" xyaxes="1 0 0 0 0 1"/>')
+    parts.append('')
     # ⛔⛔ 发射顺序：**室内在前，窗外在后**。这不是风格问题，是安全阀。
     #
     #    MuJoCo 渲染时按 geom 在模型里的**先后顺序**填 `mjvScene` 的缓冲，**不按距离**；

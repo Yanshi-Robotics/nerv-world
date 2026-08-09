@@ -76,6 +76,8 @@
     <light name="light_stair_f2" pos="4.6 3.34 8.34" dir="0 0 -1" diffuse="0.62 0.61 0.58" specular="0.05 0.05 0.05" attenuation="0.55 0.06 0.010"/>
     <light name="sun" pos="10 -18 22" dir="-0.35 0.62 -0.70" directional="true" diffuse="0.55 0.54 0.50" specular="0.10 0.10 0.10"/>
 
+    <camera name="film" pos="0 -1 1" xyaxes="1 0 0 0 0 1"/>
+
     <!-- ===== 门厅 ===== -->
     <geom name="entry_floor" type="box" size="2.25 2.55 0.025" pos="-3.75 -1.95 -0.025" material="mat_marble_grey"/>
     <geom name="entry_ceiling" type="box" size="2.25 2.55 0.05" pos="-3.75 -1.95 2.78" rgba="0.95 0.95 0.93 1" group="1"/>
