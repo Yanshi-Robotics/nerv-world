@@ -857,6 +857,82 @@ def check_furniture_not_through_wall(key: str, layout) -> list[str]:
     return errs
 
 
+# 小于这个量的重叠不算数（毫米级的贴合摆放是建模常态，比如花瓶正好放在柜面上）。
+OVERLAP_TOL = 0.005
+
+# ⭐ 允许互相插进去的家具对 —— **登记制**，一行一个理由。
+# ⛔ 往这儿加之前先问一句：这是"设计就该这样"，还是"我懒得改"？只有前者能进。
+#    没有理由的例外会让这道闸门在两年内退化成一张永远全绿的白名单。
+# 名字里的 `*` 是前缀通配（`gr_ch*` 一次盖住两把扶手椅）。
+FURNITURE_MAY_OVERLAP = [
+    # 嵌入式电器本来就是嵌进台面/吊柜里的，这是厨房的做法不是错
+    ("kt_counter", "kt_range", "嵌入式灶具嵌在台面里"),
+    ("kt_counter", "kt_sink", "水槽嵌在台面里"),
+    ("kt_counter_top", "kt_range", "同上，台面板那一层"),
+    ("kt_counter_top", "kt_sink", "同上，台面板那一层"),
+    ("kt_upper", "kt_hood", "抽油烟机嵌在吊柜中间"),
+    # 软装：抱枕本来就该陷进沙发里
+    ("gr_sofa_back", "gr_pillows", "抱枕靠在沙发背上"),
+    ("gr_sofa_arm*", "gr_pillows", "抱枕挨着扶手"),
+    # 地毯是平铺的，家具**站在它上面**，重叠量 = 地毯厚度
+    ("gr_rug", "gr_coffee", "茶几站在地毯上"),
+    ("gr_rug", "gr_ch*", "扶手椅站在地毯上"),
+]
+
+
+def _overlap_allowed(a: str, b: str) -> bool:
+    """这一对是不是登记过的合法重叠（顺序无关，支持 `前缀*` 通配）。"""
+    def hit(pat: str, name: str) -> bool:
+        return name.startswith(pat[:-1]) if pat.endswith("*") else name == pat
+    return any((hit(p, a) and hit(q, b)) or (hit(p, b) and hit(q, a))
+               for p, q, _why in FURNITURE_MAY_OVERLAP)
+
+
+def check_furniture_overlap(key: str, layout) -> list[str]:
+    """⭐⭐ 穿了真网格外衣的家具，不许和别的家具插在一起。
+
+    ⚠️ 判据**故意很窄**，因为宽判据完全不可用：拿"任意两件家具的包围盒相交"去查，
+       三个场景分别命中 193 / 104 / 71 对，而绝大多数是**合法**的——沙发是底座+靠背+
+       扶手拼出来的、植物是树干+叶片、浴缸是外壳+内胆、马桶带水箱。逐对报数只会淹死人。
+       （同样的教训 v0.12 在"逐缝报净宽"上刚吃过一次。）
+    ⭐ 所以只查**至少一件穿了真网格外衣**的组合：外衣是照着真家具建模的，插进别的东西里
+       在画面上一眼可见（2026-08-08 就是 Jeff 看截图发现餐椅靠背穿过桌面的），
+       而白盒子之间的重叠往往是建模手法。同一件家具的零件靠名字前缀排除。
+       实测这么一收：house1 / house2 **零命中**，apt1 只剩 10 对且全部登记在案。
+    ⛔ 例外走 `FURNITURE_MAY_OVERLAP`，一行一个理由。
+
+    背景：apt1 的两把端餐椅曾整个插进桌面板 0.18 m —— 边椅按"桌沿留 0.30"摆、
+    端椅却按"留 0.05"摆，一套家具两套余量。**当时 22 项自检一条都没红**，
+    因为没有任何一项管家具之间的关系。
+    """
+    errs: list[str] = []
+    items = [it for it in layout.FURNITURE if it["type"] in ("box", "cylinder", "sphere")]
+    for i, a in enumerate(items):
+        for b in items[i + 1:]:
+            if a["room"] != b["room"]:
+                continue
+            if not ((a.get("mesh") or {}).get("id") or (b.get("mesh") or {}).get("id")):
+                continue                       # 两件都是白盒子 → 多半是拼件，不管
+            na, nb = a["name"], b["name"]
+            if na.startswith(nb) or nb.startswith(na):
+                continue                       # 同一件家具的零件（名字共前缀）
+            if _overlap_allowed(na, nb):
+                continue
+            ax0, ax1, ay0, ay1 = _yaw_aabb(a)
+            bx0, bx1, by0, by1 = _yaw_aabb(b)
+            az0, az1 = a["pos"][2] - a["size"][2] / 2, a["pos"][2] + a["size"][2] / 2
+            bz0, bz1 = b["pos"][2] - b["size"][2] / 2, b["pos"][2] + b["size"][2] / 2
+            ov = min(min(ax1, bx1) - max(ax0, bx0),
+                     min(ay1, by1) - max(ay0, by0),
+                     min(az1, bz1) - max(az0, bz0))
+            if ov > OVERLAP_TOL:
+                _fail(errs, f"家具 {na} 和 {nb}（{a['room']}）插在一起 {ov * 100:.1f} cm"
+                            f"——真网格会明显穿模。要么挪开，要么去 "
+                            f"FURNITURE_MAY_OVERLAP 登记并写明理由")
+    return errs
+
+
+
 # layout 里"声明了就该在产物里看得见"的清单：名字 → 产物里对应 geom 名字的前缀。
 # ⛔ 为什么要这条检查（2026-08-05 加）：`_wall_arts()` 从写出来那天起就没被 build() 调用过，
 #    house1 声明的 11 幅挂画一幅都没进过产物，而**生成器不会报错、截图也看不出少了什么**。
@@ -1551,6 +1627,7 @@ CHECKS = [
     ("⭐⭐ 门真的走得过去（两侧在屋里 + 净通行宽）", check_door_passable),
     ("⭐⭐ 每间屋机器人都走得进去（可通行性）", check_reachability),
     ("⭐ 家具没有捅穿墙伸进隔壁", check_furniture_not_through_wall),
+    ("⭐⭐ 家具之间没有插在一起", check_furniture_overlap),
     ("⭐ 声明的东西都真的进了产物", check_no_dead_declarations),
     ("⭐ 入户门从屋里看得见", check_front_door_visible),
     ("⭐ 贴墙家具的正面没朝着墙", check_mesh_faces_room),

@@ -661,18 +661,36 @@ FURNITURE += F.mesh_piece("gr_lamp", "great_room", -1.23, 3.00,
                           size=(0.46, 0.46, 0.98), mesh="floor_lamp")
 
 # ── 餐厅：长桌八椅 + 吊灯下的餐边柜 ────────────────────────────────
-FURNITURE += F.table("dn_table", "dining", -4.00, 5.00, 2.40, 1.10, h=0.75)
+# ⛔⛔ 桌心**不能往东挪**：东侧那条通道通向大客厅，挪过去就把它挤到 0.60 m 以下，
+#    `check_reachability` 会当场红（实测：桌心 -3.90 起，餐厅有 4.0 ㎡ 变成走不进去的孤岛）。
+#    2026-08-08 我一度想「把整组摆到可用跨度的正中」，被这道闸门拦下来了——
+#    ⭐ 房间的中点不等于家具该在的地方，通道优先。
+# ⚠️ 代价是**西端那把椅子离餐边柜只有 1 cm**（柜东面 -5.74，椅背 -5.73）：
+#    这一端本来就塞不下——柜子占了 0.52 m，即便把 DN_GAP 收到 0，也只剩 8 cm。
+#    几何上不相交、两道闸门都过，但真人是拉不出这把椅子来坐的。
+#    真要彻底解决只能二选一：去掉 `dn_w`（变七椅），或把餐厅加宽。⛔ 别再靠挪桌子解决。
+DN_CX, DN_CY = -4.00, 5.00        # 餐桌组中心（⛔ 别东移，理由见上）
+DN_W, DN_D = 2.40, 1.10           # 桌面 长(x) × 宽(y)
+DN_CHAIR = (0.46, 0.60, 1.00)     # 一把餐椅的碰撞盒：宽 × 深 × 高
+# ⭐⭐ 椅沿离桌沿留多少 —— **八把共用这一个数**，位置全部由它算出来。
+#    2026-08-08 之前是各写各的字面量：边椅按 0.30、端椅按 0.05 摆，于是**两把端椅整个插进
+#    桌面板 0.18 m**（截图上一眼可见靠背穿过桌面）。一套家具两套余量，迟早对不上。
+#    ⛔ 别再把椅子的坐标写成字面量：写成字面量就等于把这个关系拆散给八个地方各记一遍。
+DN_GAP = 0.07
+_DN_OFF = DN_GAP + DN_CHAIR[0] / 2.0      # 桌沿 → 椅心 的距离（椅子无论朝哪，横向都是 0.46 宽）
+
+FURNITURE += F.table("dn_table", "dining", DN_CX, DN_CY, DN_W, DN_D, h=0.75)
 # ⭐ 餐椅八把全换真网格（每把 5k 面，八把 4 万面——纯视觉不算凸包，编译代价可忽略）
 for i, dx in enumerate((-0.80, 0.00, 0.80)):
-    FURNITURE += F.mesh_piece(f"dn_n{i}", "dining", -4.00 + dx, 5.85, yaw=-90,
-                              size=(0.46, 0.60, 1.00), mesh="dining_chair")
-    FURNITURE += F.mesh_piece(f"dn_s{i}", "dining", -4.00 + dx, 4.15, yaw=90,
-                              size=(0.46, 0.60, 1.00), mesh="dining_chair")
-FURNITURE += F.mesh_piece("dn_e", "dining", -2.75, 5.00, yaw=180,
-                          size=(0.46, 0.60, 1.00), mesh="dining_chair")
-FURNITURE += F.mesh_piece("dn_w", "dining", -5.25, 5.00, yaw=0,
-                          size=(0.46, 0.60, 1.00), mesh="dining_chair")
-FURNITURE += F.mesh_piece("dn_chand", "dining", -4.00, 5.00, z=2.72,
+    FURNITURE += F.mesh_piece(f"dn_n{i}", "dining", DN_CX + dx, DN_CY + DN_D / 2 + _DN_OFF,
+                              yaw=-90, size=DN_CHAIR, mesh="dining_chair")
+    FURNITURE += F.mesh_piece(f"dn_s{i}", "dining", DN_CX + dx, DN_CY - DN_D / 2 - _DN_OFF,
+                              yaw=90, size=DN_CHAIR, mesh="dining_chair")
+FURNITURE += F.mesh_piece("dn_e", "dining", DN_CX + DN_W / 2 + _DN_OFF, DN_CY,
+                          yaw=180, size=DN_CHAIR, mesh="dining_chair")
+FURNITURE += F.mesh_piece("dn_w", "dining", DN_CX - DN_W / 2 - _DN_OFF, DN_CY,
+                          yaw=0, size=DN_CHAIR, mesh="dining_chair")
+FURNITURE += F.mesh_piece("dn_chand", "dining", DN_CX, DN_CY, z=2.72,
                           size=(0.70, 0.66, 0.88), mesh="chandelier")
 # ⭐ 餐边柜：同一件真木柜网格，贴餐厅西墙（净空 x ≥ -6.26），yaw=90 转成南北向
 FURNITURE += F.mesh_piece("dn_sideboard", "dining", -6.00, 5.00, yaw=90,

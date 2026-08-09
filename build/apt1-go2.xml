@@ -383,8 +383,8 @@
     <geom name="furn_dn_s1" type="box" size="0.23 0.3 0.5" pos="-4 4.15 0.5" quat="0.707107 0 0 0.707107" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_dn_n2" type="box" size="0.23 0.3 0.5" pos="-3.2 5.85 0.5" quat="0.707107 0 0 -0.707107" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_dn_s2" type="box" size="0.23 0.3 0.5" pos="-3.2 4.15 0.5" quat="0.707107 0 0 0.707107" rgba="0.62 0.6 0.58 1" group="4"/>
-    <geom name="furn_dn_e" type="box" size="0.23 0.3 0.5" pos="-2.75 5 0.5" quat="0 0 0 1" rgba="0.62 0.6 0.58 1" group="4"/>
-    <geom name="furn_dn_w" type="box" size="0.23 0.3 0.5" pos="-5.25 5 0.5" rgba="0.62 0.6 0.58 1" group="4"/>
+    <geom name="furn_dn_e" type="box" size="0.23 0.3 0.5" pos="-2.5 5 0.5" quat="0 0 0 1" rgba="0.62 0.6 0.58 1" group="4"/>
+    <geom name="furn_dn_w" type="box" size="0.23 0.3 0.5" pos="-5.5 5 0.5" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_dn_chand" type="box" size="0.35 0.33 0.44" pos="-4 5 2.72" rgba="0.62 0.6 0.58 1" group="4"/>
     <geom name="furn_dn_sideboard" type="box" size="1.22 0.26 0.34" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" rgba="0.52 0.4 0.28 1" group="4"/>
     <geom name="furn_dn_vase" type="box" size="0.11 0.11 0.21" pos="-6 5 0.89" rgba="0.62 0.6 0.58 1" group="4"/>
@@ -756,8 +756,8 @@
       <geom name="dg_dn_s1_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.99867 4.15019 0.499271" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_dn_n2_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.20133 5.84981 0.499271" quat="0.707107 0 0 -0.707107" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_dn_s2_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-3.19867 4.15019 0.499271" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_e_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-2.75019 5.00133 0.499271" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
-      <geom name="dg_dn_w_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-5.24981 4.99867 0.499271" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_e_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-2.50019 5.00133 0.499271" quat="0 0 0 1" contype="0" conaffinity="0" density="0"/>
+      <geom name="dg_dn_w_0" type="mesh" mesh="dm_dining_chair_0_1_0156" material="dmat_dining_chair_0" pos="-5.49981 4.99867 0.499271" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_dn_chand_0" type="mesh" mesh="dm_chandelier_0_1_0206" material="dmat_chandelier_0" pos="-3.99998 4.99993 2.72" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_dn_chand_1" type="mesh" mesh="dm_chandelier_1_1_0206" rgba="0.62 0.6 0.58 1" pos="-3.99998 4.99993 2.72" quat="1 0 0 0" contype="0" conaffinity="0" density="0"/>
       <geom name="dg_dn_sideboard_0" type="mesh" mesh="dm_console_0_0_9898" material="dmat_console_0" pos="-6 5 0.34" quat="0.707107 0 0 0.707107" contype="0" conaffinity="0" density="0"/>
