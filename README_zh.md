@@ -2,7 +2,7 @@
 
 # alice-house · 给机器人住的房子
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.13-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.14-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
 > 这个仓是什么、每个事实住在哪、入口命令、以及红线。
@@ -217,6 +217,61 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 屋里的家具，apt1 是第一个穿上**真实网格外衣**而不是全靠基本体拼的场景。
 怎么在**不改变任何一次碰撞**的前提下把网格挂上去，见[网格只是外衣](#网格只是外衣)。
 
+#### 逐间看
+
+一层十三个空间，排成三条带。北带朝公园，南带朝中城，中脊一扇窗都没有——
+对一台靠相机导航的机器人来说，这恰恰是最有意思的地方。
+
+| 带 | 房间 |
+|---|---|
+| **北带 · 景观** | 主卧 · 餐厅 · 大客厅 · 厨房——四间全部贴着观景墙 |
+| **中脊 · 无窗** | 衣帽间 · 画廊（12.6 m 展线）· 东过厅——整天靠灯 |
+| **南带 · 城市** | 主卫 · 客卧 · 客卫 · 入户玄关 · 洗衣房 · 书房 |
+
+| 书房——书桌对着东南转角窗 | 主卫——独立浴缸，onyx 墙 |
+|---|---|
+| ![书房](docs/images/apt1/V9-书房.png) | ![主卫](docs/images/apt1/V11-主卫-独立浴缸.png) |
+
+洗衣房是特意留给**机器人的房间**：一道 0.95 m 的门直通画廊主流线，洗烘设备全挤在南端，
+北半留空当停机位（`ROBOT_HOME_XY`）——机器人待在那儿，不站在任何人的动线上。
+（衣帽间和几间服务用房拍出来就是几个纯色盒子，不上镜——所以它们只有文字，没有相机。）
+
+#### apt1 的一天
+
+同一层楼，在四个时刻是四个不同的地方。磁盘上的产物逐字节不变——**白天就是产物本身**；
+早晨、黄昏、夜晚是**运行期预设**（`scenes/apply_time_preset.py`），在已加载的模型上改写
+灯光字段、材质自发光、天空盒与立面贴图：
+
+![四时段对比](docs/images/apt1/time-presets/T0-四时段对比.png)
+
+| 早晨 6:40 | 白天 |
+|---|---|
+| ![早晨](docs/images/apt1/time-presets/T-morning.png) | ![白天](docs/images/apt1/time-presets/T-day.png) |
+
+| 黄昏 19:35 | 夜晚 23:10 |
+|---|---|
+| ![黄昏](docs/images/apt1/time-presets/T-dusk.png) | ![夜晚](docs/images/apt1/time-presets/T-night.png) |
+
+- **早晨**——冷色北向天光，外加一道暖光从东窗横切过厨房中岛。
+- **白天**——产物本身，一个字段不改。
+- **黄昏**——朝北的公寓永远看不到日落本身；它看到的是**上西区隔着公园被染成金色**、
+  东侧冷成玫瑰紫，西窗在主卧地板上拖出一条长长的琥珀色光带。这种不对称本身就是方向感。
+- **夜晚**——几千扇各自点亮的窗（夜间立面贴图，不是调自发光糊弄）、室内暖色灯岛，
+  以及压成**黑洞**的中央公园——纽约夜景最强的单一识别符。
+
+预设里烤着两个用实测换来的事实。其一：MuJoCo 渲染器只点亮 **headlight + 7 盏模型灯**
+（`mjMAXLIGHT=100` 是场景*容量*，不是渲染能力）——所以每个时段都是同一批七个灯位的
+重新指向，场景敢多声明一盏，`check_lights_render` 验收门当场变红。
+其二：机器人自己的 XML 里带着一盏无名方向光，实测占了约 68% 的像素——夜晚的第一件事
+就是把它关掉。
+
+这几张静帧同时就是验收门——整帧亮度必须沿 白天 → 早晨 → 黄昏 → 夜晚 单调下降，
+且没有任何一间屋子允许黑掉：
+
+```bash
+python tools/make_time_stills.py --scene apt1
+```
+
 ### 机器人视角
 
 场景最终要服务的是机器人的眼睛。下面几张都是**四足机器狗头部相机**看到的画面（高度 0.38 m），
@@ -239,9 +294,12 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 **别手工截图。** 机位全写在 `make_docs_images.py` 里，改了场景就重跑：
 
 ```bash
-python tools/make_docs_images.py        # 全出
-python tools/make_docs_images.py E1 G3  # 只出指定几张
+ALICE_SCENE=apt1 python tools/make_docs_images.py        # 该场景全出
+ALICE_SCENE=apt1 python tools/make_docs_images.py V9 V11 # 只出指定几张
+python tools/make_time_stills.py --scene apt1            # 四时段静帧（同时是验收门）
 ```
+
+场景由 `ALICE_SCENE` 环境变量指定（不给就是默认场景——多半不是你刚改的那个）。
 
 背景：第一版配图是一张张手摆机位截的，中厨一重排就全过时，还没人记得当初相机在哪。
 
@@ -345,7 +403,8 @@ tools/              入口脚本，都从仓根跑：`python tools/<名字>.py`
   walkthrough.py      第一人称漫游，用来人眼验收（WASD + 鼠标，带碰撞与重力）
   make_docs_images.py 出 README 配图（机位写在 shots.py，一条命令重出）
   make_textures.py    程序化生成贴图（木地板/瓷砖/大理石/地毯/织物/城市天际线/挂画）
-  make_view.py        apt1 的窗景：--sky（HDRI→六面）· --nyc（建筑轮廓）· --naip（航拍）· --calib
+  make_view.py        apt1 的窗景：--sky --sky-phase（HDRI→六面，分时段）· --nyc（建筑轮廓）· --naip（航拍）· --calib
+  make_time_stills.py 四时段静帧：出 T-*.png 与 T0 拼图，并给预设把门（亮度必须单调下降）
   fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
 build/              ⭐ **产物**（入库的交付物，不是构建缓存）：<场景>-<机器人>.xml
                     ⛔ 里面那些相对路径按"住在仓根下恰好一层"算死了，别把它挪走
@@ -452,7 +511,7 @@ G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一
 
 ## 版本
 
-见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.8**。
+见 [CHANGELOG.md](CHANGELOG.md)。当前 **v0.14**。
 
 ## 许可
 

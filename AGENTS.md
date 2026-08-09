@@ -54,7 +54,8 @@
 | `scenes/furniture.py` | 家具/零件的几何生成函数（所有场景共用） |
 | `tools/make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
 | `tools/make_textures.py` · `tools/make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
-| `tools/make_view.py` | **apt1 的窗景**：`--sky` 天空六面 · `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
+| `tools/make_view.py` | **apt1 的窗景**：`--sky --sky-phase` 天空六面（分时段）· `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
+| `tools/make_time_stills.py` · `scenes/apply_time_preset.py` | **apt1 的四时段**：前者出 `T-*.png` 静帧并给预设把门（亮度单调下降）；后者是「灯怎么打」的唯一应用逻辑（运行期写字段，产物不变） |
 | `tools/fetch_assets.py` | 下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 `--verify` |
 | `decor/` | **真家具网格管线**：`manifest.py` 登记表 + 可执行许可白名单、`fetch.py` 下载转换、`convert.py` glTF→OBJ、`calibrate.py` ⛔ 实测重心、`robocasa.py` 厨房电器移植器。⛔ `decor/assets/` 的字节 gitignore，永不入库 |
 | `scenes/apt1/nyc_massing.py` | 由 `make_view.py --nyc` 生成的建筑体量表（**入库**，因为数据源无 share-alike） |
@@ -78,6 +79,7 @@ python tools/make_house.py --scene house2 --robot g1
 python tools/check_scene.py                      # ⭐ 生成之后必跑
 python tools/walkthrough.py --scene house2       # 自己走进去看（--selftest = 无窗口自测）
 ALICE_SCENE=house2 python tools/make_docs_images.py   # 重出 README 配图
+python tools/make_time_stills.py --scene apt1         # 四时段静帧（同时是验收门）
 ```
 
 apt1 的贴图与 2716 栋楼**已入库**，clone 下来直接能编译；下面这些只在想改它们时才跑。

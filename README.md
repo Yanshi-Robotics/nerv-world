@@ -2,7 +2,7 @@
 
 # alice-house · A House for Robots to Live In
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.13-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.14-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
 > what this repo is, where each fact lives, the entry commands, and the red lines.
@@ -234,6 +234,67 @@ Indoors, apt1 is the first place dressed with **real furniture meshes** rather t
 primitives. See [Real Meshes as Clothing](#real-meshes-as-clothing) for how they are attached
 without changing a single collision.
 
+#### Room by Room
+
+Thirteen spaces on one floor, in three bands. The north band gets the park; the south band gets
+Midtown; the spine in the middle gets no window at all — which is exactly what makes it
+interesting for a robot that navigates by camera.
+
+| Band | Rooms |
+|---|---|
+| **North — the view** | Primary bedroom · Dining room · Great room · Kitchen — all four against the view wall |
+| **Middle spine — no windows** | Dressing room · Gallery (12.6 m hanging wall) · East hall — lamp-lit all day |
+| **South — the city** | Primary bath · Guest room · Guest bath · Foyer · Laundry · Study |
+
+| Study — desk against the southeast corner windows | Primary bath — freestanding tub, onyx wall |
+|---|---|
+| ![Study](docs/images/apt1/V9-书房.png) | ![Primary bath](docs/images/apt1/V11-主卫-独立浴缸.png) |
+
+The laundry is deliberately **the robot's room**: a 0.95 m door onto the gallery's main line,
+machines crowded at the south end, and the north half kept empty as a dock (`ROBOT_HOME_XY`) —
+the robot waits there without standing in anyone's way. (The dressing room and the service rooms
+photograph poorly — plain boxes — so they get words here, not cameras.)
+
+#### A Day in apt1
+
+The same floor is four different places at four times of day. The products on disk stay
+byte-identical — **daylight is the product**; morning, dusk and night are *runtime presets*
+(`scenes/apply_time_preset.py`) that rewrite light fields, material emission, the skybox and the
+facade textures on the already-loaded model:
+
+![Four times of day](docs/images/apt1/time-presets/T0-四时段对比.png)
+
+| Morning 6:40 | Day |
+|---|---|
+| ![Morning](docs/images/apt1/time-presets/T-morning.png) | ![Day](docs/images/apt1/time-presets/T-day.png) |
+
+| Dusk 19:35 | Night 23:10 |
+|---|---|
+| ![Dusk](docs/images/apt1/time-presets/T-dusk.png) | ![Night](docs/images/apt1/time-presets/T-night.png) |
+
+- **Morning** — cool north sky, plus one warm shaft cutting across the kitchen island from the
+  east window.
+- **Day** — the product itself, untouched.
+- **Dusk** — a north-facing flat never sees the sunset; it sees the **Upper West Side turn gold**
+  across the park while the east side cools to mauve, and the west windows throw one long amber
+  streak across the bedroom floor. That asymmetry *is* the sense of direction.
+- **Night** — thousands of individually lit windows (a night facade texture, not an emission
+  trick), warm practicals indoors, and Central Park as a **black hole** — the strongest single
+  signature of the New York night.
+
+Two hard-won facts are baked into the presets. First, MuJoCo's renderer only lights
+**headlight + 7 model lights** (`mjMAXLIGHT=100` is scene *capacity*, not rendering capacity) —
+so every phase is a re-aim of the same seven slots, and the `check_lights_render` gate goes red
+if a scene ever declares more. Second, the robot's own XML ships a nameless directional light
+that turns out to own ~68 % of the pixels; night begins by switching it off.
+
+The stills double as the acceptance gate — mean brightness must fall monotonically
+day → morning → dusk → night, and no room may drop to black:
+
+```bash
+python tools/make_time_stills.py --scene apt1
+```
+
 ### Through the Robot's Eyes
 
 What this scene ultimately serves is a robot's camera. The shots below are from the
@@ -254,9 +315,13 @@ height** (1.25 m, the G1's actual camera height) for comparison.
 whenever the scene changes:
 
 ```bash
-python tools/make_docs_images.py        # all of them
-python tools/make_docs_images.py E1 G3  # only the ones you name
+ALICE_SCENE=apt1 python tools/make_docs_images.py        # all of that scene's shots
+ALICE_SCENE=apt1 python tools/make_docs_images.py V9 V11 # only the ones you name
+python tools/make_time_stills.py --scene apt1            # the four times of day (also the gate)
 ```
+
+The scene comes from the `ALICE_SCENE` environment variable (defaults to the default scene, which
+is probably not the one you just changed).
 
 Background: the first set of screenshots was framed by hand one at a time. One kitchen
 re-layout later they were all stale, and nobody remembered where the cameras had been.
@@ -375,7 +440,8 @@ tools/              entry-point scripts, all run from the repo root: `python too
   walkthrough.py      first-person walkthrough for eyeballing a scene (WASD + mouse, collision + gravity)
   make_docs_images.py renders the README screenshots (poses live in shots.py; one command re-renders)
   make_textures.py    procedural textures (wood floor / tile / marble / carpet / fabric / city skyline / wall art)
-  make_view.py        apt1's window view: --sky (HDRI → cube faces) · --nyc (building footprints) · --naip (aerial) · --calib
+  make_view.py        apt1's window view: --sky --sky-phase (HDRI → cube faces, per time of day) · --nyc (building footprints) · --naip (aerial) · --calib
+  make_time_stills.py the four times of day: renders T-*.png + T0 collage, and gates the presets (brightness must fall monotonically)
   fetch_assets.py     downloads the CC0 interior materials (ambientCG), with SHA-256 bookkeeping and --verify
 build/              ⭐ **deliverables** (tracked, not a build cache): <scene>-<robot>.xml
                     ⛔ the relative paths inside them assume "exactly one level below the repo
@@ -497,7 +563,7 @@ went unnoticed until a ball-roll test. Two more rules learned the hard way: **a 
 
 ## Versioning
 
-See [CHANGELOG.md](CHANGELOG.md). Currently **v0.8**.
+See [CHANGELOG.md](CHANGELOG.md). Currently **v0.14**.
 
 ## License
 
