@@ -44,6 +44,53 @@ def _p(name, room, typ, pos, size, rgba, mat="", yaw=0.0):
     return d
 
 
+# ---------------------------------------------------------------- 沙发
+# ⭐⭐ 座面高度是**从 G1 的腿长推出来的硬指标**，不是审美选择。
+#    实测（2026-08-22）：小腿 0.318 m + 踝离地 0.033 m ⇒ 膝 90°、脚掌踏平时座面 ≈ 0.351 m。
+#    把 G1 摆成坐姿、用策略契约的 kp/kd 保持住、推 3 秒物理：
+#        座面 0.30 ✅ 坐住   0.35 ✅ 坐住   0.40 ❌ 滑落（躯干倾 33.6°）  0.45 ❌ 直接倒（80.5°）
+#    ⚠️ apt1 那张沙发是 0.42 / 进深 0.78，**正落在失败带里**（那张不改，它已验收上线）。
+# ⛔ 别为了"看起来大气"把座面抬高——0.36 以上机器人就坐不住了，`check_seat_reachable` 会红。
+SOFA_SEAT_H = 0.35      # 座面顶面高
+SOFA_SEAT_D = 0.45      # 座面进深（G1 大腿 0.341 + 髋偏置，坐满能靠到背）
+
+
+def sofa(name: str, room: str, x: float, y: float, yaw: float = 0.0, *,
+         width: float = 2.40, seat_h: float = SOFA_SEAT_H, seat_d: float = SOFA_SEAT_D,
+         back_h: float = 0.55, back_t: float = 0.18, arm_w: float = 0.20,
+         arm_h: float = 0.30, rgba=(0.80, 0.78, 0.74, 1.0), mat: str = "") -> list[dict]:
+    """一张**机器人真坐得下**的沙发：座面 + 靠背 + 两侧扶手，共 4 个盒子。
+
+    局部坐标约定：靠背在 −x 侧（人朝 +x 坐），与 `chair()` 一致；`width` 沿 y。
+
+    ⭐ 为什么沙发用手写基本体、而不是像餐椅那样上 CoACD 真网格：
+       判据是**这件家具的尺寸由谁说了算**。餐椅长什么样是艺术家定的，要的是形状保真；
+       而沙发的座面高度是**机器人定的**（0.35，见上）。拉一张网格来，它的座面是
+       艺术家做的那个高度，而 `_fit_scale` 只做**均匀缩放**——把座面压到 0.35 会把
+       整张沙发一起缩小，比例就毁了。
+       ⇒ 手写盒子在这里精度更高：形状是被需求定义的，不是被资产定义的。
+       （想要好看的外观，照样可以用 `mesh_piece` 把网格外衣套在这组盒子上。）
+
+    ⚠️ 座面是一块**从地面到座面高的整块**（真实软包沙发就是这样），所以座下是实的。
+       这不影响坐——人坐下时小腿竖直、脚落在座面前沿**之外**，不需要把脚收到底下。
+       ⛔ 所以这件不要在 `SEATS` 里开 `under_clear`（那是餐椅才该开的）。
+    """
+    out: list[dict] = []
+    # 座面（整块软包基座）
+    out.append(_p(f"{name}_base", room, "box", (x, y, seat_h / 2),
+                  (seat_d, width, seat_h), rgba, mat, yaw))
+    # 靠背：立在座面后缘之外
+    bx, by = _rot(-(seat_d / 2 + back_t / 2), 0.0, yaw)
+    out.append(_p(f"{name}_back", room, "box", (x + bx, y + by, seat_h + back_h / 2),
+                  (back_t, width, back_h), rgba, mat, yaw))
+    # 两侧扶手
+    for k, sy in (("L", +1), ("R", -1)):
+        ox, oy = _rot(-back_t / 2, sy * (width / 2 + arm_w / 2), yaw)
+        out.append(_p(f"{name}_arm{k}", room, "box", (x + ox, y + oy, seat_h + arm_h / 2),
+                      (seat_d + back_t, arm_w, arm_h), rgba, mat, yaw))
+    return out
+
+
 # ---------------------------------------------------------------- 椅子
 def chair(name: str, room: str, x: float, y: float, yaw: float = 0.0, *,
           seat_w: float = 0.46, seat_d: float = 0.46, seat_h: float = 0.45,

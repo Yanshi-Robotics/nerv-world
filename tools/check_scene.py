@@ -131,8 +131,11 @@ _HULL_AABB_TOL = 0.001
 # 坐姿保持 3 秒的实测结果是 0.30 ✅ / 0.35 ✅ / 0.40 ❌ 滑落 / 0.45 ❌ 直接倒。
 # ⚠️ apt1 现有那张沙发是 0.42，正落在失败带里（那张不改，见 apt2 计划）。
 SEAT_MAX_H = 0.36
-# 座面下方要留的净空高度：脚和小腿要伸得进去，不能是实心的
+# 座面下方要留的净空高度：脚和小腿要收得进去（⚠️ 只对声明了 under_clear 的坐具查）
 SEAT_CLEAR_Z = 0.26
+# 座面上方要留给上半身的净空。G1 坐姿骨盆在座面上方约 6 cm，肩在骨盆上方约 0.29 m，
+# 头顶再高一截；取 0.60 m 是"上半身塞得进去"的下限，不是舒适值。
+SEAT_HEADROOM = 0.60
 
 
 def _fail(msgs: list[str], text: str) -> None:
@@ -1294,15 +1297,25 @@ def check_collision_solref(key: str, layout) -> list[str]:
 def check_seat_reachable(key: str, layout) -> list[str]:
     """⭐ 声明了「能坐」的家具，必须**真的坐得下** —— 用射线量，不看声明。
 
-    两条判据，缺一不可：
+    三条判据：
+
       1. **座面高度 ≤ SEAT_MAX_H**：俯视射线在座位区量到的最高实体面。
          实测 G1 坐姿保持 3 秒：0.30 ✅ / 0.35 ✅ / 0.40 ❌ 滑落 / 0.45 ❌ 直接倒。
-      2. **座面下方是空的**：在 SEAT_CLEAR_Z 高度横穿一条射线，必须打空。
-         ⛔ 这一条才是真正区分「真碰撞」和「一个实心盒」的判据——
-         用一个包络盒时，这条射线会在椅子外缘就被挡住（实测 0.383 m）。
+      2. **座面上方留得下上半身**：座面往上 SEAT_HEADROOM 之内不许有实体。
+         抓的是"靠背前伸盖住了座面""吊灯挂太低""上面压着一块楼板"这类。
+      3. **（可选）座面下方是空的** —— `"under_clear": True` 才查。
 
-    layout 里怎么声明：`SEATS = [{"name": "gr_sofa", "at": (x, y), "span": (w, d)}, ...]`
-    没声明 `SEATS` 的场景直接跳过（house1/house2/apt1 都没有）。
+    ⚠️ 第 3 条**默认不查**，这是想清楚之后的选择，不是偷懒：
+       人坐下时小腿是竖直的、脚落在座面**前沿之外**，根本不需要把脚伸到座面底下。
+       所以一张**整体软包到地**的沙发（底下是实的）照样坐得住，是完全合法的做法。
+       只有餐椅、书桌椅这类"要把脚往里收"的才该开这一条。
+       ⛔ 别为了"更严格"给沙发也开——那会把一个正确的家具判成红的，
+       而假红比不查更坏：它会逼着后来的人去改本来对的东西。
+
+    layout 里怎么声明：
+        SEATS = [{"name": "gr_sofa", "room": "great_room", "at": (x, y),
+                  "span": (w, d), "under_clear": False}, ...]
+    没声明 `SEATS` 的场景直接跳过（house1 / house2 / apt1 都没有）。
     """
     seats = getattr(layout, "SEATS", None)
     if not seats:
@@ -1340,18 +1353,31 @@ def check_seat_reachable(key: str, layout) -> list[str]:
             _fail(errs, f"坐具 {s['name']} 的座面高 {(top - zb) * 100:.1f} cm > "
                         f"{SEAT_MAX_H * 100:.0f} cm —— G1 坐上去会滑落"
                         f"（实测 0.40 m 就滑、0.45 m 直接倒）")
-        # ② 座面下方必须是空的
-        half = max(w, dep) / 2 + 0.60
-        blocked = 0
-        for uy in np.linspace(-dep / 2, dep / 2, 5):
-            o = np.array([cx - half, cy + uy, zb + SEAT_CLEAR_Z])
-            dist = mujoco.mj_ray(m, d, o, np.array([1.0, 0.0, 0.0]), None, 1, -1, gid)
-            if 0 <= dist <= 2 * half:
-                blocked += 1
-        if blocked == 5:
-            _fail(errs, f"坐具 {s['name']} 的座面下方 {SEAT_CLEAR_Z * 100:.0f} cm 处全被挡住"
-                        f"——碰撞体退化成一个实心盒了，脚伸不进去。"
-                        f"⛔ 这件是不是漏了 collide=True，或者凸块字节不在磁盘上？")
+        # ② 座面上方要留得下上半身 —— 从座面往上打，第一个实体必须够高
+        low = 9e9
+        for ux in np.linspace(-w / 2, w / 2, 3):
+            for uy in np.linspace(-dep / 2, dep / 2, 3):
+                o = np.array([cx + ux, cy + uy, top + 0.02])
+                dist = mujoco.mj_ray(m, d, o, np.array([0.0, 0.0, 1.0]), None, 1, -1, gid)
+                if dist >= 0:
+                    low = min(low, dist + 0.02)
+        if low < SEAT_HEADROOM:
+            _fail(errs, f"坐具 {s['name']} 座面上方只有 {low * 100:.0f} cm 净空 "
+                        f"< {SEAT_HEADROOM * 100:.0f} cm —— 上半身坐不进去"
+                        f"（靠背前伸？上面压着楼板或灯？）")
+        # ③ 座面下方是不是空的 —— ⚠️ 只在这件家具**声明要查**时才查，理由见 docstring
+        if s.get("under_clear"):
+            half = max(w, dep) / 2 + 0.60
+            blocked = 0
+            for uy in np.linspace(-dep / 2, dep / 2, 5):
+                o = np.array([cx - half, cy + uy, zb + SEAT_CLEAR_Z])
+                dist = mujoco.mj_ray(m, d, o, np.array([1.0, 0.0, 0.0]), None, 1, -1, gid)
+                if 0 <= dist <= 2 * half:
+                    blocked += 1
+            if blocked == 5:
+                _fail(errs, f"坐具 {s['name']} 的座面下方 {SEAT_CLEAR_Z * 100:.0f} cm 处全被挡住"
+                            f"——碰撞体退化成一个实心盒了，脚收不进去。"
+                            f"⛔ 这件是不是漏了 collide=True，或者凸块字节不在磁盘上？")
     return errs
 
 
@@ -1397,6 +1423,22 @@ def check_decor_ray_invariance(key: str, layout) -> list[str]:
     solid = [i for i in range(m.ngeom)
              if m.geom_contype[i] != 0 and m.geom_type[i] == mujoco.mjtGeom.mjGEOM_BOX]
 
+    # ⭐ 开了 `collide=True` 的家具**没有包络盒**（碰撞真相是一组凸块），
+    #    所以上面那张 box 清单里找不到它们，采样点会落进椅子肚子里。
+    #    ⇒ 补上它们**声明的**外廓。用声明而不是去量凸块，是因为声明本来就是
+    #    「关着门的保守外廓」，`check_reachability` 那几道读的也是它——同一个真相源。
+    # ⚠️ 2026-08-22 实测踩到：餐椅间距 0.80 m，而绕单椅打的那圈射线半径 0.96 m，
+    #    起点正好落在**隔壁那把椅子**里，于是每一发都先撞上邻居的网格，报一串假阳性。
+    decl_solids = []
+    for it in layout.FURNITURE:
+        if not (it.get("mesh") or {}).get("collide"):
+            continue
+        px, py, pz = it["pos"]
+        sx, sy, sz = it["size"]
+        yaw = math.radians(float(it["mesh"].get("yaw", 0.0)))
+        decl_solids.append((np.array([px, py, pz + _zbase_of(layout, it["room"])]),
+                            np.array([sx / 2, sy / 2, sz / 2]), math.cos(yaw), math.sin(yaw)))
+
     def _inside(p) -> bool:
         """点在不在某个实心盒子里。
 
@@ -1410,6 +1452,13 @@ def check_decor_ray_invariance(key: str, layout) -> list[str]:
         for i in solid:
             q = (p - d.geom_xpos[i]) @ d.geom_xmat[i].reshape(3, 3)
             if all(abs(q[k]) <= m.geom_size[i][k] + 0.02 for k in range(3)):
+                return True
+        for c, h, ca, sa in decl_solids:
+            dxy = p - c
+            qx = dxy[0] * ca + dxy[1] * sa          # 转进家具自己的局部系
+            qy = -dxy[0] * sa + dxy[1] * ca
+            if (abs(qx) <= h[0] + 0.02 and abs(qy) <= h[1] + 0.02
+                    and abs(dxy[2]) <= h[2] + 0.02):
                 return True
         return False
 
