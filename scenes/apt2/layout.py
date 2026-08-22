@@ -508,6 +508,29 @@ SEATS: list[dict] = [
 #    就不该让资产来定它的尺寸**。餐椅和单椅照旧是给"人"用的陈设（也照旧有真碰撞，
 #    机器人撞得到、脚伸得进椅子腿之间），只是不进"能坐"名单。
 
+# ────────────────────────────────────────────────────────── 坐姿
+# ⭐ 按**关节名**声明，不按下标 —— 换机器人时对不上的名字会被安静跳过，
+#    而下标会静默错位。装配与沉降走 `scenes/apply_pose.py`（那里写了为什么）。
+# ⚠️ 这组角度是量出来的：髋 −1.57 / 膝 +1.57 / 踝 0 让大腿正好水平、小腿正好竖直
+#    （实测膝与髋同高、踝在膝正下方，误差 0.000 m）。
+# ⚠️ `base_xyz` 的 z = 座面 0.35 + 骨盆半厚 ≈ 0.104。这是**入场姿态**，不是稳态——
+#    推 3 秒物理后机器人会往靠背里靠、骨盆再抬 4.6 cm。出图和自检都要先 settle。
+_SIT_JOINTS = {
+    "left_hip_pitch_joint": -1.57, "right_hip_pitch_joint": -1.57,
+    "left_knee_joint": 1.57, "right_knee_joint": 1.57,
+    "left_ankle_pitch_joint": 0.0, "right_ankle_pitch_joint": 0.0,
+    "left_shoulder_pitch_joint": 0.22, "right_shoulder_pitch_joint": 0.22,
+    "left_elbow_joint": 0.55, "right_elbow_joint": 0.55,
+}
+SIT_POSES: dict[str, dict] = {
+    "gr_sofa": {
+        "seat": "gr_sofa", "room": "great_room",
+        "base_xyz": (GR_SOFA_XY[0], GR_SOFA_XY[1], F.SOFA_SEAT_H + 0.104),
+        "base_yaw": math.pi / 2,          # 朝北，看中央公园
+        "joints": _SIT_JOINTS,
+    },
+}
+
 WALL_ARTS: list[dict] = []
 
 # ────────────────────────────────────────────────────────── 窗外（借 apt1）

@@ -2,7 +2,7 @@
 
 # alice-house · A House for Robots to Live In
 
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.14-lightgrey?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 
 > 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
 > what this repo is, where each fact lives, the entry commands, and the red lines.
@@ -16,10 +16,11 @@ come out of one layout definition per place (`scenes/<name>/layout.py`). Change 
 its layout and re-running the generator; the scene and whatever consumes it read the same source of
 truth, so coordinates can never disagree in two places.
 
-There are **three places** so far — a single-floor apartment, a three-storey house with stairs, and
-a 62nd-floor Manhattan apartment whose windows look out over Central Park — and one robot can be
-dropped into any of them. Scenes and robots are two independent registries that get crossed at
-generation time.
+There are **four places** so far — a single-floor apartment, a three-storey house with stairs, a
+62nd-floor Manhattan apartment whose windows look out over Central Park, and the duplex penthouse
+above it where the furniture has **real collision** (the robot can sit on the sofa) — and one robot
+can be dropped into any of them. Scenes and robots are two independent registries that get crossed
+at generation time.
 
 It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their trained **locomotion policies** — so they really take steps, they don't teleport.
 
@@ -32,6 +33,7 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 
 - [What's Inside](#whats-inside) · [Robots](#robots) · [Floor Plan & Screenshots](#floor-plan)
 - [apt1 — 232 Metres Up, Facing Central Park](#apt1--232-metres-up-facing-central-park)
+- [apt2 — A Duplex Penthouse Where the Furniture Is Within Reach](#apt2--a-duplex-penthouse-where-the-furniture-is-within-reach)
 - [Design Principles](#design-principles) · [Real Meshes as Clothing](#real-meshes-as-clothing)
 - [Project Structure](#project-structure)
 - [Quick Start](#quick-start)
@@ -49,16 +51,17 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 | **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
 | **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 381 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
 | **apt1** | Full-floor Manhattan apartment, **62nd storey** — foyer / gallery / great room / dining / kitchen / primary suite / guest rooms | 13 spaces / 345 m² | Built for **what's outside**. Floor-to-ceiling glass on three sides, 232 m of air below, and a real aerial of Central Park in front. Tests perception where the visual signal is overwhelmingly out of reach |
+| **apt2** | Duplex penthouse, **62nd–63rd storeys** — double-height great room + a real two-flight staircase | 24 spaces / 690 m² | Built for **what's within reach**. In the other three scenes every piece of furniture is a welded solid block; a robot can only bump into it. Here the dining chairs, armchairs and coffee table get **real collision** via convex decomposition (a ray passes between the chair legs), and the sofa is authored to the G1's leg length — seat at 0.35 m, so **the robot can actually sit on it** |
 
-**Build order: house1 → house2 → apt1.**
+**Build order: house1 → house2 → apt1 → apt2.**
 
 The names are inconsistent **on purpose**. `house1` and `house2` were the first two places
 built in this repo, and they keep their original names — they are where the whole idea
 (not one line of geometry written by hand, all of it generated from code) first worked.
 house1 has only one floor, but it is still a house.
 The third place is a Manhattan **apartment** on the 62nd floor rather than a house, so
-naming by type starts there: `apt1`. The next one, a duplex penthouse, is drafted as `apt2`
-(see [`docs/apt2-设计草案.md`](docs/apt2-设计草案.md) — not started).
+naming by type starts there: `apt1`. `apt2` is the duplex penthouse directly above it,
+built 2026-08-22 (design draft: [`docs/apt2-设计草案.md`](docs/apt2-设计草案.md)).
 
 ⛔ **Keys are not renamed lightly**: a key is the identifier a downstream consumer (the world
 service) uses to pick a scene, so renaming one is a cross-repo break. apt1 was called `house3`
@@ -294,6 +297,142 @@ day → morning → dusk → night, and no room may drop to black:
 ```bash
 python tools/make_time_stills.py --scene apt1
 ```
+
+### apt2 — A Duplex Penthouse Where the Furniture Is Within Reach
+
+![Robot sitting on the sofa](docs/images/apt2/S1-机器人坐在沙发上.png)
+
+In the other three scenes every piece of furniture is welded to the world with zero degrees of
+freedom — and for the mesh-clothed ones, the collision body is **a single solid box wrapping the
+whole thing**. A robot can only bump into it: it cannot push it, pick it up, or sit on it.
+
+apt2 exists to fix that. The shot above is not staged: the robot is placed in a seated pose and
+then **3 seconds of physics are simulated** before the frame is taken. The pelvis rises 4.6 cm,
+slides 3.1 cm horizontally, and the torso tilts 11.4° — it really is sitting.
+
+#### Why it could not sit before: the parts are split by *material*
+
+The intuitive fix is "the furniture already has a real mesh, just turn collision on". **That does
+not work.** `decor/convert.py` splits parts **by material** (glTF primitives are grouped that way),
+while MuJoCo only ever uses the **convex hull** of a collision mesh. Together, the hull swallows the
+cavity whole:
+
+| Asset | Convexity (solid volume ÷ hull volume) |
+|---|---|
+| Dining chair | 0.30 |
+| Armchair frame | 0.12 |
+| Round coffee table | 0.22 |
+| Bed upholstery | 0.07 |
+
+⇒ Turning collision on merely replaces "one solid box" with "one solid hull". The space between the
+chair legs is still solid.
+
+The fix is **CoACD convex decomposition** (`decor/hulls.py`, run once offline; the hulls are not
+committed). Same chair, rays cast straight down to measure surface height (cm; `·` = reached the
+floor):
+
+```
+       before (one collision box)            after (17 convex hulls)
+   ·   ·   ·   ·   ·   ·   ·        ·  44  44  44  49  85  97   ·
+   ·  97  97  97  97  97   ·        ·  44  45  46  57  89  98   ·
+   ·  97  97  97  97  97   ·        ·  44  46  46  61  88  98   ·
+   ·  97  97  97  97  97   ·        ·  44  46  46  57  86  98   ·
+   ·   ·   ·   ·   ·   ·   ·        ·   ·   ·   ·   ·   ·   ·
+
+   a uniform 97 cm everywhere        seat 44–47 cm, backrest 85–98 cm
+   — that is a 97 cm solid brick     — that is an actual chair
+```
+
+And one horizontal ray 26 cm below the seat ("can you get under the chair?"): with one box it hits
+at 0.383 m; with the hulls it hits **nothing** — the ray passes between the legs.
+
+| Six chairs with real collision | Great room: armchairs and table too |
+|---|---|
+| ![Dining](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![Great room](docs/images/apt2/V2-大客厅-三开间落地窗.png) |
+
+**Cost is not the problem**: 31 decomposed items = 467 geoms, 9 ms to compile, **383× realtime**.
+And `nmeshgraph` is **independent of item count** (meshes are shared per asset), so eight identical
+dining chairs are essentially free.
+
+#### ⛔ One thing that fails silently if you skip it
+
+MuJoCo's **default contact is too soft**: a 3.9 kg slab dropped from 1.20 m onto a 49 mm-thick seat
+hull **passes straight through** to the floor. The threshold is sharp — 3.2 mm of travel per step is
+fine, 4.1 mm punches through. ⚠️ A smaller timestep does not help, and neither does `margin` (both
+measured). Only one thing works: `solref="0.005 1"`.
+
+Skip it and you get "sitting down slowly is fine, falling onto it clips through" — while **the model
+compiles without complaint and every slow test passes**. Hence a dedicated acceptance gate.
+
+#### The sofa deliberately does **not** use CoACD
+
+The criterion is *who decides this piece's dimensions*. What a dining chair looks like is the
+artist's call, so fidelity to the mesh is what matters. But a sofa's seat height is decided by
+**the robot**. Measured off the G1: shank 0.318 m + ankle 0.033 m ⇒ with the knee at 90° and the
+sole flat, the seat wants to be ≈ **0.351 m**. Placing the G1 in a seated pose, holding it with the
+policy contract's gains, and stepping 3 seconds of physics:
+
+| Seat height | Result |
+|---|---|
+| 0.30 m | ✅ stays seated |
+| **0.35 m** | ✅ stays seated |
+| 0.40 m | ❌ slides off (torso tilts 33.6°) |
+| 0.45 m | ❌ falls over (80.5°) |
+
+⇒ **The ceiling is 0.36 m.** Fetch a real sofa mesh and its seat sits wherever the artist put it,
+and `_fit_scale` only does **uniform** scaling — squashing the seat down to 0.35 shrinks the entire
+sofa and wrecks its proportions. So the sofa is authored from primitives (`furniture.sofa()`) with
+the seat pinned at 0.35 and a depth of 0.45.
+
+⭐ An unexpected corollary: **real human furniture is simply too tall for a 1.32 m G1** — the Poly
+Haven dining chair's seat measures 42.3–46.1 cm and the armchair's 53.0–70.9 cm, both inside the
+failure band. They keep their real collision (the robot can bump them and slide a foot between the
+legs); they just don't appear on the "sittable" list.
+
+#### The double-height room and that staircase
+
+| The void, seen from a camera hanging in it | Two-flight stair | 63rd-floor gallery |
+|---|---|---|
+| ![Void](docs/images/apt2/X3-双高客厅-挑空.png) | ![Stair](docs/images/apt2/V5-楼梯间-从楼下往上看.png) | ![Gallery](docs/images/apt2/V6-上层环廊.png) |
+
+The vertical dimensions are derived in the **opposite direction** from house2, and they have to be:
+the storey height is pinned by apt1's `FLOOR_TO_FLOOR = 3.75` (`ELEV = 62 × 3.75`; change it and the
+entire city outside shifts). So the storey height is fixed and the **riser height is derived**,
+leaving one integer free — how many risers per storey.
+
+| Risers/storey | Rise | Per flight | Run length | Slope | |
+|---|---|---|---|---|---|
+| 20 | 0.18750 | 10 | 2.70 | 32.01° | ❌ over the 0.175 code limit |
+| 22 | 0.17045 | 11 | 3.00 | 29.60° | ✅ but right at the limit |
+| **24** | **0.15625** | **12** | **3.30** | **27.51°** | ✅ chosen |
+
+The city outside is **referenced directly from apt1** (`SKYBOX` / `SKYLINE` / `GROUND_SLABS`), and
+the building footprint is bit-identical to apt1's (23.0 × 15.0 m), so the facade dimensions and the
+park-sightline constants are reused unchanged.
+
+| Top view (the void reaches down to floor 62) | Enfilade axis | Primary bedroom corner |
+|---|---|---|
+| ![Top](docs/images/apt2/A1-户型俯视图.png) | ![Axis](docs/images/apt2/V1-贯通轴线-从入户门望公园.png) | ![Bedroom](docs/images/apt2/V7-主卧转角窗.png) |
+
+#### How the sitting shot is produced
+
+⛔ It cannot be rendered statically like the others — **the robot in the artifact stands at the world
+origin** (placement is a runtime concern). So the pose is declared in the layout's `SIT_POSES` **by
+joint name** (⛔ never by index — indices drift silently when the robot changes), assembled by
+`scenes/apply_pose.py`, and **stepped to a settled state** before the frame is taken:
+
+```bash
+ALICE_SCENE=apt2 python tools/make_docs_images.py S1
+#   settled: pelvis +0.046 m / slide 0.031 m / tilt 11.4° / contacts 11
+```
+
+The metrics are printed alongside the render because "the picture looks right" and "the robot is
+actually seated" are two different claims.
+
+⚠️ **Not done yet**: furniture **articulation** (fridge doors and drawers still don't open) and a
+**manipulation policy** (the current G1 policy is flat-ground locomotion — the robot is *placed* in
+the seated pose, it does not walk over and sit down by itself).
+See [`待办事项-可交互家具.md`](待办事项-可交互家具.md).
 
 ### Through the Robot's Eyes
 

@@ -28,7 +28,9 @@ ROOT = os.path.dirname(HERE)                          # 仓根
 #    "脚本住仓根、sys.path[0] 恰好是仓根"的巧合。搬进 tools/ 之后就得显式插。
 sys.path.insert(0, ROOT)
 
+from scenes import apply_pose  # noqa: E402
 from scenes import manifest as SCENES  # noqa: E402
+from robots.manifest import ROBOTS  # noqa: E402
 
 # ⚠️ 2026-08-02 资产库改多场景：layout 不再躺在仓根，产物也改名 <场景>-<机器人>.xml。
 #    这个文件 2026-07-26 就因为目录一动没跟着改而把配图写到仓库外面（脚本照常打印
@@ -123,6 +125,39 @@ def render_exterior(pos, target, w=1280, h=900):
     return r.render()
 
 
+def render_posed(pose_key, robot, pos, target, w=1280, h=900):
+    """⭐ 把机器人摆成 layout 声明的姿态、**推物理到稳态**，再拍。
+
+    ⛔ 为什么不能像别的镜头那样直接 `mj_forward` 就拍：产物里的机器人站在**世界原点**
+       （摆位是运行期的事，`make_house` 有意不依赖 mujoco，见 walkthrough.park_robot）。
+       所以"机器人坐在沙发上"这张图，靠静态渲染根本出不来。
+    ⛔ 也不能只把解析姿态摆上去就拍：那不是稳态，实测推 3 秒后骨盆还会上抬 4.6 cm，
+       直接拍出来就是"悬在沙发上方"。必须 settle。
+
+    ⚠️ 这张图**必须用真机器人那份产物**（g1），不是默认的 go2——姿态是按 G1 的关节名写的。
+    """
+    global SCENE
+    scene_was, SCENE = SCENE, SCENE_FOR(robot)
+    try:
+        m = _model_looking_at(pos, target)
+    finally:
+        SCENE = scene_was
+    d = mujoco.MjData(m)
+    pose = L.SIT_POSES[pose_key]
+    n = apply_pose.apply(m, d, pose)
+    if n < 6:
+        raise ValueError(f"姿态 {pose_key} 只认出 {n} 个关节 —— 机器人 {robot} 对不上这组关节名")
+    contract = os.path.join(ROOT, ROBOTS.get(robot)["policy_dir"], "contract.json")
+    stat = apply_pose.settle(m, d, apply_pose.load_gains(contract), seconds=3.0)
+    # ⭐ 出图顺便把判据打出来：图"看着对"和机器人"真坐住了"是两回事
+    print(f"      沉降后：骨盆 {stat['rise']:+.3f} m / 滑移 {stat['slide']:.3f} m / "
+          f"倾角 {stat['tilt_deg']:.1f}° / 接触 {stat['ncon']}"
+          f"{'  ⛔ 没坐住！' if abs(stat['rise']) > 0.08 or stat['tilt_deg'] > 30 else ''}")
+    r = mujoco.Renderer(m, height=h, width=w)
+    r.update_scene(d, camera="probe")
+    return r.render()
+
+
 def render_eye(pos_xyz, yaw_deg, w=960, h=720):
     m = _model_with_camera(pos_xyz, yaw_deg)
     d = mujoco.MjData(m)
@@ -151,6 +186,13 @@ def main() -> None:
             continue
         Image.fromarray(render_exterior(pos, target)).save(os.path.join(OUT_DIR, fn))
         print(f"  {tag}  {fn:<30} 外景 {note}")
+    # ⭐ 姿态镜头：机器人被摆成 layout 声明的姿态并推到稳态再拍（见 render_posed）
+    for tag, fn, pose_key, robot, pos, target, note in getattr(SHOTS, "POSED", []):
+        if only and tag not in only:
+            continue
+        Image.fromarray(render_posed(pose_key, robot, pos, target)).save(
+            os.path.join(OUT_DIR, fn))
+        print(f"  {tag}  {fn:<30} 姿态[{pose_key}/{robot}] {note}")
     print(f"完成（场景 {SCENE_KEY}）。改了场景就重跑：ALICE_SCENE=<场景> python tools/make_docs_images.py")
 
 
