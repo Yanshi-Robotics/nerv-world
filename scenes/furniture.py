@@ -221,13 +221,22 @@ def tray_set(name: str, room: str, x: float, y: float, z: float) -> list[dict]:
 def mesh_piece(name: str, room: str, x: float, y: float, *, size, mesh: str,
                yaw: float = 0.0, z: float | None = None, rgba=(0.62, 0.60, 0.58, 1.0),
                mat: str = "", offset=(0.0, 0.0, 0.0), fit: str = "contain",
-               parts=None) -> list[dict]:
+               parts=None, collide: bool = False) -> list[dict]:
     """一件"穿了真网格外衣"的家具。
 
     ⭐ 返回的仍然是**一个普通的 box 零件**——它就是碰撞真相；只是多带一个 `mesh` 字段，
        生成器据此再发一张纯视觉的网格几何**套在这个盒子里**。
        所以：改尺寸只改 `size`，网格自动跟着缩；不装资产时场景照样完整（只是没外衣）。
     ⛔ `size` 一律写**全长**（和本文件其余部分同约定）。
+
+    `collide=True` = ⭐ **这件家具要真碰撞**：生成器改发一组 CoACD 凸块
+       （`decor/hulls.py` 离线生成），**那个包络盒就不发了**。
+       什么时候要开：机器人会跟它精细交互（坐上去、把脚伸到底下、把东西放上去）。
+       ⚠️ 不是所有家具都该开——每多一件都要多花 qhull 与接触检测，
+       而墙边的柜子、床、植物用一个盒子挡着就够了。资产还要先在
+       `decor/hulls.py` 的 `COLLIDE` 里登记过；没登记 / 字节不在，会**静默退回盒子**。
+    ⚠️ `size` 的作用不变：它仍是这件家具的**声明外廓**，`check_reachability` /
+       `check_furniture_overlap` 那几道读的都是它，不读产物。开了 `collide` 也别改它。
 
     ⚠️ **`size` 的比例要贴近网格自己的比例**，否则会白缩：缩放是均匀的、按三轴最紧的
        那一比取值，盒子哪一维偏瘦，整件就照那一维缩，其余两维空一大截。
@@ -248,4 +257,7 @@ def mesh_piece(name: str, room: str, x: float, y: float, *, size, mesh: str,
     if parts is not None:
         # ⚠️ 只在真的要挑部件时才写这个键，`parts=None` 的产物与加这个功能之前逐字节一致
         d["mesh"]["parts"] = tuple(int(i) for i in parts)
+    if collide:
+        # ⚠️ 同上：只在真要开的时候才写，`collide=False` 的产物与加这个功能之前逐字节一致
+        d["mesh"]["collide"] = True
     return [d]

@@ -314,6 +314,20 @@ def _has_mesh_coat(item: dict) -> bool:
     return lock.has(key) and lock.bytes_present(key)
 
 
+def _has_hulls(item: dict) -> bool:
+    """这件家具要不要用**真碰撞体**（CoACD 凸块）代替那个隐身碰撞盒。
+
+    三个条件都成立才算：layout 里写了 `collide=True`、资产做过凸分解、凸块字节在磁盘上。
+    ⚠️ 少任何一个都**退回隐身盒**，不报错——和网格外衣同样是"有就穿、没有就裸盒"的语义，
+       裸 clone 上照样生成得出场景。判据同样是产物里数一下（见 `check_scene`）。
+    """
+    spec = item.get("mesh") or {}
+    if not spec.get("collide"):
+        return False
+    from decor import lock
+    return lock.has_hulls(spec["id"]) and lock.hulls_present(spec["id"])
+
+
 def _furniture_geom(item: dict) -> str:
     """一件家具。
 
@@ -360,6 +374,30 @@ def _furniture_geom(item: dict) -> str:
     return _box(f'furn_{item["name"]}', item["pos"], item["size"], item["rgba"],
                 mat=mat, euler=eu, quat=qt, group=HIDDEN_BOX_GROUP if hide_box else 0,
                 extra=_DECOR if walkover else "")
+
+
+def _furniture_parts(item: dict) -> list[str]:
+    """一件家具发出来的**全部** geom。
+
+    ⭐ 两条路，二选一：
+      - 默认：一个碰撞盒（`furn_<名字>`），碰撞真相就是这个盒子；
+      - `collide=True` 且资产做过凸分解：**改发一组 CoACD 凸块**
+        （`furn_<名字>__h<N>`），碰撞真相变成真实形状。
+
+    ⛔⛔ **走凸块那条路时，那个包络盒一个都不能留下。**
+       原因是 `mj_ray` **不看 contype**——留一个 `contype=0` 的"纯声明"盒子，
+       物理上确实不挡人，但**激光照样打在它上面**，于是消费方的雷达看到的还是一块
+       97 cm 高的实心砖，真实形状白做了。而且它没法靠分组藏起来：消费方
+       (`sim.py:_build_ray_mask`) 的掩码把**房子用到的每一个组**都打开。
+       ⚠️ 唯一能让射线跳过 geom 的办法是 alpha=0，那是本仓明令禁止的坑（见 `_furniture_geom`）。
+
+    ⚠️ 盒子不发了，但 layout 里的 `size` **一个字没变**——`check_reachability` /
+       `check_furniture_overlap` / `check_furniture_not_through_wall` 三道都读
+       `layout.FURNITURE` 的声明、不读产物，所以它们照常按"关着门的整件外廓"保守判定。
+    """
+    if _has_hulls(item):
+        return _hull_geoms(item)
+    return [_furniture_geom(item)]
 
 
 def _ceiling_geom(room_key: str) -> str:
@@ -1080,6 +1118,79 @@ def _mesh_assets(robot_key: str) -> list[str]:
                            f'file="{_root_rel(lock.rel_path(key, p["png"]))}" colorspace="sRGB"/>')
                 out.append(f'    <material name="dmat_{key}_{i}" texture="dt_{key}_{i}" '
                            f'specular="0.15" shininess="0.25" reflectance="0.02"/>')
+    # ⭐ 碰撞凸块的 <mesh>。去重粒度和视觉网格一样是 (资产, 第几块, **缩放**)——
+    #    8 把餐椅只声明一套，所以"重复摆放几乎免费"（实测 nmeshgraph 与件数无关）。
+    hull_items = [it for it in items if _has_hulls(it)]
+    if hull_items:
+        out.append('')
+        out.append('    <!-- ===== 碰撞凸块（CoACD；生成见 decor/hulls.py）===== -->')
+        seen_hull = set()
+        for item in hull_items:
+            key = item["mesh"]["id"]
+            scale, _q, _pos = _mesh_placement(item)
+            for i, f in enumerate(lock.hulls(key)):
+                tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
+                if tag in seen_hull:
+                    continue
+                seen_hull.add(tag)
+                out.append(f'    <mesh name="dh_{tag}" file="{pre}{lock.rel_path(key, f["obj"])}" '
+                           f'scale="{scale:g} {scale:g} {scale:g}"/>')
+    return out
+
+
+def _mesh_placement(item: dict) -> tuple[float, tuple, tuple]:
+    """一件家具的网格该缩多少、转多少、摆在哪 —— **视觉外衣与碰撞凸块共用这一份**。
+
+    返回 `(scale, quat, (x, y, z))`。同一件资产的所有部件/凸块共用同一组值，
+    因为部件之间的相对位置**已经烘在 OBJ 文件坐标里**了（`decor/convert.py` 按整件
+    包围盒中心统一居中）。
+
+    ⛔⛔ 这个函数存在的唯一理由是：外衣和凸块必须用**逐位相同**的变换。
+       它们要是各算各的，网格和碰撞体就会错开，而且**编译不报错、渲染看着也正常**——
+       只有射线打上去才发现"看见的地方摸不着"。本仓已经在"同一个量存两处"上栽过
+       （见 `decor/calibrate.py` 顶部那段），⛔ 别把它拆回两份。
+    """
+    spec = item["mesh"]
+    key, sel = spec["id"], spec.get("parts")
+    span, ctr = _asset_span(key, sel)
+    scale = _fit_scale(item, span)
+    yaw = float(spec.get("yaw", 0.0))
+    ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+    px, py, pz = item["pos"]
+    ox, oy, oz = spec.get("offset", (0.0, 0.0, 0.0))
+    # ⭐ 所有部件共用同一个偏移 `-ctr`：把整件摆正到碰撞盒中心，
+    #    偏心资产（以及 `parts` 选出的子集）才不会探出一侧。⚠️ 偏移要跟着 yaw 转再乘缩放。
+    # ⛔⛔ 这里**绝不能再加每个部件自己的重心/包围盒中心**（2026-08-07 删掉的一段）。
+    #    MuJoCo 编译 <mesh> 时虽然把顶点搬进了惯性系，却把那个重定位量**抄进
+    #    geom_pos/geom_quat 自己补偿掉了**——实测 `<geom type="mesh" pos="0 0 0">`
+    #    的世界 bbox 与 OBJ 文件 bbox 逐位相同。老代码用 `lock.part_offset()` 又加了一遍，
+    #    条案两条柜腿各飞 ±0.49 m，这才是 console / nightstand 当年被判红的真因。
+    fx, fy, fz = (-c for c in ctr)
+    x = px + ox + (fx * ca - fy * sa) * scale
+    y = py + oy + (fx * sa + fy * ca) * scale
+    z = pz + _zbase(item["room"]) + oz + fz * scale
+    return scale, yaw_quat(yaw), (x, y, z)
+
+
+def _hull_geoms(item: dict) -> list[str]:
+    """一件家具的 CoACD 碰撞凸块 —— 它们**就是**这件家具的碰撞真相。
+
+    ⛔ 每一块都必须带 `solref`（值取 `decor.lock.HULL_SOLREF`，那边写了为什么）：
+       MuJoCo 默认接触太软，快速撞击会直接穿过去，而且**编译不报错、慢速测试全绿**。
+
+    分组走 `HIDDEN_BOX_GROUP`（4）：它们不该被画出来（画的是外面那张视觉网格），
+    但**照样参与碰撞、也照样挡射线**——这正是我们要的，雷达看到的就是真实形状。
+    """
+    from decor import lock
+    key = item["mesh"]["id"]
+    scale, q, (x, y, z) = _mesh_placement(item)
+    rot = _rot_attr(quat=q)
+    out = [f'    <!-- {item["name"]}：{len(lock.hulls(key))} 块 CoACD 凸块 = 真碰撞体 -->']
+    for i, _f in enumerate(lock.hulls(key)):
+        tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
+        out.append(f'    <geom name="furn_{item["name"]}__h{i}" type="mesh" mesh="dh_{tag}" '
+                   f'pos="{x:g} {y:g} {z:g}"{rot} '
+                   f'group="{HIDDEN_BOX_GROUP}" solref="{lock.HULL_SOLREF}"/>')
     return out
 
 
@@ -1096,33 +1207,15 @@ def _decor_geoms() -> list[str]:
         spec = item["mesh"]
         key = spec["id"]
         sel = spec.get("parts")
-        span, ctr = _asset_span(key, sel)
-        scale = _fit_scale(item, span)
-        yaw = float(spec.get("yaw", 0.0))
-        q = yaw_quat(yaw)
-        px, py, pz = item["pos"]
-        ox, oy, oz = spec.get("offset", (0.0, 0.0, 0.0))
-        z = pz + _zbase(item["room"]) + oz
-        ca, sa = math.cos(math.radians(yaw)), math.sin(math.radians(yaw))
+        # ⭐ 缩放 / 朝向 / 摆位由 `_mesh_placement()` 统一算 —— 碰撞凸块读的是**同一份**，
+        #    两边各算一遍就会错开，而且编译不报错、渲染看着也正常（见那个函数的注释）。
+        scale, q, (gx, gy, gz) = _mesh_placement(item)
         for i, p in _selected_parts(key, sel):
             tag = f"{key}_{i}_{scale:.4f}".replace(".", "_")
             look = (f'material="dmat_{key}_{i}"' if p.get("png")
                     else f'rgba="{_rgba(item["rgba"])}"')
-            # ⭐ 所有部件共用同一个偏移 `-ctr`：把整件摆正到碰撞盒中心，
-            #    偏心资产（以及 `parts` 选出的子集）才不会探出一侧。
-            # ⛔⛔ 这里**绝不能再加每个部件自己的重心/包围盒中心**（2026-08-07 删掉的一段）。
-            #    部件之间的相对位置**已经烘在 OBJ 文件坐标里**了（`decor/convert.py` 是按
-            #    整件包围盒中心统一居中的），而 MuJoCo 编译 <mesh> 时虽然把顶点搬进了惯性系，
-            #    却把那个重定位量**抄进 geom_pos/geom_quat 自己补偿掉了**——
-            #    实测 `<geom type="mesh" pos="0 0 0">` 的世界 bbox 与 OBJ 文件 bbox 逐位相同。
-            #    老代码用 `lock.part_offset()` 又加了一遍，等于把每个部件往外推了自己的重心那么远
-            #    （条案两条柜腿各飞 ±0.49 m），这才是 console / nightstand 当年被自检判红的真因。
-            # ⚠️ 偏移仍要**跟着 yaw 一起转**再乘缩放。
-            fx, fy, fz = (-c for c in ctr)
-            dx = (fx * ca - fy * sa) * scale
-            dy = (fx * sa + fy * ca) * scale
             out.append(f'      <geom name="dg_{item["name"]}_{i}" type="mesh" mesh="dm_{tag}" '
-                       f'{look} pos="{px + ox + dx:g} {py + oy + dy:g} {z + fz * scale:g}"'
+                       f'{look} pos="{gx:g} {gy:g} {gz:g}"'
                        f'{_rot_attr(quat=q)} contype="0" conaffinity="0" density="0"/>')
     out.append('    </body>')
     return out
@@ -1202,7 +1295,7 @@ def build(robot_key: str) -> str:
         parts.extend(_wall_geoms(key))
         for item in L.FURNITURE:
             if item["room"] == key:
-                parts.append(_furniture_geom(item))
+                parts.extend(_furniture_parts(item))
         parts.append('')
     decor = _decor_geoms()               # 装饰网格外衣（阶段 E；没资产就是空的）
     if decor:

@@ -119,6 +119,21 @@ MIN_HEADROOM_M = 2.20       # 梯段净高不宜小于 2.20 m（平台下为 2.0
 # 一个踢面的浮点容差：几何全是 0.16 这类有限小数，1e-6 足够，同时能抓住真错位
 EPS = 1e-6
 
+# ── 真碰撞体（CoACD 凸块）相关 ──────────────────────────────────────────
+# 网格允许探出「凸块并集包围盒」多少。⭐ 这个数是**量出来的不是拍的**：
+# 2026-08-22 实测三件已分解的资产，网格都稳稳**缩在**凸块并集里面——
+#     dining_chair −3.4 mm   armchair −4.2 mm   coffee_table −5.9 mm （负 = 在里面）
+# 也就是说真实余量至少 3.4 mm。取 1 mm 作为门线：既容得下 `%g` 六位有效数字的截断
+# （box 那条路实测最坏 4.84 µm），又远小于真实余量，变换一旦分家就当场红。
+_HULL_AABB_TOL = 0.001
+
+# 座面高度上限。⭐ 实测出来的硬指标，不是审美：G1 小腿 0.318 + 踝高 0.033 = 0.351，
+# 坐姿保持 3 秒的实测结果是 0.30 ✅ / 0.35 ✅ / 0.40 ❌ 滑落 / 0.45 ❌ 直接倒。
+# ⚠️ apt1 现有那张沙发是 0.42，正落在失败带里（那张不改，见 apt2 计划）。
+SEAT_MAX_H = 0.36
+# 座面下方要留的净空高度：脚和小腿要伸得进去，不能是实心的
+SEAT_CLEAR_Z = 0.26
+
 
 def _fail(msgs: list[str], text: str) -> None:
     msgs.append(text)
@@ -1153,6 +1168,16 @@ def check_decor_inside_box(key: str, layout) -> list[str]:
        把网格顶点变换到碰撞盒的局部系，和盒子半长逐轴比。探出多少就报多少毫米。
     ⚠️ 网格探出时**放大碰撞盒没有用**——`_fit_scale` 会把网格按比例一起撑大。
        该查的是 `_asset_span`（跨度算对没有）和 `_decor_geoms`（偏移加了几遍）。
+
+    ⭐ **开了 `collide=True` 的家具走另一条判据**（2026-08-22 加）：它没有包络盒，
+       碰撞真相是一组 CoACD 凸块（`furn_<件>__h<N>`）。对这种件，改判
+       **网格的包围盒必须落在凸块并集的包围盒里**。
+       ⚠️ 这条判据看着比逐顶点弱，但它精准盯住**真正会出的那个错**：
+       视觉网格和凸块用的是同一个 `_mesh_placement()`，两者本来就重合；
+       唯一现实的失效方式是有人把那两处变换改分家了——而变换一分家，
+       包围盒立刻整体平移或缩放，这条当场就红。
+       ⭐ 水平方向另有 `check_decor_ray_invariance` 兜着（实测 180 条射线里
+       第一个命中是 `dg_` 的次数为 0，说明凸块确实把网格整个裹住了）。
     """
     try:
         import mujoco
@@ -1166,19 +1191,48 @@ def check_decor_inside_box(key: str, layout) -> list[str]:
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
     boxes: dict[str, int] = {}
+    hulls: dict[str, list[int]] = {}
     meshes: dict[str, list[int]] = {}
     for g in range(m.ngeom):
         nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or ""
         if nm.startswith("furn_"):
-            boxes[nm[len("furn_"):]] = g
+            stem = nm[len("furn_"):]
+            if "__h" in stem:                       # furn_<家具名>__h<第几块>
+                hulls.setdefault(stem.split("__h", 1)[0], []).append(g)
+            else:
+                boxes[stem] = g
         elif nm.startswith("dg_"):
             # dg_<家具名>_<部件下标>
             meshes.setdefault(nm[len("dg_"):].rsplit("_", 1)[0], []).append(g)
+
+    def _world_aabb(gids):
+        lo = np.full(3, np.inf)
+        hi = np.full(3, -np.inf)
+        for g in gids:
+            mid = m.geom_dataid[g]
+            v = m.mesh_vert[m.mesh_vertadr[mid]:m.mesh_vertadr[mid] + m.mesh_vertnum[mid]]
+            w = v @ d.geom_xmat[g].reshape(3, 3).T + d.geom_xpos[g]
+            lo, hi = np.minimum(lo, w.min(axis=0)), np.maximum(hi, w.max(axis=0))
+        return lo, hi
+
     errs: list[str] = []
     for item, gids in sorted(meshes.items()):
+        hg = hulls.get(item)
+        if hg:
+            # ⭐ 真碰撞体那条路：网格包围盒必须在凸块并集的包围盒里（理由见 docstring）
+            mlo, mhi = _world_aabb(gids)
+            hlo, hhi = _world_aabb(hg)
+            out = np.maximum(mhi - hhi, hlo - mlo)
+            if float(out.max()) > _HULL_AABB_TOL:
+                ax = int(out.argmax())
+                _fail(errs, f"装饰 {item} 的网格探出 CoACD 凸块并集 "
+                            f"{float(out.max()) * 1000:.1f} mm（{'xyz'[ax]} 轴）"
+                            f"—— 八成是视觉外衣和凸块用了不同的变换，"
+                            f"去看 make_house._mesh_placement 是不是被拆成了两份")
+            continue
         b = boxes.get(item)
         if b is None:
-            _fail(errs, f"装饰 {item} 找不到对应的碰撞盒 furn_{item}")
+            _fail(errs, f"装饰 {item} 既没有碰撞盒 furn_{item}，也没有凸块 furn_{item}__h*")
             continue
         Rb = d.geom_xmat[b].reshape(3, 3)
         cb, hb = d.geom_xpos[b], m.geom_size[b]
@@ -1194,6 +1248,110 @@ def check_decor_inside_box(key: str, layout) -> list[str]:
             _fail(errs, f"装饰 {item} 的网格探出碰撞盒 {worst * 1000:.1f} mm（{'xyz'[axis]} 轴）"
                         f"—— 包含性不变式破了，⛔ 别去放大碰撞盒，"
                         f"去看 make_house 的 _asset_span / _decor_geoms")
+    return errs
+
+
+def check_collision_solref(key: str, layout) -> list[str]:
+    """⛔ 每一块 CoACD 碰撞凸块都必须带硬化过的 `solref` —— 不带就会被高速撞击穿透。
+
+    ⭐ 为什么单列一道门：这是本仓典型的**静默坑**。用 MuJoCo 默认接触时，
+       3.9 kg 的板从 1.20 m 砸到 49 mm 厚的座面凸块上会**直接穿过去落到地上**
+       （2026-08-22 实测；阈值很陡——每步位移 3.2 mm 还好、4.1 mm 就穿）。
+       而**编译不报错、慢速放置全绿**：机器人慢慢坐下去一切正常，摔一跤砸上去就穿模。
+    ⚠️ 减小时间步没用、加 `margin` 也没用，都实测过。只有硬化 `solref` 有效。
+    ⚠️ 这不是"几何太薄"：凸块最薄边 30 mm、座面那块 49 mm。是接触刚度的问题。
+
+    判据取 `decor.lock.HULL_SOLREF` 的**时间常数**：产物里写的必须不比它软
+    （更小 = 更硬 = 可以）。⛔ 别在这里写第二个字面量，那个数只有一处真相源。
+    """
+    try:
+        import mujoco
+    except ImportError:
+        return ["(跳过) 没装 mujoco"]
+    try:
+        from decor import lock
+    except ImportError:
+        return ["(跳过) 没有 decor 包"]
+    path = _scene_path(key, "g1")
+    if not os.path.exists(path):
+        return []
+    want = float(str(lock.HULL_SOLREF).split()[0])
+    m = mujoco.MjModel.from_xml_path(path)
+    errs: list[str] = []
+    for g in range(m.ngeom):
+        nm = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or ""
+        if "__h" not in nm or not nm.startswith("furn_"):
+            continue
+        got = float(m.geom_solref[g][0])
+        if got > want + 1e-9:
+            _fail(errs, f"碰撞凸块 {nm} 的 solref 时间常数是 {got:g}，比要求的 {want:g} 软"
+                        f"——高速撞击会穿过去，而且慢速测试全绿。"
+                        f"⛔ 去看 make_house._hull_geoms 有没有漏写 solref")
+            break                      # 一件报一次就够，不刷屏
+    return errs
+
+
+def check_seat_reachable(key: str, layout) -> list[str]:
+    """⭐ 声明了「能坐」的家具，必须**真的坐得下** —— 用射线量，不看声明。
+
+    两条判据，缺一不可：
+      1. **座面高度 ≤ SEAT_MAX_H**：俯视射线在座位区量到的最高实体面。
+         实测 G1 坐姿保持 3 秒：0.30 ✅ / 0.35 ✅ / 0.40 ❌ 滑落 / 0.45 ❌ 直接倒。
+      2. **座面下方是空的**：在 SEAT_CLEAR_Z 高度横穿一条射线，必须打空。
+         ⛔ 这一条才是真正区分「真碰撞」和「一个实心盒」的判据——
+         用一个包络盒时，这条射线会在椅子外缘就被挡住（实测 0.383 m）。
+
+    layout 里怎么声明：`SEATS = [{"name": "gr_sofa", "at": (x, y), "span": (w, d)}, ...]`
+    没声明 `SEATS` 的场景直接跳过（house1/house2/apt1 都没有）。
+    """
+    seats = getattr(layout, "SEATS", None)
+    if not seats:
+        return []
+    try:
+        import mujoco
+        import numpy as np
+    except ImportError:
+        return ["(跳过) 没装 mujoco/numpy"]
+    path = _scene_path(key, "g1")
+    if not os.path.exists(path):
+        return []
+    m = mujoco.MjModel.from_xml_path(path)
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    gid = np.zeros(1, np.int32)
+    errs: list[str] = []
+    for s in seats:
+        cx, cy = s["at"]
+        w, dep = s.get("span", (0.30, 0.30))
+        zb = _zbase_of(layout, s["room"]) if s.get("room") else 0.0
+        # ① 座面高度：在座位区打一圈俯视射线，取**最高**的那个实体面
+        tops = []
+        for ux in np.linspace(-w / 2, w / 2, 5):
+            for uy in np.linspace(-dep / 2, dep / 2, 5):
+                o = np.array([cx + ux, cy + uy, zb + 2.0])
+                dist = mujoco.mj_ray(m, d, o, np.array([0.0, 0.0, -1.0]), None, 1, -1, gid)
+                if dist >= 0:
+                    tops.append(zb + 2.0 - dist)
+        if not tops:
+            _fail(errs, f"坐具 {s['name']}：座位区往下打射线什么都没打到，座面根本不存在")
+            continue
+        top = max(tops)
+        if top - zb > SEAT_MAX_H:
+            _fail(errs, f"坐具 {s['name']} 的座面高 {(top - zb) * 100:.1f} cm > "
+                        f"{SEAT_MAX_H * 100:.0f} cm —— G1 坐上去会滑落"
+                        f"（实测 0.40 m 就滑、0.45 m 直接倒）")
+        # ② 座面下方必须是空的
+        half = max(w, dep) / 2 + 0.60
+        blocked = 0
+        for uy in np.linspace(-dep / 2, dep / 2, 5):
+            o = np.array([cx - half, cy + uy, zb + SEAT_CLEAR_Z])
+            dist = mujoco.mj_ray(m, d, o, np.array([1.0, 0.0, 0.0]), None, 1, -1, gid)
+            if 0 <= dist <= 2 * half:
+                blocked += 1
+        if blocked == 5:
+            _fail(errs, f"坐具 {s['name']} 的座面下方 {SEAT_CLEAR_Z * 100:.0f} cm 处全被挡住"
+                        f"——碰撞体退化成一个实心盒了，脚伸不进去。"
+                        f"⛔ 这件是不是漏了 collide=True，或者凸块字节不在磁盘上？")
     return errs
 
 
@@ -1743,8 +1901,10 @@ CHECKS = [
     ("⭐ 望公园的视线没被挡 + 远景没被裁", check_park_sightline),
     ("⛔ 朝外的房间往外都撞得到实体", check_void),
     ("⭐⭐ 装饰网格都带 UV（不是单色块）", check_mesh_has_uv),
-    ("⭐⭐ 装饰网格整个装在碰撞盒里", check_decor_inside_box),
+    ("⭐⭐ 装饰网格整个装在碰撞盒/凸块里", check_decor_inside_box),
     ("⭐⭐ 装饰网格没改变任何射线读数", check_decor_ray_invariance),
+    ("⛔ 碰撞凸块都硬化过 solref（不然高速撞击穿模）", check_collision_solref),
+    ("⭐ 声明能坐的家具真的坐得下（座面高 + 座下净空）", check_seat_reachable),
     ("⭐ 整条上楼路线实测走通", check_route),
     ("楼梯头顶净空", check_headroom),
     ("楼层平台没有没拦住的洞", check_no_open_drop),

@@ -1,6 +1,138 @@
 {
   "armchair": {
     "author": "Vibrant Nordic",
+    "hulls": {
+      "count": 25,
+      "fidelity": 1.071,
+      "files": [
+        {
+          "obj": "hulls/h0.obj",
+          "sha256": "090edc22a5c67c5d878f312e3ba921fe480903572bd258cdd7ca89b40590c178",
+          "tris": 172
+        },
+        {
+          "obj": "hulls/h1.obj",
+          "sha256": "97a39e23fd8a22ba7bf25e57977c2806911013799d86bd5bca12ee8855d2547c",
+          "tris": 410
+        },
+        {
+          "obj": "hulls/h2.obj",
+          "sha256": "83ed2398b533deb9cf6747bcb6c31e85f5051a27090498060dd892e85941dba9",
+          "tris": 88
+        },
+        {
+          "obj": "hulls/h3.obj",
+          "sha256": "772a9440435802922bdf50e2acc741ce1e2a5233cf7a860afb5ccd3280508a99",
+          "tris": 624
+        },
+        {
+          "obj": "hulls/h4.obj",
+          "sha256": "99d91a322e663f407bb430c3bdeec5c75a04d2758191adbb2c722c5afce551e5",
+          "tris": 1000
+        },
+        {
+          "obj": "hulls/h5.obj",
+          "sha256": "0960361b362a9e4ecc0123ada07a4b6dbf3cb9d6ffcb1d50d96a1eedbcb9e9b1",
+          "tris": 732
+        },
+        {
+          "obj": "hulls/h6.obj",
+          "sha256": "7fa74bd1e9551a61a153379bbdc69152d378132501d5b2e226c12ca3738d5d21",
+          "tris": 196
+        },
+        {
+          "obj": "hulls/h7.obj",
+          "sha256": "5e0b9804450bbc7c3e68ddedad98946f6c6a319bddbde32c9e9d5a4dec3ad909",
+          "tris": 24
+        },
+        {
+          "obj": "hulls/h8.obj",
+          "sha256": "c29a1ab0d90cafb1a342bff7ac9a242bfced097d36e9de051c2c93d71618be03",
+          "tris": 174
+        },
+        {
+          "obj": "hulls/h9.obj",
+          "sha256": "3a135088e8c5c98c30a372491865ad5612966a8dfb8421cb79dbbef9474a5c72",
+          "tris": 344
+        },
+        {
+          "obj": "hulls/h10.obj",
+          "sha256": "26efde15b1136f8f7afbff4cb238344aa14b54d88ce30f0096c9099e5e6e18b5",
+          "tris": 198
+        },
+        {
+          "obj": "hulls/h11.obj",
+          "sha256": "8ced3a422532f23d2670e491f4bb4117973abbf7c104b5cbbc283cef2f28ca7e",
+          "tris": 454
+        },
+        {
+          "obj": "hulls/h12.obj",
+          "sha256": "19d982339b22298ad78c4f58a1e3566d21615f4dfdd0a6025ea6e0a57d4a4333",
+          "tris": 46
+        },
+        {
+          "obj": "hulls/h13.obj",
+          "sha256": "e3cfb442cc9bbc2c36e3b9b8d7dbdfa56b9c129d83e2be4544a648e7777a0568",
+          "tris": 420
+        },
+        {
+          "obj": "hulls/h14.obj",
+          "sha256": "6d067a5959e2c868e86cc054d4065a10b7dd21f8c2e360322afd0bb56ebbcc48",
+          "tris": 152
+        },
+        {
+          "obj": "hulls/h15.obj",
+          "sha256": "fa0013e994ad87fa9cfd33b6edd73121b04bfb16b759f8d51891a1e6d501923d",
+          "tris": 602
+        },
+        {
+          "obj": "hulls/h16.obj",
+          "sha256": "488281b8f083c12a33ad864df0889b97eb227be3a946c2ab3f53fbeb42312907",
+          "tris": 488
+        },
+        {
+          "obj": "hulls/h17.obj",
+          "sha256": "c13f2cdd7e9ede78b759e03f0fb3cd4607a45a5c2b23c1a55aec7d45f84740d2",
+          "tris": 242
+        },
+        {
+          "obj": "hulls/h18.obj",
+          "sha256": "daec45ff2bd8b9d1b6c24632a5a4a25eee2ca7ff044fea21d1eeaadee45c7b66",
+          "tris": 226
+        },
+        {
+          "obj": "hulls/h19.obj",
+          "sha256": "7378884ef49cfe98a953c87a060d8ac3b27c2babdf5a4b37577344dbc0651fad",
+          "tris": 574
+        },
+        {
+          "obj": "hulls/h20.obj",
+          "sha256": "88e4d874bff93027cf3921d6d42d6fad368818aedca90191426c9b4a06a78b19",
+          "tris": 30
+        },
+        {
+          "obj": "hulls/h21.obj",
+          "sha256": "f0568c54217bac3139ff2b77d97cd27adf6f3fb002492ed4456bcbbc3d8853e1",
+          "tris": 2392
+        },
+        {
+          "obj": "hulls/h22.obj",
+          "sha256": "c5cc68ada488753ba38e073b5fd17ba2432183f71dd063343bd76604e213017b",
+          "tris": 3862
+        },
+        {
+          "obj": "hulls/h23.obj",
+          "sha256": "324366bcdbbad9981fa68a04cac353d616a58998d9befaddc75f5cc346ec75a1",
+          "tris": 1256
+        },
+        {
+          "obj": "hulls/h24.obj",
+          "sha256": "48b2ef6a34fd4209da032746f0f863dd85ee9907fd6d903cbef17eeef77723f4",
+          "tris": 958
+        }
+      ],
+      "threshold": 0.1
+    },
     "label": "现代单椅",
     "license": "CC0-1.0",
     "parts": [
@@ -390,6 +522,88 @@
   },
   "coffee_table": {
     "author": "Ulan Cabanilla",
+    "hulls": {
+      "count": 15,
+      "fidelity": 1.273,
+      "files": [
+        {
+          "obj": "hulls/h0.obj",
+          "sha256": "10a721d345398029b711c70c5cc3f2bfa08cee1f3819dd5f507f828a23786f5c",
+          "tris": 2830
+        },
+        {
+          "obj": "hulls/h1.obj",
+          "sha256": "b9c145118aac7ede7c14250d23f4c673726080b4b49a966ab082d937a33016d6",
+          "tris": 256
+        },
+        {
+          "obj": "hulls/h2.obj",
+          "sha256": "a503b3f49d6e236780eed197afcd6935738fa92f1e817fb8ab3b0d5bec46b557",
+          "tris": 2390
+        },
+        {
+          "obj": "hulls/h3.obj",
+          "sha256": "903d69968956815f19a1a8889f9e6b7646fcfa19d86c25e308fa16fd89702d2c",
+          "tris": 316
+        },
+        {
+          "obj": "hulls/h4.obj",
+          "sha256": "ed46b3b5296fe5bb036cdc46fbf2872685716747e13d44df07bf26abaa682466",
+          "tris": 322
+        },
+        {
+          "obj": "hulls/h5.obj",
+          "sha256": "390969f6c8e1c94f30cc8698d1e4472c7b3380c926059510144bc1441282a685",
+          "tris": 296
+        },
+        {
+          "obj": "hulls/h6.obj",
+          "sha256": "f6edfd3c5b5b581057dcd6fd5d94d11b572633e563689ad3f54299974a528116",
+          "tris": 382
+        },
+        {
+          "obj": "hulls/h7.obj",
+          "sha256": "3079dfab51cf7309672baae155309de077341aee2606c3434fe42506b79faaf8",
+          "tris": 310
+        },
+        {
+          "obj": "hulls/h8.obj",
+          "sha256": "15473f2492ade7f648e0efd383e561ea4527df40f5f698c1fea6bf1faf87d1b9",
+          "tris": 258
+        },
+        {
+          "obj": "hulls/h9.obj",
+          "sha256": "93374215d3c2e33b2a9ae693a8b8f171aca9f45807c869da6d607872e93f52c5",
+          "tris": 292
+        },
+        {
+          "obj": "hulls/h10.obj",
+          "sha256": "4f556889b974b3e64047c5c8260eeabe5ee94e1f85bb739347fe4e0922c63317",
+          "tris": 330
+        },
+        {
+          "obj": "hulls/h11.obj",
+          "sha256": "9e138d2f35feb15c341ce55935ac05ce66a43d5b393521587b7f6336f22b7841",
+          "tris": 346
+        },
+        {
+          "obj": "hulls/h12.obj",
+          "sha256": "5356446d6e67ba4f53c6093fa9dd78baded6f65f1066ed543ca1634181aa6508",
+          "tris": 182
+        },
+        {
+          "obj": "hulls/h13.obj",
+          "sha256": "b0188b7dbe182278582d4a783c4ddf80b7f01f34cb11745c17bae7c13f967d24",
+          "tris": 314
+        },
+        {
+          "obj": "hulls/h14.obj",
+          "sha256": "afe49b70b974f1e75d23f126c2f09e91dd389a79734c6bff22d57074677262b7",
+          "tris": 278
+        }
+      ],
+      "threshold": 0.1
+    },
     "label": "圆形大理石茶几",
     "license": "CC0-1.0",
     "parts": [
@@ -504,6 +718,98 @@
   },
   "dining_chair": {
     "author": "James Ray Cock",
+    "hulls": {
+      "count": 17,
+      "fidelity": 0.969,
+      "files": [
+        {
+          "obj": "hulls/h0.obj",
+          "sha256": "91d779d4f09abb75c6f088f68d4919837518776dee524bbdc30a6f0d7cb0d5d2",
+          "tris": 350
+        },
+        {
+          "obj": "hulls/h1.obj",
+          "sha256": "3f7efb0772353caca3d8f09df01072961b92c1fd75cebe99493e3d6f27434539",
+          "tris": 452
+        },
+        {
+          "obj": "hulls/h2.obj",
+          "sha256": "2a0e5f0706cc721b9be5bb92fc88589ceadf16a1da89fbc58f0eb160b346915b",
+          "tris": 836
+        },
+        {
+          "obj": "hulls/h3.obj",
+          "sha256": "b72cd517ccbc0f07a1c19196a445edea1228db6af6234ff5804d28b7b33940c1",
+          "tris": 520
+        },
+        {
+          "obj": "hulls/h4.obj",
+          "sha256": "0c4d740b25c94b3e0287eb41f9a9b1230f206401f4c2b64db83d6212c6efea4f",
+          "tris": 300
+        },
+        {
+          "obj": "hulls/h5.obj",
+          "sha256": "29329422be4abe4a9a08186640727739123cc85067a1d5cd83a49a817a21e9e5",
+          "tris": 198
+        },
+        {
+          "obj": "hulls/h6.obj",
+          "sha256": "eaa108f7b8163f77f7213a6542f29e66bc6b4f6e4bfa31f5b7df95d6bcd492d8",
+          "tris": 272
+        },
+        {
+          "obj": "hulls/h7.obj",
+          "sha256": "640aba5ca3044c1df76be6ef460e6546ac99c3555f6bc7899b77bb9e7f76bb15",
+          "tris": 252
+        },
+        {
+          "obj": "hulls/h8.obj",
+          "sha256": "b11b2a1fed5fb7289c1c2969de0366014afd4d6e1abda0342b469d9122030445",
+          "tris": 396
+        },
+        {
+          "obj": "hulls/h9.obj",
+          "sha256": "757726f8ea0fafb5cf6c8a95162a94cec3a6e0a992842b5bf84d9a76152c9488",
+          "tris": 114
+        },
+        {
+          "obj": "hulls/h10.obj",
+          "sha256": "d6a46d8bc761a84a73b82e21ec56844530b5dcb627a9d8df76daeac82fafc243",
+          "tris": 160
+        },
+        {
+          "obj": "hulls/h11.obj",
+          "sha256": "8afec3ca160a806ceed00e66e066480c6212d42406eab4514f585aa3b3215f10",
+          "tris": 186
+        },
+        {
+          "obj": "hulls/h12.obj",
+          "sha256": "05d0401ed4af040c6ac1f20207c5240071f86efbadc290dad9eb441471581f3d",
+          "tris": 520
+        },
+        {
+          "obj": "hulls/h13.obj",
+          "sha256": "1174fd77e160d469486bebe716e4eb8b8797c035dffba2d0ccbf8af6dfbcd98d",
+          "tris": 138
+        },
+        {
+          "obj": "hulls/h14.obj",
+          "sha256": "d5bcb056e326590389211caca11b9fd827ca37a5ef9d32486e34527889bb11fe",
+          "tris": 182
+        },
+        {
+          "obj": "hulls/h15.obj",
+          "sha256": "238e9e67c64b6f9dde29c3bc1c0c3ea83c418013ca5998128b2b0b71b1e2d500",
+          "tris": 196
+        },
+        {
+          "obj": "hulls/h16.obj",
+          "sha256": "5abd03a8b0d24b285d4eece6f9b669a4e5e362aa8fc6c9f9adc23ee609c464cf",
+          "tris": 220
+        }
+      ],
+      "threshold": 0.1
+    },
     "label": "现代皮质餐椅（×8，必须减面）",
     "license": "CC0-1.0",
     "parts": [
