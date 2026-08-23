@@ -328,31 +328,49 @@ cavity whole:
 chair legs is still solid.
 
 The fix is **CoACD convex decomposition** (`decor/hulls.py`, run once offline; the hulls are not
-committed). Same chair, rays cast straight down to measure surface height (cm; `·` = reached the
-floor):
+committed). Both columns below are measured **straight off the two shipped artifacts** — rays cast
+downward, reading the height of the first surface hit (cm; `·` = reached the floor):
 
 ```
-       before (one collision box)            after (17 convex hulls)
-   ·   ·   ·   ·   ·   ·   ·        ·  44  44  44  49  85  97   ·
-   ·  97  97  97  97  97   ·        ·  44  45  46  57  89  98   ·
-   ·  97  97  97  97  97   ·        ·  44  46  46  61  88  98   ·
-   ·  97  97  97  97  97   ·        ·  44  46  46  57  86  98   ·
-   ·   ·   ·   ·   ·   ·   ·        ·   ·   ·   ·   ·   ·   ·
+ apt1 · armchair (one hidden box)     apt2 · dining chair (17 CoACD hulls)
+  110  110  110  110  110  110  110    ·   94   95   95   95   94    ·   ← backrest
+  110  110  110  110  110  110  110    ·   78   87   87   86   79    ·
+  110  110  110  110  110  110  110    ·   36   45   46   46   36    ·   ← seat
+  110  110  110  110  110  110  110    ·   43   45   45   45   43    ·
+  110  110  110  110  110  110  110    ·   43   43   43   43   43    ·
 
-   a uniform 97 cm everywhere        seat 44–47 cm, backrest 85–98 cm
-   — that is a 97 cm solid brick     — that is an actual chair
+  a uniform 110 cm across the whole     backrest 94–95, seat 43–46, and the
+  footprint — a 0.90×1.06×1.10 brick    floor visible at the edges — a chair
 ```
 
-And one horizontal ray 26 cm below the seat ("can you get under the chair?"): with one box it hits
-at 0.383 m; with the hulls it hits **nothing** — the ray passes between the legs.
+And one horizontal ray, same height, both scenes:
+
+| Height | apt1 armchair (one box) | apt2 dining chair (hulls) |
+|---|---|---|
+| 0.45 m (seat height) | hits the box | hits `furn_dn_w1__h8` at 0.737 m — **the chair really is there** |
+| 0.26 m (**below** the seat) | hits `furn_gr_ch1` at **0.721 m** — blocked by the solid box | **passes straight through the chair**, travelling 15.25 m before hitting the library shelving |
+
+⇒ The same ray: blocked in one scene, through the chair legs in the other. That is the whole
+meaning of "real collision".
 
 | Six chairs with real collision | Great room: armchairs and table too |
 |---|---|
 | ![Dining](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![Great room](docs/images/apt2/V2-大客厅-三开间落地窗.png) |
 
-**Cost is not the problem**: 31 decomposed items = 467 geoms, 9 ms to compile, **383× realtime**.
-And `nmeshgraph` is **independent of item count** (meshes are shared per asset), so eight identical
-dining chairs are essentially free.
+**Cost is not the problem**, and that too is measured:
+
+| | ngeom | of which collision hulls | Realtime factor |
+|---|---|---|---|
+| apt1 (all furniture is hidden boxes) | 3329 | 0 | 15.7× |
+| **apt2 (12 items with real collision)** | 3719 | **184** | **14.1×** |
+
+Real collision across the whole apartment costs about 10%. ⭐ The key is that `nmeshgraph` is
+**independent of item count** — meshes are shared per asset, so six identical dining chairs declare
+one set of hulls and repeated placement is essentially free.
+
+⚠️ But don't say "meshes are free" any more: MuJoCo **skips qhull entirely** when
+`contype=0 and conaffinity=0`, which is the only reason the purely visual coats are cheap. Turn
+collision on and qhull runs.
 
 #### ⛔ One thing that fails silently if you skip it
 
