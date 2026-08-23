@@ -52,10 +52,13 @@ MuJoCo 的**默认接触太软**。实测：一块 3.9 kg 的板从 1.20 m 砸�
 
 ## 用法
 
-⛔ **要 `coacd`，本机只有 `infinigen` 那个环境有**（`isaaclab` 没装）：
+⛔ 这一步的依赖**不在生成器那三个**（`mujoco numpy pillow`）里，要额外装两个：
 
-    ~/miniforge3/envs/infinigen/bin/python -m decor.hulls           # 缺谁补谁
-    ~/miniforge3/envs/infinigen/bin/python -m decor.hulls --force   # 全部重做
+    pip install coacd trimesh          # coacd 是 MIT，只依赖 numpy
+
+    python -m decor.hulls              # 缺谁补谁
+    python -m decor.hulls --force      # 全部重做
+    python -m decor.hulls --only dining_chair
 
 产物落在 `decor/assets/<key>/hulls/hN.obj`，**和网格字节一样不入库**
 （`decor/assets/` 整个在 .gitignore 里）。lock 里只记块数、阈值和每块的 sha256，
@@ -185,8 +188,8 @@ def main() -> int:
         import coacd  # noqa: F401
         import trimesh  # noqa: F401
     except ImportError as e:
-        print(f"⛔ 缺 {e.name}。本机只有 infinigen 那个环境装了 coacd：\n"
-              f"   ~/miniforge3/envs/infinigen/bin/python -m decor.hulls")
+        print(f"⛔ 缺 {e.name}。这一步的依赖不在生成器那三个里，单独装：\n"
+              f"   pip install coacd trimesh")
         return 1
 
     data = lock.load()

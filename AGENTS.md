@@ -28,7 +28,7 @@
 |---|---|---|
 | 改屋子（房间、门窗、家具、出生点） | `scenes/<场景>/layout.py`，然后重跑 `tools/make_house.py --scene <场景>` | `build/<场景>-<机器人>.xml` 是**产物**，手改会被下一次重跑覆盖 |
 | 加一个新地方 | `scenes/manifest.py` 追加一条 + 建 `scenes/<key>/layout.py` | 变体名与产物名的规则住 `scenes/manifest.py`，⛔ 别在别处再拼一份 |
-| ⭐ 让某件家具有**真碰撞**（不是一个实心盒） | 在 `decor/hulls.py` 的 `COLLIDE` 里登记 → 用 infinigen 那个环境跑 `python -m decor.hulls` → layout 里给它 `F.mesh_piece(..., collide=True)` | 部件是**按材质**拆的、MuJoCo 又只取凸包，所以"把 contype 打开"没用（实测凸度只有 0.12–0.30）。⛔ 凸块必须带 `solref`，否则快速撞击穿模而慢速测试全绿 |
+| ⭐ 让某件家具有**真碰撞**（不是一个实心盒） | 在 `decor/hulls.py` 的 `COLLIDE` 里登记 → 跑 `python -m decor.hulls`（要先 `pip install coacd trimesh`） → layout 里给它 `F.mesh_piece(..., collide=True)` | 部件是**按材质**拆的、MuJoCo 又只取凸包，所以"把 contype 打开"没用（实测凸度只有 0.12–0.30）。⛔ 凸块必须带 `solref`，否则快速撞击穿模而慢速测试全绿 |
 | ⭐ 让机器人**坐得下**某件家具 | layout 里加 `SEATS` 条目；沙发用 `F.sofa()` 手写基本体（⛔ 别用真网格） | 座面高上限 **0.36 m** 是从 G1 腿长实测出来的（0.40 滑落 / 0.45 直接倒）；而 `_fit_scale` 只做均匀缩放，压座面会把整件缩成玩具 |
 | ⭐ 摆一个姿态出图 / 做判据 | layout 的 `SIT_POSES`（**按关节名**）+ `scenes/apply_pose.py` | 产物里的机器人站在世界原点，静态渲染拍不到"坐着"；⛔ 按下标声明会随机器人型号静默错位 |
 | ⛔ 改楼梯 | **先读 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
