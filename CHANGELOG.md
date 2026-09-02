@@ -1,5 +1,14 @@
 # alice-house Changelog
 
+## [Unreleased] — 2026-09-02 策略迁出
+
+- ⛔ **`policies/` 整目录移出本仓**。训练好的运动策略是训练产物，不是场景资产；现由消费方的策略发布架保管
+  （`policy.onnx` + `contract.json` + `release.yaml`）。本仓从此只交付场景与机器人本体。
+- `robots/manifest.py` 删去 `policy_dir` / `turn_vx` / `command_ranges` / `lin_cmd_deadband` / `pd_mode`——
+  这些是策略属性，随策略一起迁到 `release.yaml`。清单保留模型路径、出生高度、相机、跟拍机位、`foot_bodies`。
+- `tools/make_docs_images.py` 的坐姿沉降改从 `ALICE_HOUSE_CONTRACT_JSON` 读契约（缺了响亮报错，不猜）。
+- README / AGENTS 同步。消费方参考从 anima-zero 改指 NERV。
+
 场景资产库的版本记录。**要点：保持简洁，每版只说重点。**（格式参考 [Keep a Changelog](https://keepachangelog.com)）
 
 ## [0.15] — 2026-08-22

@@ -36,8 +36,8 @@
 | 场景改完验一下 | `python tools/check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
 | 摆家具怕挡路 | 摆完跑一次 `check_scene.py` 看「可通行性」那项 | 判据是**整层只准有一个连通块**——⛔ 不是"两件家具之间多宽"，那种问法会被床头柜↔床炸出上百条假阳性 |
 | 机器人该站哪 | layout 的 `ROBOT_HOME_XY` / `ROBOT_HOME_YAW`（「保姆间」） | ⛔ 和 `START_POS_XY`（任务出生点）是两个量，别合并 |
-| 知道某台机器人是什么（模型 / 出生高度 / 相机 / 力矩模式） | `robots/manifest.py` | 机器人事实的**单一真相源** |
-| 知道某个策略怎么用（关节序 / 增益 / 观测布局 / 控制周期） | `policies/<名字>/contract.json` | 契约是策略侧的单一真相源，**别抄进 manifest** |
+| 知道某台机器人是什么（模型 / 出生高度 / 相机 / 脚的 body） | `robots/manifest.py` | 机器人事实的**单一真相源** |
+| 知道某个策略怎么用 | ⛔ **不在本仓**（2026-09-02 起）：策略住消费方的发布架，`contract.json` + `release.yaml` | 本仓只放场景与本体 |
 | 换 README 里的配图 | `tools/make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
 | 加或改家具几何 | `scenes/furniture.py` | 家具零件的生成函数都在这 |
 | 改贴图 | `tools/make_textures.py` | 贴图是生成物，不是素材库 |
@@ -66,7 +66,6 @@
 | `scenes/apt1/nyc_massing.py` | 由 `make_view.py --nyc` 生成的建筑体量表（**入库**，因为数据源无 share-alike） |
 | `build/<场景>-<机器人>.xml` | **产物**（入库的交付物，不是构建缓存）：完整可跑场景，含屋外景色 + `<include>` 进来的那台机器人。⛔ 里面的相对路径按"住在仓根下恰好一层"算死了，别把 `build/` 挪走 |
 | `robots/manifest.py` | 机器人清单与事实源；`robots/g1/`、`robots/go2/` 是模型资产 |
-| `policies/<名字>/` | 训练好的 `policy.onnx` + 与它配套的 `contract.json` |
 | `textures/` · `docs/` | 生成出来的贴图 · 配图与文档。⚠️ apt1 的贴图住 `textures/house3/`、材质名带 `h3_` 前缀 —— 那是这个场景的**资产命名空间**，沿用它最早的名字，有意不跟着 key 改 |
 
 ## 怎么跑起来
@@ -100,8 +99,9 @@ python -m decor.robocasa          # 厨房电器（RoboCasa，CC-BY-4.0）
 python -m decor.calibrate         # ⛔ 上面两条只要跑过，这条必跑（见红线）
 ```
 
-**要让机器人真走起来**：拿 `policies/<名字>/policy.onnx`，严格照同目录 `contract.json` 拼观测、
-按契约里的增益发力矩。消费方通常不把本仓当路径写死，而是通过 `HOUSENAV_ASSETS_ROOT` 指到这里。
+**要让机器人真走起来**：策略不在本仓。消费方（如 NERV）从自己的策略发布架拿 `policy.onnx`，
+严格照同目录 `contract.json` 拼观测、按 `release.yaml` 里的力矩模式发力矩；场景与本体则通过
+环境变量（如 `ALICE_HOUSE_ROOT`）指到本仓，不写死路径。
 
 ## 红线（改之前必看）
 
@@ -119,14 +119,15 @@ python -m decor.calibrate         # ⛔ 上面两条只要跑过，这条必跑�
 |---|---|---|
 | 房间矩形 / 门窗 / 家具 / 出生点 | `scenes/<场景>/layout.py` | 别写进产物 xml |
 | 有哪些场景、产物叫什么名字 | `scenes/manifest.py` | 消费方也调它的 `scene_filename()`，⛔ 两边别各拼各的 |
-| 机器人是什么（模型/出生高度/相机/力矩模式） | `robots/manifest.py` | 别写进消费方的代码 |
-| 关节顺序 / 增益 / 观测格式 / 控制周期 | 各策略目录下的 `contract.json` | **别抄进 manifest**——抄两份必然对不上 |
+| 机器人是什么（模型/出生高度/相机/脚的 body） | `robots/manifest.py` | 别写进消费方的代码 |
+| 关节顺序 / 增益 / 观测格式 / 控制周期 / 力矩模式 | 消费方发布架里各策略的 `contract.json` + `release.yaml` | **别抄进 manifest**——本仓不存策略 |
 
-### ⛔ `pd_mode` 搞反当场倒
+### ⛔ 力矩模式跟着策略走，不在本仓
 
 Go2 是显式 PD（部署器自己算 `−kd·qd`、模型阻尼清零），G1 是隐式 PD
-（`kd` 写进 `dof_damping`、力矩只发 `kp` 那项）。这一项是**训练侧的事实**，
-契约里没导出，所以住在 manifest；凭印象填会让机器人在部署里 1 秒内倒。
+（`kd` 写进 `dof_damping`、力矩只发 `kp` 那项）。这是**训练侧的事实**，2026-09-02 起随策略
+住在消费方发布架的 `release.yaml`（`pd_mode`）里；凭印象填会让机器人在部署里 1 秒内倒。
+⚠️ `tools/make_docs_images.py` 的坐姿沉降需要一份契约，用 `ALICE_HOUSE_CONTRACT_JSON` 指过去。
 
 ### ⛔ 第三方资产的许可不许动
 

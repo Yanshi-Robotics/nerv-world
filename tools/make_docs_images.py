@@ -147,7 +147,12 @@ def render_posed(pose_key, robot, pos, target, w=1280, h=900):
     n = apply_pose.apply(m, d, pose)
     if n < 6:
         raise ValueError(f"姿态 {pose_key} 只认出 {n} 个关节 —— 机器人 {robot} 对不上这组关节名")
-    contract = os.path.join(ROOT, ROBOTS.get(robot)["policy_dir"], "contract.json")
+    # 沉降用的关节增益来自策略契约；策略 2026-09-02 起不住本仓，由环境变量指到发布架里的 contract.json。
+    contract = os.environ.get("ALICE_HOUSE_CONTRACT_JSON", "")
+    if not contract or not os.path.isfile(contract):
+        raise FileNotFoundError(
+            "需要一份策略契约来做沉降：export ALICE_HOUSE_CONTRACT_JSON=<发布架>/<策略>/contract.json"
+            f"（当前值：{contract!r}）")
     stat = apply_pose.settle(m, d, apply_pose.load_gains(contract), seconds=3.0)
     # ⭐ 出图顺便把判据打出来：图"看着对"和机器人"真坐住了"是两回事
     print(f"      沉降后：骨盆 {stat['rise']:+.3f} m / 滑移 {stat['slide']:.3f} m / "

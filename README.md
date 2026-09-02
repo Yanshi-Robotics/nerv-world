@@ -603,7 +603,6 @@ tools/              entry-point scripts, all run from the repo root: `python too
 build/              ⭐ **deliverables** (tracked, not a build cache): <scene>-<robot>.xml
                     ⛔ the relative paths inside them assume "exactly one level below the repo
                     root" — don't move this directory
-policies/           trained locomotion policies (ONNX + contract)
 textures/ · docs/images/<scene>/  generated textures · README screenshots
                     ⚠️ apt1's textures live in textures/house3/ and its material names carry the
                     h3_ prefix — that is the scene's asset namespace, keeping its original name
@@ -666,10 +665,11 @@ the return flight was attached to the shaft's far wall instead of the half-landi
 into two disconnected pieces — it reported **green**: walking around, there *was* a path.
 **Proving a path exists does not prove it is a staircase.**
 
-To actually **make a robot walk**: `policies/` holds trained ONNX policies with a
-`contract.json` next to each (joint order, gains, observation layout — all of it). Feed a policy
-a velocity command `(vx, vy, wz)` and it returns joint targets. For a working deployer, see
-`world/sim-house-nav/sim.py` in [anima-zero](https://github.com/Yanshi-Robotics/anima-zero).
+**Policies do not live here (since 2026-09-02).** Trained locomotion policies are training
+products, not scene assets; consumers keep them on their own policy shelf as `policy.onnx` +
+`contract.json` + `release.yaml` (torque mode, command ranges, command deadband, turning behaviour).
+This repository ships places and robot bodies only. For a working deployer see
+[NERV](https://github.com/Yanshi-Robotics/nerv), the successor of anima-zero.
 
 ## One File per (Place, Robot)
 
@@ -683,17 +683,12 @@ house hosts either robot. The filename rule lives in `scenes/manifest.py` and co
 rather than re-deriving it, so a rename cannot desynchronise the two sides.
 
 **`robots/manifest.py` is the single source of truth for "what this robot is"** — where the model
-lives, how high it spawns, what the camera is called, how torque is applied. Adding a robot means
+lives, how high it spawns, what the camera is called, which bodies are its feet. Adding a robot means
 appending one entry and re-running the generator.
 
-⚠️ The manifest deliberately **does not repeat** anything already in the policy contract
-(`contract.json`: joint order, gains, observation layout, control period). The contract is the
-source of truth for those; copying them would guarantee they drift apart.
-
-⛔ **The two robots apply torque in opposite ways** — recorded as `pd_mode` in the manifest, and
-getting it backwards makes the robot fall over immediately. The Go2 was trained with explicit PD
-(the deployer computes `−kd·qd` itself and zeroes the model's damping); the G1 with implicit PD
-(`kd` goes into `dof_damping` for MuJoCo to apply, and the torque carries only the `kp` term).
+⚠️ The manifest deliberately **does not repeat** anything that belongs to a policy (joint order,
+gains, observation layout, control period, torque mode, command ranges). Those live with the policy
+on the consumer's shelf; copying them here would guarantee they drift apart.
 
 ## Changing a House / Adding New Places
 
@@ -731,7 +726,7 @@ Code and assets are licensed separately. Four tiers:
 library, the scene layouts, and the manifests.
 
 **2 · Assets authored here — MIT.** The procedurally generated textures in `textures/`, the
-generated `<scene>-<robot>.xml` products, and the locomotion policies in `policies/`. These are
+generated `<scene>-<robot>.xml` products. These are
 produced by code in this repository from no external source material.
 
 **3 · Third-party assets bundled here — each keeps its own license.** They are *not* covered by

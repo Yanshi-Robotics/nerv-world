@@ -549,7 +549,6 @@ tools/              入口脚本，都从仓根跑：`python tools/<名字>.py`
   fetch_assets.py     下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 --verify
 build/              ⭐ **产物**（入库的交付物，不是构建缓存）：<场景>-<机器人>.xml
                     ⛔ 里面那些相对路径按"住在仓根下恰好一层"算死了，别把它挪走
-policies/           训练好的运动策略（ONNX + 契约）
 textures/ · docs/images/<场景>/   生成的贴图 · README 配图
                     ⚠️ apt1 的贴图住 textures/house3/、材质名带 h3_ 前缀 —— 那是这个场景的
                     资产命名空间，沿用它最早的名字，有意不跟着 key 改（见上面「建造顺序」）
@@ -607,10 +606,10 @@ python tools/make_house.py && python tools/check_scene.py     # 重新生成并�
 打射线，于是"回头跑没接到平台上"这种结构性错误它**报了绿**——绕着走确实摸得到一条路。
 **查"存在一条路径"证明不了"这是一部楼梯"。**
 
-想让机器人**真的走起来**：`policies/` 下是训练好的 ONNX 策略，配 `contract.json`
-（关节顺序、增益、观测格式全在里面）。喂它速度指令 `(vx, vy, wz)`，它吐关节目标角度。
-一个跑通的部署器可以参考 [anima-zero](https://github.com/Yanshi-Robotics/anima-zero)
-的 `world/sim-house-nav/sim.py`。
+**策略不住这里（2026-09-02 起）。** 训练好的运动策略是训练产物，不是场景资产；消费方把它们放在
+自己的策略发布架上：`policy.onnx` + `contract.json` + `release.yaml`（力矩模式、命令范围、命令死区、
+转弯特性）。本仓只交付「地方」和「机器人本体」。跑通的部署器见 anima-zero 的继任者
+[NERV](https://github.com/Yanshi-Robotics/nerv)。
 
 ## 一个「场景 × 机器人」一份文件
 
@@ -622,14 +621,10 @@ python tools/make_house.py && python tools/check_scene.py     # 重新生成并�
 产物文件名的规则住在 `scenes/manifest.py`，消费方调它而不是自己再拼一份——改名不会两边脱节。
 
 **机器人清单 `robots/manifest.py` 是「这台机器人是什么」的单一真相源**——模型在哪、
-出生多高、相机叫什么、力矩怎么发。加一台新的就往里追加一条，再跑一次生成器。
+出生多高、相机叫什么、脚是哪几个 body。加一台新的就往里追加一条，再跑一次生成器。
 
-⚠️ 清单里**不重复**策略契约（`contract.json`）已有的东西（关节顺序、增益、观测格式、
-控制周期）——那些的真相源是契约，抄两份必然对不上。清单只放契约里没有的。
-
-⛔ **两台机器人的力矩发法是相反的**，写在清单的 `pd_mode` 里，搞反了当场倒：
-Go2 训练侧是显式 PD（部署器自己算 −kd·qd、模型阻尼清零），
-G1 是隐式 PD（kd 写进 `dof_damping` 交给 MuJoCo，力矩只发 kp 那一项）。
+⚠️ 清单里**不重复**任何属于策略的东西（关节顺序、增益、观测格式、控制周期、力矩模式、
+命令范围）——那些跟着策略住在消费方的发布架上，抄两份必然对不上。
 
 ## 改屋子 / 加新地方
 
