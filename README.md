@@ -1,6 +1,8 @@
 [![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
 
-# alice-house · A House for Robots to Live In
+# nerv-world
+
+> Formerly **alice-house**. Since 2026-09-03 this repository is the `worlds/` submodule of [NERV](https://github.com/Yanshi-Robotics/nerv): each top-level `<world>/world.yaml` (today: `apt2/`) is a NERV world descriptor, and everything else is the scene library it always was. Policies do not live here. · A House for Robots to Live In
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 

@@ -1,6 +1,8 @@
 [![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
 
-# alice-house · 给机器人住的房子
+# nerv-world
+
+> 原名 **alice-house**。2026-09-03 起本仓是 [NERV](https://github.com/Yanshi-Robotics/nerv) 的 `worlds/` 子模块：仓根下每个 `<world>/world.yaml`（目前是 `apt2/`）是一份 NERV 世界描述，其余仍是原来的场景资产库。策略不住这里。 · 给机器人住的房子
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 

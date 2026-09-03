@@ -1,4 +1,7 @@
-# AGENTS.md · 本仓的 agent 入口
+# AGENTS.md · nerv-world (formerly alice-house)
+
+> 本仓 = NERV 的 `worlds/` 子模块。`<world>/world.yaml` + `guidance.md` 是给 NERV 的世界描述（`assets_root: worlds` 相对 NERV 仓根）；场景与机器人本体资产照旧；⛔ 不放策略。
+ · 本仓的 agent 入口
 
 先读这一份，然后直接跳到你这次要用的那一节——不必通读。
 
