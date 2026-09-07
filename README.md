@@ -1,45 +1,38 @@
-[![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
-
 # nerv-world
-
-> Formerly **alice-house**. Since 2026-09-03 this repository is the `worlds/` submodule of [NERV](https://github.com/Yanshi-Robotics/nerv): each top-level `<world>/world.yaml` (`apt2/` and `house2/`) is a NERV world descriptor, and everything else is the scene library it always was. Policies do not live here. · A House for Robots to Live In
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 
-> 🤖 **If you are an AI agent, read [AGENTS.md](AGENTS.md) first** — the machine-facing entry point:
-> what this repo is, where each fact lives, the entry commands, and the red lines.
+[![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
 
-**Procedurally generated indoor scenes, shipped with two Unitree robots and trained locomotion policies — clone it and they actually walk around, up the stairs included.**
+Residential scenes for MuJoCo: hillside estates and city apartments, with Unitree G1 and Go2 scene variants.
 
-**Alice's house** — an indoor scene generated entirely from code, for robots to look around in, walk through, search, and work in.
+Rooms, doors, stairs, furniture and gardens are generated from each scene's layout definition.
+Explore the lawn, pool and enclosed grounds of house2, or the Central Park-facing duplex in apt2.
+house1 and apt1 remain the reference scenes.
 
-Not one line of geometry is hand-written: rooms, doors, windows, stairs, furniture and textures all
-come out of one layout definition per place (`scenes/<name>/layout.py`). Change a house by changing
-its layout and re-running the generator; the scene and whatever consumes it read the same source of
-truth, so coordinates can never disagree in two places.
+![house2: three-storey mansion, lawn, pool and hillside neighborhood](docs/images/house2/X1-整栋外景.png)
 
-There are **four places** so far — a single-floor apartment, a three-storey house with stairs, a
-62nd-floor Manhattan apartment whose windows look out over Central Park, and the duplex penthouse
-above it where the furniture has **real collision** (the robot can sit on the sofa) — and one robot
-can be dropped into any of them. Scenes and robots are two independent registries that get crossed
-at generation time.
+[house2 gallery](#house2--california-hillside-estate) · [apt2 gallery](#apt2--manhattan-duplex) · [Quick Start](#quick-start) · [Residence guide](docs/residences/README.md)
 
-It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their trained **locomotion policies** — so they really take steps, they don't teleport.
+Formerly alice-house, this repository is the `worlds/` submodule of
+[NERV](https://github.com/Yanshi-Robotics/nerv). `house2/world.yaml` and `apt2/world.yaml`
+provide NERV world entries. Locomotion policies are supplied separately by
+[nerv-policies](https://github.com/Yanshi-Robotics/nerv-policies).
 
-> Where the name comes from: Alice is robot number one in this series. This is her house.
-> It may grow into an island one day — house, hillside trail, dock — with Alice visiting each.
+> 🤖 **AI agents: read [AGENTS.md](AGENTS.md)** for repository entry points, commands and collaboration rules.
 
 ---
 
 ## Table of Contents
 
 - [What's Inside](#whats-inside) · [Robots](#robots) · [Floor Plan & Screenshots](#floor-plan)
+- [house2 — California Hillside Estate](#house2--california-hillside-estate)
 - [apt1 — 232 Metres Up, Facing Central Park](#apt1--232-metres-up-facing-central-park)
-- [apt2 — A Duplex Penthouse Where the Furniture Is Within Reach](#apt2--a-duplex-penthouse-where-the-furniture-is-within-reach)
+- [apt2 — Manhattan Duplex](#apt2--manhattan-duplex)
 - [Design Principles](#design-principles) · [Real Meshes as Clothing](#real-meshes-as-clothing)
 - [Project Structure](#project-structure)
 - [Quick Start](#quick-start)
-- [One Scene per Robot](#one-scene-per-robot)
+- [One File per Scene and Robot](#one-file-per-place-robot)
 - [Versioning](#versioning) · [License](#license)
 
 ---
@@ -122,12 +115,28 @@ that, a full-height cabinet wall sat in the middle of the room and blocked a doo
 
 ### house2 — California Hillside Estate
 
-![Three-storey exterior](docs/images/house2/X1-整栋外景.png)
+![Pool terrace, three-storey mansion and timber pergola](docs/images/house2/X5-泳池露台.png)
 
-The three-storey house sits above a hillside neighborhood, with a large lawn, swimming pool
-and enclosed driveway. Its entrance stays open; the outer gate stays closed.
-[Scene details and reproduction](docs/residences/README.md) cover the property, apt2 interior
-refinement and asset sources. The original stair dimensions are retained.
+An 80 × 70 m property surrounds the three-storey house, with a 30 × 25 m lawn to the south
+and a 15 × 6 m pool to the southeast. Warm plaster, pale stone and timber finishes connect
+the interior to the garden; upper-floor setbacks and glass balustrades form viewing terraces.
+
+| Lawn and mansion | Ground-floor living room |
+|---|---|
+| ![Looking across the lawn toward the mansion](docs/images/house2/X4-草坪与主楼.png) | ![Living room opening toward the garden](docs/images/house2/R1-底层客厅.png) |
+
+| Second-floor primary bedroom | Third-floor studio |
+|---|---|
+| ![Primary bedroom with layered bedding and timber finishes](docs/images/house2/R2-二层主卧.png) | ![Studio and window view](docs/images/house2/R3-三层工作间.png) |
+
+The entrance stays open, while paths and the driveway lead to a closed outer gate.
+The pool has separate walls, a bottom and steps; its water does not support a robot.
+Trees, retaining walls and neighboring houses at different elevations form the hillside backdrop.
+The surrounding streets are visual scenery. The [residence guide](docs/residences/README.md)
+covers layouts, asset sources and reproduction.
+
+<details>
+<summary>Stair structure and circulation details</summary>
 
 A half-turn stair is **five parts, two of which are landings** — floor landing → up flight →
 half-landing → return flight → the floor landing above. Neither landing is optional: without the
@@ -161,13 +170,7 @@ only across the **floor landing**; where the flights come up it stays open.
 The derivation, the code clauses it follows, and the two ways this got built wrong are all in
 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md) (Chinese). **Read it before changing the stair.**
 
-| Ground floor | Floor 1 | Floor 2 |
-|---|---|---|
-| ![Living room](docs/images/house2/R1-底层客厅.png) | ![Bedroom](docs/images/house2/R2-二层主卧.png) | ![Attic studio](docs/images/house2/R3-三层工作间.png) |
-
-The top-down view shows the property and the uppermost floor:
-
-![Three-storey plan](docs/images/house2/A1-三层楼-顶视.png)
+</details>
 
 ### apt1 — 232 Metres Up, Facing Central Park
 
@@ -302,7 +305,25 @@ day → morning → dusk → night, and no room may drop to black:
 python tools/make_time_stills.py --scene apt1
 ```
 
-### apt2 — A Duplex Penthouse Where the Furniture Is Within Reach
+### apt2 — Manhattan Duplex
+
+![Double-height living room facing Central Park](docs/images/apt2/V2-大客厅-三开间落地窗.png)
+
+The 62nd–63rd floor home keeps its double-height living room, upper gallery and Central Park
+orientation. Pale oak, stone and linen sit alongside walnut and dark metal. Rounded furniture,
+layered bedding, cabinet panels and window finishes add detail at robot camera distances.
+
+| Corner bedroom | Dining room | G1 seated on the sofa |
+|---|---|---|
+| ![Corner windows and layered bedding](docs/images/apt2/V7-主卧转角窗.png) | ![Pale dining table and six chairs](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![G1 sitting on the sofa](docs/images/apt2/S1-机器人坐在沙发上.png) |
+
+Dining chairs, armchairs and coffee tables retain real gaps between their collision shapes.
+The sofa keeps its 0.35 m seat and G1 sitting pose. Materials are defined independently,
+while the city coordinates, elevation and Central Park relationship remain unchanged.
+The [residence guide](docs/residences/README.md) provides more views and running instructions.
+
+<details>
+<summary>Furniture collision, sitting pose and duplex structure</summary>
 
 ![Robot sitting on the sofa](docs/images/apt2/S1-机器人坐在沙发上.png)
 
@@ -362,7 +383,8 @@ meaning of "real collision".
 |---|---|
 | ![Dining](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![Great room](docs/images/apt2/V2-大客厅-三开间落地窗.png) |
 
-**Cost is not the problem**, and that too is measured:
+The following collision-cost comparison predates the interior refinement. For the current
+scene, see the [dual-camera measurements](docs/residences/validation.md).
 
 | | ngeom | of which collision hulls | Realtime factor |
 |---|---|---|---|
@@ -456,6 +478,8 @@ actually seated" are two different claims.
 **manipulation policy** (the current G1 policy is flat-ground locomotion — the robot is *placed* in
 the seated pose, it does not walk over and sit down by itself).
 See [`待办事项-可交互家具.md`](待办事项-可交互家具.md).
+
+</details>
 
 ### Through the Robot's Eyes
 

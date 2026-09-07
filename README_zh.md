@@ -1,47 +1,36 @@
-[![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
-
 # nerv-world
-
-> 原名 **alice-house**。2026-09-03 起本仓是 [NERV](https://github.com/Yanshi-Robotics/nerv) 的 `worlds/` 子模块：仓根下每个 `<world>/world.yaml`（目前包括 `apt2/` 与 `house2/`）是一份 NERV 世界描述，其余仍是原来的场景资产库。策略不住这里。 · 给机器人住的房子
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 
-> 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)** —— 那是面向机器的入口：
-> 这个仓是什么、每个事实住在哪、入口命令、以及红线。
+[![Language: English](https://img.shields.io/badge/Language-English-2f81f7?style=flat-square)](README.md) [![语言: 简体中文](https://img.shields.io/badge/语言-简体中文-e67e22?style=flat-square)](README_zh.md)
 
-**用代码生成的室内仿真场景，带两台宇树机器人和训练好的运动策略——克隆下来就能让它们真的迈腿走路，连爬楼梯也算。**
+面向 MuJoCo 的住宅场景库，包含山坡豪宅、都市公寓，以及宇树 G1、Go2 的场景版本。
 
-**Alice 的房子**——一套**用代码生成**的室内场景，让机器人在里面看、走、找东西、干活。
+房间、门窗、楼梯、家具和庭院由每张地图的布局定义生成。house2 提供草坪、泳池和封闭宅地；
+apt2 提供面向中央公园的高层复式。house1、apt1 保留为标准场景。
 
-几何一行都不手写：房间、门窗、楼梯、家具、贴图全部由每个地方自己的那份布局定义
-（`scenes/<名字>/layout.py`）生成。想改屋子就改它的布局、重跑生成器；场景和使用它的程序
-读同一份真相源，不会两处坐标打架。
+![house2 的三层主楼、草坪、泳池及山坡社区](docs/images/house2/X1-整栋外景.png)
 
-目前有**四个地方**——一套单层大平层，一栋带庭院和泳池的三层山坡豪宅，一套 62 层、窗外是中央公园的
-曼哈顿大平层，以及它楼上那套家具有**真碰撞**的复式顶层豪宅（机器人能坐在沙发上）——
-同一台机器人可以放进任何一个。
-「有哪些地方」和「有哪些身体」是两份独立清单，生成时交叉组合。
+[house2 图集](#house2--加州山坡豪宅) · [apt2 图集](#apt2--都市复式豪宅) · [运行方法](#快速开始) · [住宅场景说明](docs/residences/README.md)
 
-配套还带**机器人**（宇树 Go2 四足、宇树 G1 人形）和训练好的**运动策略**——
-克隆下来就能让它们在屋里真的迈腿走路，不是瞬移。
+本仓原名 alice-house，现为 [NERV](https://github.com/Yanshi-Robotics/nerv) 的 `worlds/` 子模块。
+`house2/world.yaml` 与 `apt2/world.yaml` 提供 NERV 世界入口。运动策略由独立的
+[nerv-policies](https://github.com/Yanshi-Robotics/nerv-policies) 仓库提供。
 
-> 名字的来历：Alice 是这一系列里第一号机器人，这是她的房子。
-> 以后可能扩成一座岛——房子、山路、码头都在上面，Alice 挨个去。
-
-**MIT 许可**，随便用。仓里的宇树机器人模型来自 MuJoCo Menagerie，保留它们自己的
-BSD-3-Clause 许可（见 `LICENSE` 末尾的说明）。
+> 🤖 **如果你是 AI agent，请先读 [AGENTS.md](AGENTS.md)**，了解仓库入口、命令及协作约定。
 
 ---
 
 ## 目录
 
 - [里面有什么](#里面有什么) · [现有机器人](#现有机器人) · [户型与实拍](#户型)
+- [house2 — 加州山坡豪宅](#house2--加州山坡豪宅)
 - [apt1 — 232 米高空，正对中央公园](#apt1--232-米高空正对中央公园)
-- [apt2 — 复式顶层豪宅，家具是够得着的](#apt2--复式顶层豪宅家具是够得着的)
+- [apt2 — 都市复式豪宅](#apt2--都市复式豪宅)
 - [设计原则](#设计原则) · [网格只是外衣](#网格只是外衣)
 - [目录结构](#目录结构)
 - [快速开始](#快速开始)
-- [一台机器人一份场景](#一台机器人一份场景)
+- [场景与机器人组合](#一个场景--机器人一份文件)
 - [版本](#版本) · [许可](#许可)
 
 ---
@@ -117,11 +106,25 @@ apt1 在 v0.10 之前叫 `house3`，那次改名是为了让「这是套公寓�
 
 ### house2 — 加州山坡豪宅
 
-![三层外景](docs/images/house2/X1-整栋外景.png)
+![泳池露台旁的三层豪宅与木质遮阳架](docs/images/house2/X5-泳池露台.png)
 
-三层住宅位于山坡社区高处，前庭设有大草坪、泳池和封闭车道。入户门固定敞开，外大门固定关闭。
-[场景说明与复现方法](docs/residences/README.md) 包含宅地、apt2 室内精修和资产来源。
-楼梯保留原有的双跑结构和踏步尺寸。
+80 × 70 米宅地围绕三层主楼展开，南侧是 30 × 25 米草坪，东南侧是 15 × 6 米泳池。
+暖白墙面、浅色石材与木饰面连接室内外空间；退台和玻璃栏板形成面向庭院的露台。
+
+| 草坪与主楼 | 一层客厅 |
+|---|---|
+| ![从草坪望向主楼](docs/images/house2/X4-草坪与主楼.png) | ![一层客厅与庭院开口](docs/images/house2/R1-底层客厅.png) |
+
+| 二层主卧 | 三层工作室 |
+|---|---|
+| ![二层主卧的床品与木饰面](docs/images/house2/R2-二层主卧.png) | ![三层工作室与窗景](docs/images/house2/R3-三层工作间.png) |
+
+入户门固定敞开，步道和车道通向关闭的外大门。泳池有独立池壁、池底及台阶，水面不承重。
+树木、挡土墙和不同标高的邻宅构成山坡社区远景，外围街景不开放通行。
+[完整场景说明](docs/residences/README.md)包含布局、资产来源和复现方法。
+
+<details>
+<summary>楼梯结构与通行细节</summary>
 
 一部双跑楼梯是**五段，其中两段是平台**——楼层平台 → 上行跑 → 中间休息平台 →
 回头跑 → 上一层的楼层平台。两块平台缺一不可：少了中间平台，两跑接不上；
@@ -152,13 +155,7 @@ apt1 在 v0.10 之前叫 `house3`，那次改名是为了让「这是套公寓�
 推导过程、依据的规范条文、以及两次做错的经过，都记在
 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)。**改楼梯之前先读它。**
 
-| 一层 | 二层 | 三层 |
-|---|---|---|
-| ![客厅](docs/images/house2/R1-底层客厅.png) | ![主卧](docs/images/house2/R2-二层主卧.png) | ![工作间](docs/images/house2/R3-三层工作间.png) |
-
-俯视图呈现完整宅地与主楼顶层：
-
-![三层楼俯视](docs/images/house2/A1-三层楼-顶视.png)
+</details>
 
 ### apt1 — 232 米高空，正对中央公园
 
@@ -280,7 +277,23 @@ Steinway Hall 的记录，不含它就会被静默丢掉，而它是定义当前
 python tools/make_time_stills.py --scene apt1
 ```
 
-### apt2 — 复式顶层豪宅，家具是**够得着**的
+### apt2 — 都市复式豪宅
+
+![面向中央公园的双高客厅](docs/images/apt2/V2-大客厅-三开间落地窗.png)
+
+62—63 层的复式住宅保留双高客厅、上层环廊及中央公园朝向。浅橡木、石材和亚麻布艺
+搭配胡桃木与深色金属，家具圆角、床品、柜门分缝和门窗收口补齐近距离观察的细节。
+
+| 转角主卧 | 餐厅 | G1 坐姿 |
+|---|---|---|
+| ![主卧转角窗与床品](docs/images/apt2/V7-主卧转角窗.png) | ![浅色餐桌与六把餐椅](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![G1 坐在沙发上](docs/images/apt2/S1-机器人坐在沙发上.png) |
+
+餐椅、单椅和茶几保留家具腿之间的真实碰撞空隙，沙发保留 0.35 米座面和 G1 坐姿。
+新增材质独立定义，窗外城市的坐标、标高与中央公园关系沿用既有场景。
+[住宅场景说明](docs/residences/README.md)提供更多配图与运行方法。
+
+<details>
+<summary>家具碰撞、坐姿与复式结构</summary>
 
 ![机器人坐在沙发上](docs/images/apt2/S1-机器人坐在沙发上.png)
 
@@ -335,7 +348,7 @@ apt2 的餐椅、单椅和茶几采用凸分解碰撞，保留家具腿之间的
 |---|---|
 | ![餐厅](docs/images/apt2/V3-餐厅-六把真碰撞餐椅.png) | ![大客厅](docs/images/apt2/V2-大客厅-三开间落地窗.png) |
 
-**代价不是问题**，而且这也是量出来的：
+以下为精修前版本的碰撞成本对比；当前场景的双相机实测见[住宅验证记录](docs/residences/validation.md)：
 
 | | ngeom | 其中碰撞凸块 | 实时倍率 |
 |---|---|---|---|
@@ -417,6 +430,8 @@ ALICE_SCENE=apt2 python tools/make_docs_images.py S1
 ⚠️ **还没做的**：家具的**铰接**（冰箱门、抽屉还打不开）和**会操作的策略**
 （现役 G1 是平地行走策略，不含坐下/抓取——它是被摆成坐姿的，不是自己走过去坐下的）。
 详见 [`待办事项-可交互家具.md`](待办事项-可交互家具.md)。
+
+</details>
 
 ### 机器人视角
 
