@@ -1,0 +1,42 @@
+{
+  "license": "MIT; derived from repository-authored facade and roof textures",
+  "generator": "tools/make_city_textures.py",
+  "tiles": {
+    "textures/residences/city/glass.png": {
+      "source": "textures/house3/facade_glass.png",
+      "face": "F",
+      "source_sha256": "5b93d5de568002baaa3a713ede3a8a1707bbdab069f3dde4c62caadbdec623f2",
+      "sha256": "af4d730cd53898a360bf081675f84437458b7a5c6761b18aa8186dca86334a69"
+    },
+    "textures/residences/city/glass_night.png": {
+      "source": "textures/house3/facade_glass_night.png",
+      "face": "F",
+      "source_sha256": "7410803a5c07df60e8b20fcc6316540c50c78c88c716ef55904796a4d305f7d4",
+      "sha256": "7186cbe8d38657780afcd3b7d30406d614494ff9559a1d547cf309d1db1b723f"
+    },
+    "textures/residences/city/stone.png": {
+      "source": "textures/house3/facade_limestone.png",
+      "face": "F",
+      "source_sha256": "742e088100a5e345cbeaeb4b3cb6f4b4adbceea6e5d5580f53a54d84f650f2fe",
+      "sha256": "68d3d8c2ccaa89b5178c07d58228048435b13b42c50ed2dcac9fbe3081b6bc75"
+    },
+    "textures/residences/city/stone_night.png": {
+      "source": "textures/house3/facade_limestone_night.png",
+      "face": "F",
+      "source_sha256": "941e16ba55aacd5c7589d37431330bb50de00968bdb251997c121a9f1e245ed7",
+      "sha256": "71d99a99886dbffc76ddf7b1148b4b30471c0bacb2a4684d26022e86ec78b745"
+    },
+    "textures/residences/city/roof.png": {
+      "source": "textures/house3/facade_glass.png",
+      "face": "U",
+      "source_sha256": "5b93d5de568002baaa3a713ede3a8a1707bbdab069f3dde4c62caadbdec623f2",
+      "sha256": "c5dbe9e1d78e08faf88101c9faa969b9d999b5066cc85216bb265d4434e7861e"
+    },
+    "textures/residences/city/roof_night.png": {
+      "source": "textures/house3/facade_glass_night.png",
+      "face": "U",
+      "source_sha256": "7410803a5c07df60e8b20fcc6316540c50c78c88c716ef55904796a4d305f7d4",
+      "sha256": "6d76e59e35bad31c68fbe8db61e0c332b4f1f9ea2ae15cf2e9390692e5b23786"
+    }
+  }
+}

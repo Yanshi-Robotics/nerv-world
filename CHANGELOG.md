@@ -1,6 +1,15 @@
-# alice-house Changelog
+# nerv-world Changelog
 
 ## [Unreleased]
+
+### 2026-09-07 canonical apt and house
+
+- Promote apt2 and house2 to apt and house; retire numbered scene entries, old layouts, builds and current screenshots. The four-map recovery revision is `7fb134f`.
+- Extract Manhattan geometry and time presets into an independent environment module; retain all city coordinates, elevation, source textures and robot assets.
+- Restore district-specific lighting, eight artworks and parallax views; furnish the duplex wardrobes, bathrooms and laundry without blocking circulation.
+- Keep appliance articulation, movable objects, sofa support and the closed mansion property; regenerate both robot variants under their canonical names.
+- Replace the old furniture TODO and apartment draft with current capability, development, migration and validation documentation. Refresh English and Chinese README galleries.
+- Requires the corresponding NERV parent update for the new world names and protection against reusing a body bound to another world. Existing resident services and saved sessions are not automatically migrated.
 
 ### 2026-09-07 apt2 家具交互
 

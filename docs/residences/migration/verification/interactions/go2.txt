@@ -1,0 +1,1 @@
+PASS apt/go2: 44 joint targets, 9 movable objects, gravity, occlusion, obstruction, reset and four time presets

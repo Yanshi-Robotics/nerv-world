@@ -1,18 +1,8 @@
-"""alice-house 里有哪些**场景** —— 换地方要知道的全部事实，收在这一处。
+"""Canonical residence catalogue: apt and house.
 
-和 `robots/manifest.py` 是一对：那边是"有哪些身体"，这边是"有哪些地方"。
-同一台机器人可以放进任何一个场景，所以两者正交，各自登记、交叉组合生成。
-
-**这里只放"这个场景是什么"**（叫什么、layout 模块在哪、有几层、给谁看的），
-不放房间矩形/家具/出生点——那些是场景自己 `layout.py` 的事。
-
-⭐ 2026-08-02 重新引入多场景目录。CHANGELOG [0.4] 曾主动把 `domus01/` 拍平到仓根，
-当时的判断是"一个世界里有多个地方"而不是"多套户型并列"；Jeff 2026-08-02 拍板改回
-CARLA 式的多场景（house1 / house2 / …），本文件是那次决定的落地。
-⛔ 别再拍平：拍平就等于假设永远只有一个地方。
-
-加一个新场景：往 `SCENES` 里**追加**一条（⛔ 追加不替换），建 `scenes/<key>/layout.py`，
-再跑 `python make_house.py --scene <key>`。
+Scene registration and generated file paths are separate from robot registration.
+Room geometry belongs to each scene's layout.py. Retired numbered variants are
+recoverable from Git history and are deliberately absent from this catalogue.
 """
 from __future__ import annotations
 
@@ -20,46 +10,25 @@ import importlib.util
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # alice-house 仓根
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # nerv-world 仓根
 
 
 SCENES: dict[str, dict] = {
-    "house2": {
-        "label": "加州山坡豪宅（三层住宅、草坪与泳池）",
-        "layout": "scenes/house2/layout.py",
-        "floors": 3,
-        "note": "带封闭宅地的三层豪宅。室内、庭院和外大门之间可通行，泳池下沉，山坡社区仅作远景。",
-    },
-    "house1": {
-        "label": "单层大平层（12 空间，约 364 ㎡）",
-        "layout": "scenes/house1/layout.py",
-        "floors": 1,
-        "note": "首个场景。无高差、无楼梯，适合导航与房间识别。",
-    },
-    # ⚠️ v0.10 之前这个 key 叫 house3。改名是为了让"这是套公寓"写在名字里
-    #    （house1/house2 是最早 build 的两栋房子，名字保留不改，见 README 的建造顺序）。
-    #    ⛔ 贴图目录仍叫 `textures/house3/`、材质名仍带 `h3_` 前缀 —— 那是这个场景的
-    #    资产命名空间（也是它最早的名字），有意保留，别顺手改。
-    "apt1": {
-        "label": "曼哈顿高层豪宅大平层（13 空间，约 345 ㎡，62 层）",
-        "layout": "scenes/apt1/layout.py",
-        "floors": 1,
-        "note": "北面整墙落地窗俯瞰中央公园。考的是视觉信息极强、且窗外是 232 米空气的环境；"
-                "落地窗有可碰撞玻璃，不然机器人会直接走出去。",
-    },
-    # ⭐ 2026-08-22 新增。它和 apt1 同一栋楼、同一片窗景（直接引用 apt1 的 SKYBOX/SKYLINE，
-    #    ⛔ 没有重跑 make_view.py --nyc）；不同的是复式两层 + 家具有真碰撞。
-    "apt2": {
-        "label": "曼哈顿复式顶层豪宅（24 空间，62–63 层，双高客厅）",
-        "layout": "scenes/apt2/layout.py",
+    "apt": {
+        "label": "曼哈顿复式公寓（24 空间、四时段、可交互家具）",
+        "layout": "scenes/apt/layout.py",
         "floors": 2,
-        "note": "为「屋里的东西真的坐得下」建的：餐椅/单椅/茶几走 CoACD 凸块做真碰撞，"
-                "沙发按 G1 腿长手写成座面 0.35 m（实测 0.42 会滑落）。"
-                "另有一部 24 踢面/层的双跑楼梯与一间双高客厅。",
+        "note": "62—63 层复式，中央公园窗景、双高客厅、双跑楼梯与真实家具碰撞；支持检查器家具交互。",
+    },
+    "house": {
+        "label": "加州山坡豪宅（三层住宅、草坪与泳池）",
+        "layout": "scenes/house/layout.py",
+        "floors": 3,
+        "note": "带封闭宅地的三层豪宅。住宅、庭院和外大门间有连续通路；泳池下沉，山坡社区仅作远景。",
     },
 }
 
-DEFAULT_SCENE = "house1"
+DEFAULT_SCENE = "apt"
 
 _cache: dict[str, object] = {}
 
@@ -144,7 +113,7 @@ def scene_filename(scene_key: str, robot_key: str) -> str:
        仓内 15 处调用点与仓外消费方（anima-zero 的世界服务）都是这么写的，所以
        v0.10 把产物挪进 `build/` 时，**消费方一个字都不用改**。
 
-    ⛔ 名字里的 "filename" 是历史包袱：v0.10 起返回的是 `build/apt1-g1.xml` 这种
+    ⛔ 名字里的 "filename" 是历史包袱：v0.10 起返回的是 `build/apt-g1.xml` 这种
        **带目录**的相对路径，不是裸文件名。⛔ **别改名** —— 消费方按这个名字调它，
        改名就是一次跨仓破坏；名字得给兼容性让路。
     ⛔ **别在这里开第二个函数**（`scene_basename()` 之类）：两个函数就会有两份规则，
@@ -152,4 +121,5 @@ def scene_filename(scene_key: str, robot_key: str) -> str:
     ⚠️ 固定用正斜杠（返回值会被拼进错误信息和文档）；Windows 上
        `os.path.join(root, "build/x.xml")` 照样打得开。
     """
+    get(scene_key)  # Retired or unknown scene keys must not produce misleading paths.
     return f"{OUT_SUBDIR}/{scene_key}-{robot_key}.xml"

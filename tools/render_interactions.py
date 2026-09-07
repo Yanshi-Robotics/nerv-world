@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Photograph actual apt2 fixture motion and the four reversible time presets."""
+"""Photograph actual apt fixture motion and the four reversible time presets."""
 from pathlib import Path
 import argparse
 import json
@@ -19,21 +19,21 @@ from tools.walkthrough import park_robot
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--output', type=Path, default=ROOT/'docs/images/apt2/interactions')
+    ap.add_argument('--output', type=Path, default=ROOT/'docs/images/apt/interactions')
     ap.add_argument('--width', type=int, default=1280)
     ap.add_argument('--height', type=int, default=800)
     a=ap.parse_args()
     a.output.mkdir(parents=True, exist_ok=True)
-    m=mujoco.MjModel.from_xml_path(str(ROOT/'build/apt2-g1.xml'))
+    m=mujoco.MjModel.from_xml_path(str(ROOT/'build/apt-g1.xml'))
     d=mujoco.MjData(m)
-    park_robot(m,d,manifest.load_layout('apt2'),'g1')
+    park_robot(m,d,manifest.load_layout('apt'),'g1')
     mujoco.mj_forward(m,d)
     i=Interaction(m,d);p=InspectionPhysics(m,d,i);p.advance(.5)
     opt=mujoco.MjvOption();opt.geomgroup[2:5]=0
-    shots=manifest.load_sibling('apt2','shots').INTERACTIVE
+    shots=manifest.load_sibling('apt','shots').INTERACTIVE
     states={}
     with mujoco.Renderer(m,height=a.height,width=a.width) as renderer:
-        cycle=TimeCycle(m,'apt2',renderer)
+        cycle=TimeCycle(m,'apt',renderer)
         cam=m.camera('film').id
         def frame(tag,eye,target):
             m.cam_pos[cam]=eye;m.cam_quat[cam]=_look_at_quat(eye,target);m.cam_fovy[cam]=58

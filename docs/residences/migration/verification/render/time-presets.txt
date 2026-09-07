@@ -1,0 +1,28 @@
+Night facade ablation: mean absolute pixel change=3.570/255; OpenGL errors=0
+对比图 → docs/images/apt/time-presets/T0-四时段对比.png
+亮度阶梯（day→morning→dusk→night）： 96.4 > 93.1 > 85.0 > 27.3
+  night kitchen: 39.7/255 (5 views)
+  night dining: 42.4/255 (5 views)
+  night great_room: 52.5/255 (5 views)
+  night library: 39.9/255 (5 views)
+  night stair_f62: 108.2/255 (3 views)
+  night gallery: 46.7/255 (5 views)
+  night east_hall: 37.8/255 (5 views)
+  night guest_bed: 38.8/255 (5 views)
+  night guest_bath: 41.1/255 (5 views)
+  night laundry: 51.7/255 (5 views)
+  night foyer: 36.0/255 (5 views)
+  night media: 34.7/255 (5 views)
+  night primary_bed: 35.1/255 (5 views)
+  night study: 35.3/255 (5 views)
+  night mezzanine: 25.2/255 (3 views)
+  night sitting: 35.2/255 (5 views)
+  night stair_f63: 70.9/255 (3 views)
+  night upper_hall: 35.1/255 (5 views)
+  night dressing: 35.2/255 (1 views)
+  night primary_bath: 34.2/255 (5 views)
+  night closet: 36.1/255 (5 views)
+  night gym: 41.2/255 (5 views)
+  night family: 34.6/255 (5 views)
+  night terrace_room: 34.6/255 (5 views)
+✅ 三道门禁全过（逐房间检查两层）

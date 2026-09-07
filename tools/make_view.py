@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""生成 apt1 的窗景贴图（俯瞰中央公园 + 曼哈顿街网）→ textures/house3/。
+"""生成 apt 的窗景贴图（俯瞰中央公园 + 曼哈顿街网）→ textures/house3/。
 
-⚠️ 贴图目录沿用场景最早的名字 house3（见下面 TEX_SUBDIR 的注释），场景 key 是 apt1。
+⚠️ 贴图目录沿用场景最早的名字 house3（见下面 TEX_SUBDIR 的注释），场景 key 是 apt。
 
 为什么窗景要用**几何 + 俯视贴图**，不用一张平视照片：
 
@@ -50,7 +50,7 @@ ROOT = os.path.dirname(HERE)                          # 仓根
 #    tools/ 下长出一个目录（`ls tools/ | grep -v '\.py$'` 必须为空）。
 
 # 这个脚本只服务一个场景，名字散在四五处过，提成常量。
-SCENE_KEY = "apt1"       # `scenes/<这里>/nyc_massing.py` 的落点
+ENVIRONMENT_SUBDIR = "environments"       # `scenes/<这里>/nyc_massing.py` 的落点
 # ⛔ 贴图目录**有意**沿用它最早的名字 `house3`：那 9 张材质的文件名本身就叫 `h3_oak.png`，
 #    只改目录会造出 `textures/apt1/h3_oak.png` 这种新的不一致。它是这个场景的
 #    **资产命名空间**，不是场景 key。详见 README「建造顺序」那一节。
@@ -706,7 +706,7 @@ def main() -> None:
     ap.add_argument("--procedural", action="store_true",
                     help="程序化生成公园与城市贴图（不联网的兜底）")
     ap.add_argument("--nyc", action="store_true",
-                    help=f"⭐ 抓 NYC Open Data 建筑轮廓 → scenes/{SCENE_KEY}/nyc_massing.py")
+                    help=f"⭐ 抓 NYC Open Data 建筑轮廓 → scenes/{ENVIRONMENT_SUBDIR}/nyc_massing.py")
     ap.add_argument("--sky", action="store_true",
                     help="⭐ 抓 Poly Haven 的 CC0 实景天空 → 天空盒六面")
     ap.add_argument("--sky-id", default="kloofendal_48d_partly_cloudy_puresky",
@@ -732,7 +732,7 @@ def main() -> None:
     if a.nyc or a.all:
         print("抓真实纽约建筑群（NYC Open Data，Local Law 11：无使用限制）")
         rows = nyc_massing()
-        dst = os.path.join(ROOT, "scenes", SCENE_KEY, "nyc_massing.py")
+        dst = os.path.join(ROOT, "scenes", ENVIRONMENT_SUBDIR, "nyc_massing.py")
         with open(dst, "w", encoding="utf-8") as fh:
             fh.write('"""曼哈顿真实建筑体块 —— ⛔ 本文件由 `python tools/make_view.py --nyc` 生成，请勿手改。\n\n'
                      "来源：NYC Open Data 建筑轮廓（数据集 5zhs-2jue，DoITT 航测）。\n"
@@ -775,7 +775,7 @@ def main() -> None:
         _save("park_aerial.png", park)
         _save("city_ground.png", city)
         return
-    print(f"程序化生成 {SCENE_KEY} 窗景贴图 →", OUT_DIR)
+    print(f"程序化生成 {ENVIRONMENT_SUBDIR} 窗景贴图 →", OUT_DIR)
     _save("park_aerial.png", park_aerial(a.park_px_per_m))
     _save("city_ground.png", city_ground())
 

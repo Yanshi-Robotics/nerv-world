@@ -1,0 +1,16 @@
+house/X1: docs/images/house/X1-整栋外景.png
+house/X2: docs/images/house/X2-从门口平视楼梯.png
+house/X3: docs/images/house/X3-顶层梯口栏板俯视.png
+house/X4: docs/images/house/X4-草坪与主楼.png
+house/X5: docs/images/house/X5-泳池露台.png
+house/X6: docs/images/house/X6-山坡社区.png
+house/X7: docs/images/house/X7-关闭的外大门.png
+house/R1: docs/images/house/R1-底层客厅.png
+house/R2: docs/images/house/R2-二层主卧.png
+house/R3: docs/images/house/R3-三层工作间.png
+house/R4: docs/images/house/R4-厨房.png
+house/S1: docs/images/house/S1-楼层平台望向上行跑.png
+house/S2: docs/images/house/S2-站在上行跑中间.png
+house/S3: docs/images/house/S3-中间平台-回头跑从脚下起步.png
+house/S4: docs/images/house/S4-中间平台-回望上行跑.png
+house/S5: docs/images/house/S5-二层楼层平台.png

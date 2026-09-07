@@ -1,0 +1,7 @@
+场景 apt：曼哈顿复式公寓（24 空间、四时段、可交互家具）
+鼠标转头 · WASD 走 · 空格跳 · Shift 跑 · F 飞行 · T 透视 · 数字键跳层 · C 天花板 · P 报坐标 · Esc 放鼠标 · Q 退出
+当前：飞行模式，透视关
+
+E 开合/按压 · [ ] 调整开度 · J 切换同一部件的关节 · G 抓取/松手 · L 切换时段 · Backspace 复位家具。瞄准 2 米内可见的活动部件。
+   → 厨房
+{"passed": true, "opened": {"name": "ix_a2_fridge__fridge_door_joint", "value": 1.5491550072572333, "fraction": 0.9862227079534247, "result": "reached"}, "checks": ["real GLFW context", "E door", "four L phases", "G grab and release", "Backspace reset"]}

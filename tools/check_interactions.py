@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CPU physics acceptance for apt2 furniture; does not run a robot manipulation policy."""
+"""CPU physics acceptance for apt furniture; does not run a robot manipulation policy."""
 from pathlib import Path
 import argparse
 import json
@@ -21,9 +21,9 @@ DROP_HEIGHT = 0.4
 
 
 def run(robot='g1'):
-    m = mujoco.MjModel.from_xml_path(str(ROOT / manifest.scene_filename('apt2', robot)))
+    m = mujoco.MjModel.from_xml_path(str(ROOT / manifest.scene_filename('apt', robot)))
     d = mujoco.MjData(m)
-    park_robot(m, d, manifest.load_layout('apt2'), robot)
+    park_robot(m, d, manifest.load_layout('apt'), robot)
     mujoco.mj_forward(m, d)
     i = Interaction(m, d)
     p = InspectionPhysics(m, d, i)
@@ -63,7 +63,7 @@ def run(robot='g1'):
     assert np.linalg.norm(d.qvel[m.jnt_dofadr[i.free_bodies[body]]:][:3]) < 0.1
 
     # Lighting switches leave furniture untouched and day restores every model field.
-    cycle = TimeCycle(m, 'apt2')
+    cycle = TimeCycle(m, 'apt')
     qpos, qvel = d.qpos.copy(), d.qvel.copy()
     for phase in (*cycle.phases, 'night', 'morning', 'day'):
         cycle.set(phase)
@@ -115,11 +115,11 @@ def main():
     ap.add_argument('--robot', choices=['g1','go2'], default='g1')
     ap.add_argument('--output', type=Path)
     args = ap.parse_args()
-    report = dict(scene='apt2', mujoco=mujoco.__version__, physics=run(args.robot), obstruction=obstruction())
+    report = dict(scene='apt', mujoco=mujoco.__version__, physics=run(args.robot), obstruction=obstruction())
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2)+'\n')
-    print(f"PASS apt2/{args.robot}: 44 joint targets, 9 movable objects, gravity, occlusion, obstruction, reset and four time presets")
+    print(f"PASS apt/{args.robot}: 44 joint targets, 9 movable objects, gravity, occlusion, obstruction, reset and four time presets")
 
 
 if __name__ == '__main__':

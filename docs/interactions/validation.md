@@ -1,5 +1,9 @@
 # apt2 interaction validation
 
+Historical validation before canonical migration, preserved with its original names and
+measurements. See the [current validation](../residences/migration/validation.md).
+
+
 Tested on 2026-09-07 with MuJoCo 3.12.0, the NERV Python environment and an NVIDIA
 RTX 5070 Ti. Furniture inspection, robot walking and camera performance are separate checks.
 The [source checksums](verification/source-sha256.json) identify the tested scene and core code.

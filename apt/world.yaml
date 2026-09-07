@@ -1,0 +1,20 @@
+# NERV world · alice-house apt: a two-storey Manhattan penthouse, simulated in MuJoCo.
+# This file lives in the nerv-world submodule; relative paths resolve against the nerv repository root.
+name: apt
+kind: sim
+engine: mujoco
+label: Manhattan duplex penthouse (nerv-world apt)
+assets_root: worlds                               # the nerv-world submodule = this repository
+supports:
+  humanoid-unitree-g1: build/apt-g1.xml          # the arena built for the G1 (relative to assets_root)
+spawn:
+  scene: apt
+  source: layout                                   # ROBOT_HOME_XY / START_POS_XY from scenes/apt/layout.py
+ambient: []                                        # no fixed cameras in this world
+physics:
+  dt: 0.002
+  realtime_factor: 1.0
+  render_width: 640
+  render_height: 480
+  stream_fps: 12
+  third_person: true

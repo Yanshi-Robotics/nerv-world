@@ -1,5 +1,9 @@
 # 住宅升级验证
 
+Historical validation of the numbered scenes before canonical migration. Names and measurements
+below describe that revision. See the [current validation](migration/validation.md).
+
+
 日期：2026-09-07。以下结果来自本机 MuJoCo 和 NERV 实际运行。
 
 ## 场景与碰撞

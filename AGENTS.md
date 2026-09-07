@@ -7,23 +7,13 @@
 
 ## 这个仓是什么（以及不是什么）
 
-**alice-house** = 一套**用代码生成**的室内仿真场景资产库 + 两台机器人模型 + 训练好的运动策略。
-改屋子只改一份布局定义再重跑生成器，场景与消费方读的是同一份真相源，坐标不可能在两处对不上。
+**nerv-world** 是 MuJoCo 住宅场景与机器人本体资产库，也是 NERV 的 worlds 子模块。
+布局定义生成建筑、家具和真实碰撞；本仓提供原生漫游检查工具，不运行常驻服务，也不存运动策略。
 
-它**不是**：
-
-- **不是应用**：没有运行期服务、没有 API、没有用户输入——它是**别的项目 import 的资产**。
-  主要消费方：[anima-zero](https://github.com/Yanshi-Robotics/anima-zero) 的 `sim-house-nav` 世界。
-- **不是训练仓**：这里只**装**训练产物（ONNX + 契约），训练本身在
-  [unitree-g1-locomotion](https://github.com/jeffliulab/unitree-g1-locomotion)。
-- **不是给某一台机器人定制的考题**：场景是「现实」，四足眼高约 0.4 m、人形约 1.25 m，
-  谁看不见高处是**机器人侧**的局限，不是场景要迁就的事。
-- **不是素材库**：外部网格与贴图的**字节一件都不入库**。`decor/` 与 `make_view.py` 是
-  「拉取 + 转换」的脚本，字节落在 gitignore 的目录里。裸 clone 照样能生成全部场景。
-
-现有四个地方：**house1** 单层大平层（考平层导航）、**house2** 三层带楼梯（考爬楼）、
-**apt1** 62 层曼哈顿大平层（**考窗外**——三面落地玻璃，看得见但够不着）、
-**apt2** 62–63 层复式顶层豪宅（**考够得着**——家具有真碰撞，沙发机器人真坐得下）。
+当前只维护 **apt**（曼哈顿两层复式、四时段与可交互家具）和 **house**（三层山坡豪宅与封闭宅地）。
+旧编号地图已退役；恢复版本、迁移范围与保留功能见 [迁移说明](docs/residences/migration/README.md)。
+城市和时段环境在 `scenes/environments/`，不再依赖旧公寓布局。第三方家具字节在忽略目录中，
+裸 clone 可生成基本碰撞版本；详细外观及家具凸分解需按 README 准备本地资产。
 
 ## 任务 → 去哪查
 
@@ -34,20 +24,20 @@
 | ⭐ 让某件家具有**真碰撞**（不是一个实心盒） | 在 `decor/hulls.py` 的 `COLLIDE` 里登记 → 跑 `python -m decor.hulls`（要先 `pip install coacd trimesh`） → layout 里给它 `F.mesh_piece(..., collide=True)` | 部件是**按材质**拆的、MuJoCo 又只取凸包，所以"把 contype 打开"没用（实测凸度只有 0.12–0.30）。⛔ 凸块必须带 `solref`，否则快速撞击穿模而慢速测试全绿 |
 | ⭐ 让机器人**坐得下**某件家具 | layout 里加 `SEATS` 条目；沙发用 `F.sofa()` 手写基本体（⛔ 别用真网格） | 座面高上限 **0.36 m** 是从 G1 腿长实测出来的（0.40 滑落 / 0.45 直接倒）；而 `_fit_scale` 只做均匀缩放，压座面会把整件缩成玩具 |
 | ⭐ 摆一个姿态出图 / 做判据 | layout 的 `SIT_POSES`（**按关节名**）+ `scenes/apply_pose.py` | 产物里的机器人站在世界原点，静态渲染拍不到"坐着"；⛔ 按下标声明会随机器人型号静默错位 |
-| ⛔ 改楼梯 | **先读 [`scenes/house2/楼梯设计.md`](scenes/house2/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
-| 自己进去看看 | `python tools/walkthrough.py --scene house2`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
+| ⛔ 改楼梯 | **先读 [`scenes/house/楼梯设计.md`](scenes/house/楼梯设计.md)**，再改 `layout.py` 顶部那几个参数 | 一部双跑楼梯 = 五段、其中两段是平台；踏板数 = 踢面数−1。这两条都栽过跟头，尺寸全是推出来的，单独改一个会让别处悄悄对不上 |
+| 自己进去看看 | `python tools/walkthrough.py --scene house`（`T` 透视 / `F` 飞行 / 数字键跳层） | 第一人称漫游，带碰撞与重力；`--selftest` 是不开窗口的自动版 |
 | 场景改完验一下 | `python tools/check_scene.py` | 它**查产物不查声明**（射线实测楼梯能不能走），必跑 |
 | 摆家具怕挡路 | 摆完跑一次 `check_scene.py` 看「可通行性」那项 | 判据是**整层只准有一个连通块**——⛔ 不是"两件家具之间多宽"，那种问法会被床头柜↔床炸出上百条假阳性 |
 | 机器人该站哪 | layout 的 `ROBOT_HOME_XY` / `ROBOT_HOME_YAW`（「保姆间」） | ⛔ 和 `START_POS_XY`（任务出生点）是两个量，别合并 |
 | 知道某台机器人是什么（模型 / 出生高度 / 相机 / 脚的 body） | `robots/manifest.py` | 机器人事实的**单一真相源** |
 | 知道某个策略怎么用 | ⛔ **不在本仓**（2026-09-02 起）：策略住消费方的发布架，`contract.json` + `release.yaml` | 本仓只放场景与本体 |
-| 换 README 里的配图 | `tools/make_docs_images.py` 里的机位，然后重跑它 | 图不许手工截，机位是代码 |
+| 换 README 里的配图 | `scenes/<scene>/shots.py` 的固定机位，重跑 `tools/render_residences.py` | 图不许手工截，机位是代码 |
 | 加或改家具几何 | `scenes/furniture.py` | 家具零件的生成函数都在这 |
 | 改贴图 | `tools/make_textures.py` | 贴图是生成物，不是素材库 |
 | 加一张新贴图 | 放 `textures/`，**做成正方形** | ⛔ 贴到基本体上的必须是 `type="cube"`（2d 在竖直面上会被沿局部 Z 拖成条纹）；而 cube 要求 PNG 是 gridsize 的整数倍，非方形会**编译期报错**。生成器按图片实际尺寸自动判，不用手写名单 |
 | ⛔ 给家具穿真网格外衣 / 加装饰资产 | `decor/manifest.py` 登记 → `python -m decor.fetch` → **`python -m decor.calibrate`** → layout 里改用 `F.mesh_piece(...)` | 网格是**外衣**，碰撞真相仍是原来的盒子；漏跑 calibrate 网格会摆偏、被射线自检判红（见红线一节） |
-| 改 apt1 的窗外景色（天空 / 建筑群 / 航拍） | `tools/make_view.py`（`--sky` / `--nyc` / `--naip`），产物落 `textures/house3/` 与 `scenes/apt1/nyc_massing.py` | ⛔ 天空盒六面到世界方向的对应是**实测**出来的、而且全是反的，改之前先跑 `--calib` |
-| 加厨房电器 | `decor/robocasa.py` 里的 `FIXTURES` 换型号，`--list` 看有哪些 | ⛔ 不能直接 `<include>` 那份 MJCF：它会**撞 body 名**（每件电器根 body 都叫 `object`）、用 `<option>` 静默覆盖积分器设置、撞 `<default>` 类名。⚠️ 但"`nu`/`nq`/`nv` 一变就坏"这半句**实测不成立**——消费方是按关节名与传动目标建映射的（apt2 加了 184 个碰撞 geom，`nu` 仍是 29） |
+| 改 apt 的窗外景色（天空 / 建筑群 / 航拍） | `tools/make_view.py`（`--sky` / `--nyc` / `--naip`），产物落 `textures/house3/` 与 `scenes/environments/nyc_massing.py` | ⛔ 天空盒六面到世界方向的对应是**实测**出来的、而且全是反的，改之前先跑 `--calib` |
+| 加厨房电器 | `decor/robocasa.py` 里的 `FIXTURES` 换型号，`--list` 看有哪些 | ⛔ 不能直接 `<include>` 那份 MJCF：它会**撞 body 名**（每件电器根 body 都叫 `object`）、用 `<option>` 静默覆盖积分器设置、撞 `<default>` 类名。⚠️ 但"`nu`/`nq`/`nv` 一变就坏"这半句**实测不成立**——消费方是按关节名与传动目标建映射的（apt 加了 184 个碰撞 geom，`nu` 仍是 29） |
 | 看版本改了什么 | [`CHANGELOG.md`](CHANGELOG.md) | 本仓已公开、有外部消费方，CHANGELOG 是写给使用者的 |
 
 ## 目录地图
@@ -61,36 +51,35 @@
 | `scenes/furniture.py` | 家具/零件的几何生成函数（所有场景共用） |
 | `tools/make_house.py` | 布局 → MJCF 场景生成器（**一个「场景 × 机器人」组合一份文件**） |
 | `tools/make_textures.py` · `tools/make_docs_images.py` | 贴图生成 · README 配图渲染（机位写在代码里） |
-| `tools/make_view.py` | **apt1 的窗景**：`--sky --sky-phase` 天空六面（分时段）· `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
-| `tools/make_time_stills.py` · `scenes/apply_time_preset.py` | **apt1 的四时段**：前者出 `T-*.png` 静帧并给预设把门（亮度单调下降）；后者是「灯怎么打」的唯一应用逻辑（运行期写字段，产物不变） |
+| `tools/make_view.py` | **apt 的窗景**：`--sky --sky-phase` 天空六面（分时段）· `--nyc` 2716 栋真实曼哈顿建筑 · `--naip` 中央公园航拍 · `--calib` 天空盒定向标定 |
+| `tools/make_time_stills.py` · `scenes/apply_time_preset.py` | **apt 的四时段**：前者出 `T-*.png` 静帧并给预设把门（亮度单调下降）；后者是「灯怎么打」的唯一应用逻辑（运行期写字段，产物不变） |
 | `tools/fetch_assets.py` | 下载 CC0 室内材质（ambientCG），带 SHA-256 记账与 `--verify` |
 | `decor/` | **真家具网格管线**：`manifest.py` 登记表 + 可执行许可白名单、`fetch.py` 下载转换、`convert.py` glTF→OBJ、`calibrate.py` ⛔ 实测重心、`robocasa.py` 厨房电器移植器、⭐ `hulls.py` **CoACD 凸分解出真碰撞体**、`lock.py` 只读访问器（stdlib，生成器 import 它）。⛔ `decor/assets/` 的字节 gitignore，永不入库（凸块也一样） |
 | `scenes/apply_pose.py` | ⭐ 把 layout 的 `SIT_POSES`（**按关节名**声明）装到机器人身上并**推物理到稳态**。产物里没有关键帧、也不该有——`make_house.py` 有意不 import mujoco |
-| `scenes/apt1/nyc_massing.py` | 由 `make_view.py --nyc` 生成的建筑体量表（**入库**，因为数据源无 share-alike） |
+| `scenes/environments/nyc_massing.py` | 由 `make_view.py --nyc` 生成的建筑体量表（**入库**，因为数据源无 share-alike） |
 | `build/<场景>-<机器人>.xml` | **产物**（入库的交付物，不是构建缓存）：完整可跑场景，含屋外景色 + `<include>` 进来的那台机器人。⛔ 里面的相对路径按"住在仓根下恰好一层"算死了，别把 `build/` 挪走 |
 | `robots/manifest.py` | 机器人清单与事实源；`robots/g1/`、`robots/go2/` 是模型资产 |
-| `textures/` · `docs/` | 生成出来的贴图 · 配图与文档。⚠️ apt1 的贴图住 `textures/house3/`、材质名带 `h3_` 前缀 —— 那是这个场景的**资产命名空间**，沿用它最早的名字，有意不跟着 key 改 |
+| `textures/` · `docs/` | 生成出来的贴图 · 配图与文档。⚠️ apt 的贴图住 `textures/house3/`、材质名带 `h3_` 前缀 —— 那是这个场景的**资产命名空间**，沿用它最早的名字，有意不跟着 key 改 |
 
 ## 怎么跑起来
 
 ```bash
 pip install mujoco numpy pillow
 
-python -m mujoco.viewer --mjcf=build/house1-go2.xml   # 单层大平层（四足那份）
-python -m mujoco.viewer --mjcf=build/house2-g1.xml    # 三层小楼带楼梯（人形那份）
-python -m mujoco.viewer --mjcf=build/apt1-g1.xml   # 62 层俯瞰中央公园（人形那份）
+python -m mujoco.viewer --mjcf=build/house-g1.xml    # 三层山坡豪宅（人形那份）
+python -m mujoco.viewer --mjcf=build/apt-g1.xml   # 62 层俯瞰中央公园（人形那份）
 
 python tools/make_textures.py        # 改过贴图才需要
 python tools/make_house.py                       # 全场景 × 全机器人
-python tools/make_house.py --scene house2 --robot g1
+python tools/make_house.py --scene house --robot g1
 python tools/check_scene.py                      # ⭐ 生成之后必跑
-python tools/walkthrough.py --scene house2       # 自己走进去看（--selftest = 无窗口自测）
-ALICE_SCENE=house2 python tools/make_docs_images.py   # 重出 README 配图
-python tools/make_time_stills.py --scene apt1         # 四时段静帧（同时是验收门）
+python tools/walkthrough.py --scene house       # 自己走进去看（--selftest = 无窗口自测）
+python tools/render_residences.py --scene house    # 重出 README 配图
+python tools/make_time_stills.py --scene apt         # 四时段静帧（同时是验收门）
 ```
 
-apt1 的贴图与 2716 栋楼**已入库**，clone 下来直接能编译；下面这些只在想改它们时才跑。
-⚠️ **家具网格是例外**：字节永不入库，裸 clone 上 apt1 的家具是素盒子，直到你拉下来。
+apt 的贴图与 2716 栋楼**已入库**，clone 下来直接能编译；下面这些只在想改它们时才跑。
+⚠️ **家具网格是例外**：字节永不入库，裸 clone 上 apt 的家具是素盒子，直到你拉下来。
 
 ```bash
 pip install trimesh fast-simplification   # 只有下载/转换那一侧要它，⛔ 生成器不许 import
@@ -102,7 +91,7 @@ python -m decor.robocasa          # 厨房电器（RoboCasa，CC-BY-4.0）
 python -m decor.calibrate         # ⛔ 上面两条只要跑过，这条必跑（见红线）
 ```
 
-**要让机器人真走起来**：策略不在本仓。消费方（如 NERV）从自己的策略发布架拿 `policy.onnx`，
+**要让机器人真走起来**：策略不在本仓。消费方 NERV从自己的策略发布架拿 `policy.onnx`，
 严格照同目录 `contract.json` 拼观测、按 `release.yaml` 里的力矩模式发力矩；场景与本体则通过
 环境变量（如 `ALICE_HOUSE_ROOT`）指到本仓，不写死路径。
 
@@ -114,7 +103,7 @@ python -m decor.calibrate         # ⛔ 上面两条只要跑过，这条必跑�
 再重跑 `make_house.py`。改完跑 `check_scene.py`——它查的是产物，不是你在布局里的声明。
 手改产物的下场：下一次重跑就被覆盖，而且场景与消费方的坐标真相源从此分叉。
 
-同理，README 的配图不许手工截——机位写在 `make_docs_images.py` 里，改了场景重跑那个脚本。
+README 配图由 `scenes/<scene>/shots.py` 固定机位与原生渲染工具生成，改场景后同步重出。
 
 ### ⛔ 单一真相源，谁也别抄谁
 
@@ -145,13 +134,14 @@ G1 是用 `import_from_menagerie.py` 导入的——**改上游模型走那个�
 `api.sketchfab.com/v3/models/<uid>` 拿真 slug。加资产时别跳过这一步。
 
 ⛔ **建筑数据别改用 OpenStreetMap。** 覆盖率相当，但把派生出来的坐标表提交进 MIT 仓
-构成 ODbL 的「派生数据库」，share-alike 会附着到 `scenes/apt1/nyc_massing.py` 上。
+构成 ODbL 的「派生数据库」，share-alike 会附着到 `scenes/environments/nyc_massing.py` 上。
 现用的 NYC Open Data 走 Local Law 11 of 2012，**没有 share-alike**。
 
 ### ⛔ 装饰网格是外衣，不许碰碰撞
 
-apt1 的家具在原来的盒子外面套了一张真网格。规矩只有一条：
-**网格必须完全装进它所装饰的盒子**，于是所有射线读数逐位不变。
+带装饰外衣的静态家具必须保留碰撞约束：
+**网格必须装进它所装饰的盒子或已校验凸块**，避免装饰改变导航射线。
+交互家具的网格、原生关节和碰撞必须跟随同一身体树；门、抽屉与浴缸不得用整盒封住内腔。
 `check_decor_ray_invariance` 强制这一条——**它判不过就不许放行**。
 
 - ⛔ **`mj_ray` 不看 `contype`**。「纯视觉」对物理成立、对射线不成立，
@@ -168,7 +158,7 @@ apt1 的家具在原来的盒子外面套了一张真网格。规矩只有一条
   | 4 | 房子的隐身碰撞盒（`make_house.HIDDEN_BOX_GROUP`） | 不画 |
   | 5 | 预留 | 不画 |
 
-  `group` 在 MuJoCo 里本来只管**画不画**，但消费方（anima-zero 的 sim-house-nav）还得靠它把
+  `group` 在 MuJoCo 里本来只管**画不画**，但消费方（NERV 的 MuJoCo 世界）还得靠它把
   「机器人自己」和「房子」分开——它的激光测距要滤掉打在自己身上的射线，而 `mj_ray` 的过滤接口
   **只吃一个 6 位分组掩码**，没法按 geom 或 body 子树过滤。占了 2 或 3，消费方的自检会**当场拒绝启动**。
   ⛔ 硬上界 **≤ 5**：分组掩码固定 6 个槽，≥6 会被静默丢掉，那些碰撞盒对激光就成了透明的——
@@ -215,7 +205,7 @@ apt1 的家具在原来的盒子外面套了一张真网格。规矩只有一条
 |---|---|---|
 | 根目录必备 `.env.example` | **不设** | 本仓是纯资产库，没有任何运行期环境变量。放一个空文件是仪式，不是规范。 |
 | pre-1.0 走 rapid-versioning 三件套 | **用 `CHANGELOG.md`**（Keep a Changelog） | 本仓已公开、有外部消费方，CHANGELOG 是写给使用者看的；三件套是写给自己看的。规范允许就近覆盖。 |
-| `stacks/python-ml.md` 的训练目录约束 | 不适用 | 本仓只**装**训练产物（ONNX + 契约），训练本身在 [unitree-g1-locomotion](https://github.com/jeffliulab/unitree-g1-locomotion)。 |
+| `stacks/python-ml.md` 的训练目录约束 | 不适用 | 本仓只存场景和机器人本体，策略及契约在 nerv-policies。 |
 
 ---
 

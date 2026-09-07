@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "injected_failures": [
+    "apt-g1/day: 8 盏活动模型灯 + 1 盏相机灯 > 8 个渲染灯槽",
+    "apt-g1/morning: 8 盏活动模型灯 + 1 盏相机灯 > 8 个渲染灯槽",
+    "apt-g1/dusk: 8 盏活动模型灯 + 1 盏相机灯 > 8 个渲染灯槽",
+    "apt-g1/night: 8 盏活动模型灯 + 1 盏相机灯 > 8 个渲染灯槽"
+  ]
+}

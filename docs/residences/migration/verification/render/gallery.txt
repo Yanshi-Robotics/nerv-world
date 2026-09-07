@@ -1,0 +1,18 @@
+apt/V1: docs/images/apt/V1-贯通轴线-从入户门望公园.png
+apt/V2: docs/images/apt/V2-大客厅-三开间落地窗.png
+apt/V3: docs/images/apt/V3-餐厅-六把真碰撞餐椅.png
+apt/V4: docs/images/apt/V4-厨房中岛.png
+apt/V5: docs/images/apt/V5-楼梯间-从楼下往上看.png
+apt/V6: docs/images/apt/V6-上层环廊.png
+apt/V7: docs/images/apt/V7-主卧转角窗.png
+apt/V8: docs/images/apt/V8-狗视角-画廊.png
+apt/P1: docs/images/apt/P1-公园视差.png
+apt/P2: docs/images/apt/P2-公园视差.png
+apt/X1: docs/images/apt/X1-越过窗框俯瞰公园.png
+apt/X2: docs/images/apt/X2-本楼外景-两层.png
+apt/X3: docs/images/apt/X3-双高客厅-挑空.png
+apt/V9: docs/images/apt/V9-主卫浴缸与淋浴.png
+apt/V10: docs/images/apt/V10-衣帽间.png
+apt/V11: docs/images/apt/V11-洗衣房.png
+apt/S1: {'matched': 29, 'rise': 0.04626946625059214, 'slide': 0.0299843992608618, 'tilt_deg': 11.506666235333887, 'ncon': 79}
+apt/S2: {'matched': 29, 'rise': 0.04626946625059214, 'slide': 0.0299843992608618, 'tilt_deg': 11.506666235333887, 'ncon': 79}

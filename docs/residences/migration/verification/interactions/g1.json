@@ -1,0 +1,352 @@
+{
+  "scene": "apt",
+  "mujoco": "3.12.0",
+  "physics": {
+    "robot": "g1",
+    "nq": 121,
+    "nv": 111,
+    "nu": 29,
+    "ngeom": 2887,
+    "joint_cycles": [
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__freezer_door_joint",
+        "value": 1.558690580261996,
+        "fraction": 0.9922932422683185,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__freezer_drawer0_joint",
+        "value": 0.3736296822631813,
+        "fraction": 0.9931677266075639,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__freezer_drawer1_joint",
+        "value": 0.3734739972026279,
+        "fraction": 0.9927538907026648,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__fridge_door_joint",
+        "value": 1.5491885908946068,
+        "fraction": 0.9862440879610019,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__fridge_drawer0_joint",
+        "value": 0.3749494088772921,
+        "fraction": 0.9966757719885964,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_fridge__fridge_drawer1_joint",
+        "value": 0.3761715139188968,
+        "fraction": 0.9999243235450308,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__knob_front_left_joint",
+        "value": 3.490098968694391,
+        "fraction": 0.9998397049425007,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__knob_front_right_joint",
+        "value": 3.490095963803206,
+        "fraction": 0.9998388441045867,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__knob_rear_left_joint",
+        "value": 3.490103547546553,
+        "fraction": 0.9998410166870201,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__knob_rear_right_joint",
+        "value": 3.4900983907720184,
+        "fraction": 0.9998395393799365,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__Door001_joint",
+        "value": 1.5714864966814237,
+        "fraction": 1.0004393756654255,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__Knob001_joint",
+        "value": 5.1644045195766655,
+        "fraction": 0.986328608896897,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__Knob002_joint",
+        "value": 5.505368561786743,
+        "fraction": 0.985732447737359,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_stove__Shelf001_joint",
+        "value": 0.2927948947949273,
+        "fraction": 0.9858414291453647,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_sink__handle_temp_joint",
+        "value": 0.7853981688975029,
+        "fraction": 1.000000003499819,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_sink__handle_joint",
+        "value": 0.49267649100527927,
+        "fraction": 0.9853529820105585,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_sink__spout_joint",
+        "value": 1.5354927222984185,
+        "fraction": 0.9850166848087365,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_hood__Button001_joint",
+        "value": 0.0019464954627694323,
+        "fraction": 0.9830785393894166,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_hood__Button002_joint",
+        "value": 0.0019464954627694323,
+        "fraction": 0.9830785393894166,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_hood__Button003_joint",
+        "value": 0.0019464954627694323,
+        "fraction": 0.9830785393894166,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_hood__Button004_joint",
+        "value": 0.0019464954627694323,
+        "fraction": 0.9830785393894166,
+        "result": "reached"
+      },
+      {
+        "target": 1,
+        "name": "ix_a2_hood__Button005_joint",
+        "value": 0.0019464954627694323,
+        "fraction": 0.9830785393894166,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_hood__Button005_joint",
+        "value": 2.7272527422379334e-11,
+        "fraction": 1.3774004068678546e-08,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_hood__Button004_joint",
+        "value": 2.868296766974279e-11,
+        "fraction": 1.4486347644502413e-08,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_hood__Button003_joint",
+        "value": 2.8863817127167795e-11,
+        "fraction": 1.4577685756435018e-08,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_hood__Button002_joint",
+        "value": 2.701961042916608e-11,
+        "fraction": 1.3646268210552735e-08,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_hood__Button001_joint",
+        "value": 2.392662829355097e-11,
+        "fraction": 1.2084155984556638e-08,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_sink__spout_joint",
+        "value": -0.750232646693029,
+        "fraction": 0.014924708826138161,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_sink__handle_joint",
+        "value": 0.007374576990137897,
+        "fraction": 0.014749153980275794,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_sink__handle_temp_joint",
+        "value": -0.7853981686852523,
+        "fraction": -3.3646960752905966e-09,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__Shelf001_joint",
+        "value": 0.004101151913978452,
+        "fraction": 0.013808592758594817,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__Knob002_joint",
+        "value": 0.07971885862023156,
+        "fraction": 0.014273606708911429,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__Knob001_joint",
+        "value": 0.0680099646362798,
+        "fraction": 0.01298894646160051,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__Door001_joint",
+        "value": -6.271865036191845e-05,
+        "fraction": -3.992793291139294e-05,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__knob_rear_right_joint",
+        "value": 0.0006607918092572438,
+        "fraction": 0.0001893029090356539,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__knob_rear_left_joint",
+        "value": 0.0006525245674158225,
+        "fraction": 0.00018693451870702458,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__knob_front_right_joint",
+        "value": 0.0006629623714510699,
+        "fraction": 0.00018992472930003636,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_stove__knob_front_left_joint",
+        "value": 0.0006597602929478093,
+        "fraction": 0.00018900740138050732,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__fridge_drawer1_joint",
+        "value": 1.7225682686846992e-11,
+        "fraction": 4.5788632235348985e-11,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__fridge_drawer0_joint",
+        "value": 0.001162812454051749,
+        "fraction": 0.003090942332167442,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__fridge_door_joint",
+        "value": 0.020772166367961874,
+        "fraction": 0.013223971823026726,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__freezer_drawer1_joint",
+        "value": 0.0026201136472791433,
+        "fraction": 0.006964683048625417,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__freezer_drawer0_joint",
+        "value": 0.002467823617668055,
+        "fraction": 0.006559871681451156,
+        "result": "reached"
+      },
+      {
+        "target": 0,
+        "name": "ix_a2_fridge__freezer_door_joint",
+        "value": 0.01045355685289493,
+        "fraction": 0.006654940983252585,
+        "result": "reached"
+      }
+    ],
+    "movable_bodies": 9,
+    "object_drop": {
+      "resting": [
+        -9.249998517858842,
+        4.300000556849134,
+        1.007465153129811
+      ],
+      "raised": [
+        -9.249998517860071,
+        4.30000055685082,
+        1.3784789670122501
+      ],
+      "landed": [
+        -9.249993637631166,
+        4.299991549473925,
+        1.0074651531064276
+      ]
+    },
+    "time_presets": [
+      "day",
+      "morning",
+      "dusk",
+      "night"
+    ],
+    "cancellation": "passed"
+  },
+  "obstruction": {
+    "name": "ix_slide",
+    "value": 0.1989103371933353,
+    "fraction": 0.1989103371933353,
+    "result": "blocked"
+  }
+}

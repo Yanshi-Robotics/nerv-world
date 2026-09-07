@@ -1,0 +1,19 @@
+name: house
+kind: sim
+engine: mujoco
+label: Beverly Hills hillside mansion
+assets_root: worlds
+supports:
+  humanoid-unitree-g1: build/house-g1.xml
+spawn:
+  scene: house
+  source: layout
+  point: home
+ambient: []
+physics:
+  dt: 0.002
+  realtime_factor: 1.0
+  render_width: 640
+  render_height: 480
+  stream_fps: 12
+  third_person: true

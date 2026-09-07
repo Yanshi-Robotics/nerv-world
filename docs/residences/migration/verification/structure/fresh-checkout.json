@@ -1,0 +1,26 @@
+{
+  "mode": "Tracked candidate files only; no downloaded decor assets",
+  "models": {
+    "apt/g1": {
+      "ngeom": 2671,
+      "nu": 29,
+      "compiled": true
+    },
+    "apt/go2": {
+      "ngeom": 2656,
+      "nu": 12,
+      "compiled": true
+    },
+    "house/g1": {
+      "ngeom": 3295,
+      "nu": 29,
+      "compiled": true
+    },
+    "house/go2": {
+      "ngeom": 3280,
+      "nu": 12,
+      "compiled": true
+    }
+  },
+  "passed": true
+}

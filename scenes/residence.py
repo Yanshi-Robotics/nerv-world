@@ -1,4 +1,4 @@
-"""house2/apt2 专属的住宅构件；旧场景不调用这些构造函数。尺寸单位为米。"""
+"""住宅构件、材质和具有米制 UV 的细部网格，供 apt 与 house 使用。"""
 
 from __future__ import annotations
 
@@ -62,6 +62,13 @@ def material_set(prefix):
                 reflectance=0,
             )
         )
+        if key == "plaster":
+            # Walls are primitives and use cubemapping. Builder meshes have UVs
+            # and therefore require a separate 2D texture object in MuJoCo.
+            textures.append(dict(name=f"{prefix}_tex_plaster_mesh", type="2d",
+                                 file=file, colorspace="sRGB"))
+            materials.append({**materials[-1], "name": f"{prefix}_plaster_mesh",
+                              "texture": f"{prefix}_tex_plaster_mesh"})
     for key, rgba, sp, sh in [
         ("white", WHITE, 0.08, 0.2),
         ("metal", BRONZE, 0.6, 0.72),
@@ -148,6 +155,8 @@ class Builder:
         yaw=0,
         group=0,
     ):
+        if mat == "plaster":
+            mat = "plaster_mesh"
         d = F._p(f"{self.prefix}_{name}", room, "box", pos, size, rgba, f"{self.prefix}_{mat}", yaw)
         d.update(visual_mesh=self.mesh(size, radius, tile), collide=collide, group=group)
         return d

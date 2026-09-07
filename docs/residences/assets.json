@@ -3,7 +3,9 @@
     "license": "MIT (repository LICENSE)",
     "geometry": [
       "scenes/residence.py",
-      "scenes/house2/estate.py"
+      "scenes/house/estate.py",
+      "scenes/apt/service_rooms.py",
+      "scenes/apt/refinement.py"
     ],
     "texture_generator": "tools/make_residence_textures.py",
     "textures": {
@@ -12,7 +14,8 @@
       "textures/residences/linen.png": "2fec92d1abb04f6581c69ed9506776960a3242a686d3eceaa08ba1c952c93f38",
       "textures/residences/pale_oak.png": "599dd4597c1ba4c4921931c1b9b73dbee832d575c32867e8d4413537f6ec156a",
       "textures/residences/pool_tile.png": "cdbb0cad73de58adffccdb7e42b7c6b5112efb0eaaa09ed7aae87260d1f3e011"
-    }
+    },
+    "city_texture_derivatives": "textures/residences/city/sources.json"
   },
   "reused_decor": {
     "armchair": {

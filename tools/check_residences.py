@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Residence regressions: reference bytes, physical estate routes and pool hazards."""
+"""Canonical residences: inherited environment, real estate routes and pool hazards."""
 
 from __future__ import annotations
 import argparse
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import sys
 import numpy as np
 import mujoco
@@ -17,48 +16,159 @@ from scenes import manifest  # noqa: E402
 from scenes.collision import collision_ray  # noqa: E402
 from tools import make_house  # noqa: E402
 
-BASELINE = "0c1fdcebdeb21134b368b170fbe7a12810e812a2"  # Last saved scene-library revision before this upgrade.
+BASELINE = ROOT / "docs/residences/migration/baseline.json"
 BODY_RADIUS = 0.30
 BODY_LEVELS = (0.30, 0.75, 1.35)
 SAMPLE_SPACING = 0.20
 
 
-def references(ref):
-    paths = [
-        "scenes/house1",
-        "scenes/apt1",
-        "docs/images/house1",
-        "docs/images/apt1",
-        "robots",
-        "decor",
-        "textures/house3",
-    ]
-    files = (
-        subprocess.check_output(
-            ["git", "ls-tree", "-rz", "--name-only", ref, "--", *paths], cwd=ROOT
+def digest(value):
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, ensure_ascii=False).encode()
+    ).hexdigest()
+
+
+def references(path):
+    from scenes.environments import manhattan
+    from scenes.apply_time_preset import _band_geoms
+    from scenes.time_cycle import TimeCycle
+
+    baseline = json.loads(Path(path).read_text())
+    for name, expected in baseline["assets"].items():
+        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
+    for name, expected in baseline["environment"].items():
+        assert digest(getattr(manhattan, name)) == expected, name
+    for phase, expected in baseline["time"].items():
+        assert digest(manhattan.LIGHTS_BY_TIME[phase]) == expected, phase
+    layout = manifest.load_layout("apt")
+    for name in (
+        "SKYLINE",
+        "GROUND_SLABS",
+        "ELEV",
+        "FLOOR_TO_FLOOR",
+        "PARK_NEAR_Y",
+        "PARK_W",
+        "PARK_L",
+        "CITY_SPAN",
+        "SKYBOX",
+        "GLASS_THICK",
+    ):
+        assert digest(getattr(layout, name)) == baseline["environment"][name], name
+    buildings = {row[0]: row for row in layout.SKYLINE}
+    emitted = [name for names in layout.CITY_BATCH_BUILDINGS.values() for name in names]
+    assert len(emitted) == len(set(emitted)) == baseline["building_count"]
+    assert set(emitted) == set(buildings)
+    for batch, names in layout.CITY_BATCH_BUILDINGS.items():
+        # Check each box against its original footprint and absolute elevation.
+        vertices = np.asarray(layout.RES_MESHES[batch]["vertex"]).reshape(len(names), -1, 3)
+        for name, chunk in zip(names, vertices):
+            _, x, y, width, depth, top, _ = buildings[name]
+            assert np.allclose(chunk.min(axis=0), (x - width / 2, y - depth / 2, -layout.ELEV))
+            assert np.allclose(chunk.max(axis=0), (x + width / 2, y + depth / 2, top))
+        roof = np.asarray(layout.RES_MESHES[batch + "_roof"]["vertex"]).reshape(len(names), -1, 3)
+        for name, chunk in zip(names, roof):
+            _, x, y, width, depth, top, _ = buildings[name]
+            assert np.allclose(chunk.min(axis=0), (x - width / 2, y - depth / 2, top))
+            assert np.allclose(chunk.max(axis=0), (x + width / 2, y + depth / 2, top))
+    assert {k: len(v) for k, v in layout.CITY_BAND_BUILDINGS.items()} == baseline["city_bands"]
+    m = mujoco.MjModel.from_xml_path(str(ROOT / manifest.scene_filename("apt", "g1")))
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    band_counts = {name: len(_band_geoms(m, layout, name)) for name in layout.GEOM_BANDS}
+    assert all(band_counts.values())
+    cycle = TimeCycle(m, "apt")
+    qpos, qvel = d.qpos.copy(), d.qvel.copy()
+    collisions = m.geom_contype.copy(), m.geom_conaffinity.copy()
+    for phase in layout.PHASES:
+        assert layout.LIGHTS_BY_TIME[phase].get("geom_tint", []) == manhattan.LIGHTS_BY_TIME[
+            phase
+        ].get("geom_tint", [])
+        cycle.set(phase)
+        assert np.array_equal(d.qpos, qpos) and np.array_equal(d.qvel, qvel)
+        assert np.array_equal(m.geom_contype, collisions[0]) and np.array_equal(
+            m.geom_conaffinity, collisions[1]
         )
-        .decode()
-        .rstrip("\0")
-        .split("\0")
+        for tint in layout.LIGHTS_BY_TIME[phase].get("geom_tint", []):
+            ids = _band_geoms(m, layout, tint["where"])
+            rgba = tint["rgba"]
+            expected = np.fromstring(rgba, sep=" ") if isinstance(rgba, str) else np.asarray(rgba)
+            assert np.allclose(m.geom_rgba[ids], expected)
+    cycle.set("day")
+    assert np.array_equal(m.geom_rgba, cycle.base["geom_rgba"])
+    assert len(layout.WALL_ARTS) == baseline["wall_art_count"]
+    for i in range(len(layout.WALL_ARTS)):
+        assert m.geom(f"art{i}").id >= 0
+    shots = manifest.load_sibling("apt", "shots")
+    pair = [shot for shot in shots.EYE if shot[0] in ("P1", "P2")]
+    assert len(pair) == 2 and pair[0][3] == pair[1][3]
+    assert pair[0][2][0] != pair[1][2][0]
+    assert set(manifest.keys()) == {"apt", "house"}
+    for retired in ("apt1", "apt2", "house1", "house2"):
+        try:
+            manifest.load_layout(retired)
+        except KeyError:
+            pass
+        else:
+            raise AssertionError(f"Retired scene remains registered: {retired}")
+    return dict(
+        source_revision=baseline["revision"],
+        preserved_assets=len(baseline["assets"]),
+        buildings=len(emitted),
+        city_bands=baseline["city_bands"],
+        rendered_bands=band_counts,
+        wall_art=len(layout.WALL_ARTS),
+        time_phases=list(layout.PHASES),
+        parallax_distance_m=shots.PARALLAX_DISTANCE,
     )
-    for name in files:
-        old = subprocess.check_output(["git", "show", f"{ref}:{name}"], cwd=ROOT)
-        assert (ROOT / name).read_bytes() == old, f"Reference asset changed: {name}"
-    hashes = {}
-    for scene in ("house1", "apt1"):
-        make_house.use_scene(scene)
-        for robot in ("go2", "g1"):
-            name = manifest.scene_filename(scene, robot)
-            old = subprocess.check_output(["git", "show", f"{ref}:{name}"], cwd=ROOT)
-            assert make_house.build(robot).encode() == old, f"Regenerated reference changed: {name}"
-            assert (ROOT / name).read_bytes() == old, f"Reference build changed: {name}"
-            hashes[name] = hashlib.sha256(old).hexdigest()
-    return dict(source_files=len(files), generated=hashes)
+
+
+def mesh_texture_bindings(model):
+    """Explicit mesh UVs select GL_TEXTURE_2D; binding a cubemap is invalid."""
+    checked = 0
+    for geom in range(model.ngeom):
+        if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_MESH:
+            continue
+        if model.mesh_texcoordadr[model.geom_dataid[geom]] < 0 or model.geom_matid[geom] < 0:
+            continue
+        for texture in model.mat_texid[model.geom_matid[geom]]:
+            if texture >= 0:
+                assert model.tex_type[texture] == mujoco.mjtTexture.mjTEXTURE_2D, model.geom(
+                    geom
+                ).name
+                checked += 1
+    return checked
+
+
+def apartment_fixtures():
+    from scenes.apt.service_rooms import TUB_BOTTOM_TOP, TUB_RIM_TOP, TUB_SIZE
+
+    layout = manifest.load_layout("apt")
+    m = mujoco.MjModel.from_xml_path(str(ROOT / manifest.scene_filename("apt", "g1")))
+    d = mujoco.MjData(m)
+    mujoco.mj_forward(m, d)
+    base = next(it for it in layout.FURNITURE if it["name"] == "a2_primary_tub_base")
+    x, y, _ = base["pos"]
+    z = layout.FLOOR_Z(layout.ROOMS["primary_bath"]["floor"])
+    samples = 0
+    for dx in np.linspace(-TUB_SIZE[0] / 4, TUB_SIZE[0] / 4, 5):
+        for dy in np.linspace(-TUB_SIZE[1] / 3, TUB_SIZE[1] / 3, 7):
+            dist, geom = collision_ray(m, d, (x + dx, y + dy, z + 1), (0, 0, -1))
+            assert abs(z + 1 - dist - (z + TUB_BOTTOM_TOP)) < 1e-6
+            assert m.geom(geom).name == "furn_a2_primary_tub_base"
+            samples += 1
+    for it in layout.FURNITURE:
+        if it["name"] in {"a2_primary_tub_" + side for side in "nswe"}:
+            px, py, _ = it["pos"]
+            dist, _ = collision_ray(m, d, (px, py, z + 1), (0, 0, -1))
+            assert abs(z + 1 - dist - (z + TUB_RIM_TOP)) < 1e-6
+    for name in ("washer_body", "dryer_body", "primary_bath_wc_lid", "guest_bath_wc_lid"):
+        assert m.geom("furn_a2_" + name).id >= 0
+    return dict(hollow_tub_samples=samples, tub_rim_samples=4, static_service_fixtures=True)
 
 
 def estate():
-    layout = manifest.load_layout("house2")
-    m = mujoco.MjModel.from_xml_path(str(ROOT / "build/house2-g1.xml"))
+    layout = manifest.load_layout("house")
+    m = mujoco.MjModel.from_xml_path(str(ROOT / "build/house-g1.xml"))
     d = mujoco.MjData(m)
     mujoco.mj_forward(m, d)
 
@@ -144,14 +254,21 @@ def main():
     parser.add_argument("--baseline", default=BASELINE)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    report = {"reference_scenes": references(args.baseline), "house2_estate": estate()}
-    for scene in ("house2", "apt2"):
+    report = {
+        "inherited_features": references(args.baseline),
+        "house_estate": estate(),
+        "apartment_fixtures": apartment_fixtures(),
+        "mesh_texture_bindings": {},
+    }
+    for scene in manifest.keys():
         make_house.use_scene(scene)
         for robot in ("go2", "g1"):
             assert (
                 make_house.build(robot).encode()
                 == (ROOT / manifest.scene_filename(scene, robot)).read_bytes()
             ), f"Stale build: {scene}/{robot}"
+            m = mujoco.MjModel.from_xml_path(str(ROOT / manifest.scene_filename(scene, robot)))
+            report["mesh_texture_bindings"][f"{scene}/{robot}"] = mesh_texture_bindings(m)
     report["passed"] = True
     serialized = json.dumps(report, indent=2, ensure_ascii=False)
     print(serialized)

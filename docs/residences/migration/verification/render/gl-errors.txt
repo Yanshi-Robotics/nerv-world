@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "gl_errors": {
+    "apt": {
+      "day": 0,
+      "morning": 0,
+      "dusk": 0,
+      "night": 0
+    },
+    "house": {
+      "day": 0
+    }
+  }
+}

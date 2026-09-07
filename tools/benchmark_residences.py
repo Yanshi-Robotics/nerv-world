@@ -192,7 +192,7 @@ async def measure(scene, seconds, out, pose=None, walk_m=0.0):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scene", nargs="+", default=["house2", "apt2"])
+    parser.add_argument("--scene", nargs="+", default=["house", "apt"])
     parser.add_argument("--seconds", type=float, default=30.0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument('--walk', type=float, default=0.0, metavar='METRES',

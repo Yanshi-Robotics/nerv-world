@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """四时段光照的验收工具：同机位 × 四段对比图 + 三道量化门禁。
 
-    python tools/make_time_stills.py [--scene apt1] [--out docs/images/apt1/time-presets]
+    python tools/make_time_stills.py [--scene apt] [--out docs/images/apt/time-presets]
 
 产出 `T0-四时段对比.png`（2×2，同一机位）+ 每段一张全尺寸静帧，并打印门禁：
   ① 整帧平均亮度单调：day > morning > dusk > night（时段没生效一眼露馅）
@@ -56,7 +56,7 @@ def _look_at_quat(eye, target) -> np.ndarray:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scene", default="apt1")
+    ap.add_argument("--scene", default="apt")
     ap.add_argument("--robot", default="g1")
     ap.add_argument("--out", help="Output directory; defaults to docs/images/<scene>/time-presets")
     a = ap.parse_args()
@@ -95,10 +95,19 @@ def main() -> None:
         # 门禁③：换天空的段，换装前后 mean 必须变
         r.update_scene(d, camera=cid)
         before = r.render().astype(float).mean()
+        assert mujoco.mjr_getError() == 0, "OpenGL error while rendering the daytime model"
+        day_facades = {}
+        for texture in ("a2_city_tex_glass", "a2_city_tex_stone"):
+            tid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_TEXTURE, texture)
+            if tid >= 0:
+                adr = int(m.tex_adr[tid])
+                size = int(m.tex_height[tid]*m.tex_width[tid]*m.tex_nchannel[tid])
+                day_facades[tid] = (adr, m.tex_data[adr:adr+size].copy())
         warns = preset.apply(m, r, phase, scene_key=a.scene)
         all_warns += warns
         r.update_scene(d, camera=cid)
         rgb = r.render()
+        assert mujoco.mjr_getError() == 0, f"OpenGL error while rendering {phase}"
         frames[phase] = rgb
         means[phase] = float(rgb.astype(float).mean())
         spec = getattr(L, "LIGHTS_BY_TIME", {}).get(phase) or {}
@@ -106,6 +115,18 @@ def main() -> None:
             print(f"❌ 门禁③：{phase} 声明了换天空但画面 mean 一字没变（上传静默失效？）")
             sys.exit(1)
         Image.fromarray(rgb).save(os.path.join(out_dir, f"T-{phase}.png"))
+        if phase == "night" and day_facades:
+            # An ablation verifies real night pixels, not only changed model fields:
+            # keep night lighting but restore day facade textures and compare frames.
+            for tid, (adr, pixels) in day_facades.items():
+                m.tex_data[adr:adr+pixels.size] = pixels
+                mujoco.mjr_uploadTexture(m, r._mjr_context, tid)
+            r.update_scene(d, camera=cid)
+            no_window_lights = r.render()
+            difference = float(np.abs(rgb.astype(float)-no_window_lights.astype(float)).mean())
+            min_difference = 1.0  # RGB levels over the whole fixed frame; detects a missing upload.
+            assert difference > min_difference, f"Night facade textures have no visible effect: {difference}"
+            print(f"Night facade ablation: mean absolute pixel change={difference:.3f}/255; OpenGL errors=0")
         r.close()
 
     # 拼 2×2 对比图

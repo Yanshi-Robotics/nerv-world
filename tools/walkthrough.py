@@ -2,8 +2,8 @@
 """第一人称漫游 —— 像玩 Minecraft 那样走进屋里看。
 
     python tools/walkthrough.py                      # 默认场景
-    python tools/walkthrough.py --scene house2       # 三层小楼，可以踩着楼梯上楼
-    python tools/walkthrough.py --scene house2 --fly # 飞行模式（穿墙、自由升降）
+    python tools/walkthrough.py --scene house       # 三层小楼，可以踩着楼梯上楼
+    python tools/walkthrough.py --scene house --fly # 飞行模式（穿墙、自由升降）
     python tools/walkthrough.py --mouse-sens 40      # 鼠标转视角调慢一点
 
 鼠标转头，WASD 走路，空格跳，Shift 跑。默认是**走路模式**：脚下踩实、撞墙走不过去、
@@ -28,7 +28,7 @@
 轨道语义，想进屋里看得一边转一边缩距离，很难落到某个房间中间，更别说在三层楼里上下。
 这里自己开窗口，就为了拿到鼠标——FPS 的手感全在鼠标上。
 
-普通场景只做 mj_forward；apt2 的交互模式会推进家具物理。检查器中的机器人保持停机姿态，
+普通场景只做 mj_forward；apt 的交互模式会推进家具物理。检查器中的机器人保持停机姿态，
 不会自己走。视角行走的碰撞由射线计算，不是 MuJoCo 玩家刚体。
 """
 from __future__ import annotations
@@ -72,13 +72,13 @@ MOUSE_SENS_DEG_PER_SCREEN = 77.0
 PITCH_LIMIT = 89.0
 
 BODY_RADIUS = 0.28      # 玩家"胖"多少：撞墙判定用的水平半径
-STEP_UP_MAX = 0.30      # 能自动迈上去的台阶高度上限（house2 踢面 0.16，够）
+STEP_UP_MAX = 0.30      # 能自动迈上去的台阶高度上限（house 踢面 0.16，够）
 
 # ⭐ 撞墙探测的射线高度（相对**脚底**）。三根，**任一根命中就不让走**。
 #    两端的边界是**算出来的**，不是试出来的——selftest 里有一条断言在守着：
 #
 #    · 下界 0.35 —— 一帧最远探到 `BODY_RADIUS + WALK_SPEED*RUN_MULT/60 = 0.368 m`，
-#      在 house2 的楼梯上（踏面 STEP_RUN=0.30）这段距离里地面最多升**两级**
+#      在 house 的楼梯上（踏面 STEP_RUN=0.30）这段距离里地面最多升**两级**
 #      = 2 × STEP_RISE(0.16) = 0.32 m。射线低于它就会打到前面第二级台阶，走两步卡死。
 #      ⚠️ 实测 0.31 就已经卡在 (3.94, 4.54) 上不去了，余量只有 3 cm，别再往下调。
 #      它同时 > STEP_UP_MAX(0.30)，语义上也自洽：能自动迈上去的东西不该被当成墙。
@@ -237,7 +237,7 @@ def park_robot(m, d, layout, robot_key: str) -> None:
        也是自己写 qpos 的，做法和这里一模一样。
 
     ⚠️ 2026-08-08 之前这一步**根本没有**，那台机器人一直杵在原点：apt1 撞进画廊长凳
-       22.7 cm、house1 撞进冰箱和两面墙（96 个接触点），house2 纯粹因为原点恰好是空地
+       22.7 cm、house1 撞进冰箱和两面墙（96 个接触点），house 纯粹因为原点恰好是空地
        才看着正常。是 Jeff 走进去撞见了才发现的——**没有任何一项自检管过这件事**。
 
     ⛔ 和 `START_POS_XY` 不是一回事：那是**任务出生点**（消费方跑导航从那儿起步），

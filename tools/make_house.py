@@ -547,7 +547,8 @@ def _lights() -> list[str]:
     if getattr(L, "LIGHTS", None):
         out = ['    <!-- ===== 灯光（场景自排）===== -->']
         for lt in L.LIGHTS:
-            attrs = " ".join(f'{k}="{v}"' for k, v in lt.items() if k != "name")
+            settings = {"active": "true", **lt}
+            attrs = " ".join(f'{k}="{v}"' for k, v in settings.items() if k != "name")
             out.append(f'    <light name="{lt["name"]}" {attrs}/>')
         return out
     out = []
@@ -884,6 +885,8 @@ _HANDLE_T = 0.045
 
 
 def _flatten(values):
+    if isinstance(values, str):
+        return values
     """Serialize authored mesh/transform values deterministically."""
     if isinstance(values, (list, tuple)):
         return " ".join(_flatten(v) for v in values)
@@ -1324,6 +1327,10 @@ def build(robot_key: str) -> str:
     # 机器人的 XML 与网格都住在 robots/<key>/，从这里按相对路径 include。
     # meshdir 由机器人自己的 XML 声明（导入脚本写好的），这里不重复声明、免得两处打架。
     _assert_meshdir_agrees(robot_key)   # ⛔ 每份产物都核一次，见该函数的 docstring
+    if getattr(L, "LIGHTS", None):
+        # Set before the include so its nested classes inherit the scene default.
+        # Explicit scene lights remain active; headlight occupies the eighth GL slot.
+        parts.append('  <default><light active="false"/></default>')
     parts.append('  <include file="'
                  + _root_rel(f'robots/{robot_key}/{os.path.basename(r["xml"])}') + '"/>')
     parts.append('')

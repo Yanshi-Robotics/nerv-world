@@ -1,0 +1,10 @@
+kitchen-day
+kitchen-morning
+kitchen-dusk
+kitchen-night
+fridge-closed
+oven-closed
+kitchen-open
+fridge-open
+oven-open
+kitchen-open-night

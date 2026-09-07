@@ -2,7 +2,7 @@
 """场景自检 —— 生成之后、用之前跑一遍。
 
     python tools/check_scene.py                 # 检查全部已登记场景
-    python tools/check_scene.py --scene house2
+    python tools/check_scene.py --scene house
 
 **为什么要有它**：这个仓和它的前身都没有任何自动检查，全靠人看截图。
 结果是同一类错误反复出现，而且都是"看起来没问题"的那种：
@@ -129,7 +129,7 @@ _HULL_AABB_TOL = 0.001
 
 # 座面高度上限。⭐ 实测出来的硬指标，不是审美：G1 小腿 0.318 + 踝高 0.033 = 0.351，
 # 坐姿保持 3 秒的实测结果是 0.30 ✅ / 0.35 ✅ / 0.40 ❌ 滑落 / 0.45 ❌ 直接倒。
-# ⚠️ apt1 现有那张沙发是 0.42，正落在失败带里（那张不改，见 apt2 计划）。
+# 历史单层公寓的 0.42 m 座面位于失败带；现用沙发保持较低座面。
 SEAT_MAX_H = 0.36
 # 座面下方要留的净空高度：脚和小腿要收得进去（⚠️ 只对声明了 under_clear 的坐具查）
 SEAT_CLEAR_Z = 0.26
@@ -1366,7 +1366,7 @@ def check_seat_reachable(key: str, layout) -> list[str]:
     layout 里怎么声明：
         SEATS = [{"name": "gr_sofa", "room": "great_room", "at": (x, y),
                   "span": (w, d), "under_clear": False}, ...]
-    没声明 `SEATS` 的场景直接跳过（house1 / house2 / apt1 都没有）。
+    没声明 `SEATS` 的场景直接跳过。
     """
     seats = getattr(layout, "SEATS", None)
     if not seats:
@@ -1606,16 +1606,22 @@ def check_art_clear(key: str, layout) -> list[str]:
     """
     errs: list[str] = []
     for i, a in enumerate(getattr(layout, "WALL_ARTS", []) or []):
-        x0, y0, x1, y1 = layout.ROOMS[a["room"]]["rect"]
+        room = layout.ROOMS[a["room"]]
+        floor = room.get("floor", 0)
+        x0, y0, x1, y1 = room["rect"]
         horizontal = a["side"] in ("n", "s")
         want = "h" if horizontal else "v"
         fixed = {"n": y1, "s": y0, "e": x1, "w": x0}[a["side"]]
         lo, hi = (x0, x1) if horizontal else (y0, y1)
-        aa, ab = a["center"] - a["w"] / 2.0, a["center"] + a["w"] / 2.0
+        half_width = a["w"] / 2.0 + layout.ART_FRAME_T
+        aa, ab = a["center"] - half_width, a["center"] + half_width
+        if aa < lo + layout.WALL_THICK or ab > hi - layout.WALL_THICK:
+            _fail(errs, f"挂画 art{i}（含画框）超出 {a['room']} 的墙面范围")
         # 这面墙上的所有洞口：门按走向+坐标匹配，窗按房间+朝向匹配
         gaps = [(d["center"], d["width"], d.get("note", "门"))
                 for d in layout.DOORS
-                if d["orient"] == want and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
+                if d.get("floor", floor) == floor and d["orient"] == want
+                and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
         gaps += [(w["center"], w["width"], "窗")
                  for w in layout.WINDOWS
                  if w["room"] == a["room"] and w["side"] == a["side"]]
@@ -1947,34 +1953,30 @@ def check_time_presets(key: str, layout) -> list[str]:
 
 
 def check_lights_render(key: str, layout) -> list[str]:
-    """⛔ 渲染器只点亮 headlight + 前 7 盏 active 模型灯（2026-08-09 逐盏关灯实测，
-    第 8 盏起受影响像素 = 0.000%）。`mjMAXLIGHT=100` 是 mjvScene 的容量不是渲染能力。
+    """Count compiled active lights including the headlight in every time preset.
 
-    从**产物**数灯（⛔ 不能数 len(L.LIGHTS)——机器人 include 也带灯，layout 看不见）。
-    超预算的灯不会报错、只是静默不亮——这道门把静默变成红。
-    ⚠️ 本门首次加入时三个场景都超（apt1 11 / house1 14 / house2 13，各有 3–7 盏
-    从来没亮过的死灯，含 house1/2 那盏「让窗外草地亮起来」的 sun）——这是存量 bug，
-    修灯要重排 LIGHTS + 重跑产物 + 重出 README 配图，单独一个 commit 做。
+    Classic OpenGL has eight light slots. mjvScene capacity does not increase it;
+    counting XML declarations missed the included robot lamp and the headlight.
     """
+    try:
+        import mujoco
+    except ImportError:
+        return ["(跳过) 未安装 mujoco，无法统计编译后的实际灯光"]
+    from scenes.time_cycle import TimeCycle
+
     errs: list[str] = []
-    budget = getattr(layout, "LIGHT_BUDGET", 7)
-    import re as _re
-    for robot in ("g1", "go2"):
-        xml = open(_scene_path(key, robot), encoding="utf-8").read()
-        scene_lights = _re.findall(r'<light[^>]*name="([^"]+)"', xml)
-        inc = _re.search(r'<include file="([^"]+)"', xml)
-        robot_lights = 0
-        if inc:
-            rp = os.path.normpath(os.path.join(os.path.dirname(_scene_path(key, robot)),
-                                               inc.group(1)))
-            if os.path.isfile(rp):
-                robot_lights = open(rp, encoding="utf-8").read().count("<light")
-        total = len(scene_lights) + robot_lights
-        if total > 1 + budget:
-            dead = scene_lights[budget - robot_lights + 1 - 1:]
-            _fail(errs, f"{key}-{robot}: 共 {total} 盏灯（场景 {len(scene_lights)} + "
-                        f"机器人 {robot_lights}）> 渲染上限 {1 + budget}；"
-                        f"排在后面的静默不亮：{', '.join(dead)}")
+    gl_light_slots = 8  # Classic renderer uses OpenGL's eight fixed-function slots.
+    for robot in _modelled_robots():
+        model = mujoco.MjModel.from_xml_path(_scene_path(key, robot))
+        cycle = TimeCycle(model, key) if hasattr(layout, "LIGHTS_BY_TIME") else None
+        for phase in cycle.phases if cycle else ("day",):
+            if cycle:
+                cycle.set(phase)
+            active = int(model.light_active.sum())
+            headlight = int(bool(model.vis.headlight.active))
+            if active + headlight > gl_light_slots:
+                _fail(errs, f"{key}-{robot}/{phase}: {active} 盏活动模型灯 + "
+                            f"{headlight} 盏相机灯 > {gl_light_slots} 个渲染灯槽")
     return errs
 
 

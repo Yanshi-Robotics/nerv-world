@@ -18,7 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scene", choices=["house2", "apt2"], required=True)
+    parser.add_argument("--scene", choices=["house", "apt"], required=True)
     parser.add_argument("--shots", nargs="*")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--baseline")

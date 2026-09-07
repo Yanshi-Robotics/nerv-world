@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""下载 apt1 用的 CC0 材质贴图（ambientCG）→ textures/house3/。
+"""下载 住宅场景 用的 CC0 材质贴图（ambientCG）→ textures/house3/。
 
 ⚠️ 贴图目录与 `h3_` 前缀沿用场景最早的名字 house3（资产命名空间，见 README「建造顺序」）；
-场景 key 是 apt1。
+当前场景为 apt 和 house。
 
-和 `make_textures.py` 的分工：那个是**程序化生成**本仓自己的 20 张基础贴图（house1/house2 在用）；
-这个是**下载第三方**的照片级材质，只给 apt1 用。
-⛔ 两边名字不许撞——apt1 的一律带 `h3_` 前缀，撞名 MuJoCo 会当场拒绝编译（本仓踩过）。
+和 `make_textures.py` 的分工：那个是**程序化生成**本仓自己的 20 张基础贴图（共用基础材质）；
+这个是**下载第三方**的照片级材质，由住宅场景复用。
+⛔ 两边名字不许撞——住宅场景 的一律带 `h3_` 前缀，撞名 MuJoCo 会当场拒绝编译（本仓踩过）。
 
 许可：ambientCG 全站 **CC0 1.0**（"copy, modify, distribute and perform the assets,
 even for commercial purposes, all without asking permission"）。署名不是义务，

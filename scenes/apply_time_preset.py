@@ -199,6 +199,23 @@ def _swap_gridcube(m, renderer, L, tex_name: str, night_file: str, warns: list[s
     spec = next((t for t in getattr(L, "TEXTURES_EXTRA", ()) if t.get("name") == tex_name), None)
     if spec is None:
         raise ValueError(f"layout.TEXTURES_EXTRA 里找不到 {tex_name!r} 的声明（要读它的 gridlayout）")
+    if int(m.tex_type[ti]) == int(mujoco.mjtTexture.mjTEXTURE_2D):
+        path = (os.path.join(_ROOT, os.path.dirname(spec["file"]), night_file)
+                if os.sep not in night_file else os.path.join(_ROOT, night_file))
+        nch = int(m.tex_nchannel[ti])
+        with Image.open(path) as image:
+            pixels = np.asarray(image.convert("RGBA" if nch == 4 else "RGB"))
+        expected = (int(m.tex_height[ti]), int(m.tex_width[ti]), nch)
+        if pixels.shape != expected:
+            raise ValueError(f"{tex_name}: replacement texture shape {pixels.shape} != {expected}")
+        adr = int(m.tex_adr[ti])
+        m.tex_data[adr:adr+pixels.size] = pixels.ravel()
+        if renderer is None:
+            warns.append(f"⚠️ 没有 renderer，{tex_name} 写进了 tex_data 但没上传 GPU")
+        else:
+            renderer._gl_context.make_current()
+            mujoco.mjr_uploadTexture(m, renderer._mjr_context, ti)
+        return
     W = int(m.tex_width[ti])
     H = int(m.tex_height[ti])
     nch = int(m.tex_nchannel[ti])
@@ -242,7 +259,7 @@ def _swap_gridcube(m, renderer, L, tex_name: str, night_file: str, warns: list[s
     mujoco.mjr_uploadTexture(m, renderer._mjr_context, ti)
 
 
-def apply(model, renderer, phase: str, scene_key: str = "apt1",
+def apply(model, renderer, phase: str, scene_key: str = "apt",
           light_patch: dict | None = None) -> list[str]:
     """把 `phase` 的光照预设写进 model。返回告警列表（空 = 全部如实生效）。
 
