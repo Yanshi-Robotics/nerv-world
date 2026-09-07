@@ -467,12 +467,10 @@ joint name** (⛔ never by index — indices drift silently when the robot chang
 `scenes/apply_pose.py`, and **stepped to a settled state** before the frame is taken:
 
 ```bash
-ALICE_SCENE=apt2 python tools/make_docs_images.py S1
-#   settled: pelvis +0.046 m / slide 0.031 m / tilt 11.4° / contacts 11
+python tools/render_residences.py --scene apt2 --shots S1 --contract ../policies/g1-29dof-turn/contract.json
 ```
 
-The metrics are printed alongside the render because "the picture looks right" and "the robot is
-actually seated" are two different claims.
+The renderer records settling measurements beside the image in `seated-poses.json`.
 
 ⚠️ **Not done yet**: furniture **articulation** (fridge doors and drawers still don't open) and a
 **manipulation policy** (the current G1 policy is flat-ground locomotion — the robot is *placed* in
@@ -497,8 +495,16 @@ height** (1.25 m, the G1's actual camera height) for comparison.
 
 ### How the Screenshots Are Made
 
-**Don't hand-capture them.** Every camera pose lives in `make_docs_images.py`; re-run it
-whenever the scene changes:
+Camera poses live in each scene's `shots.py`. Re-render house2 and apt2 with the
+residence renderer; the apt2 sitting picture also requires a released G1 policy contract:
+
+```bash
+python tools/render_residences.py --scene house2
+python tools/render_residences.py --scene apt2 --contract ../policies/g1-29dof-turn/contract.json
+```
+
+The contract path assumes NERV's submodule layout. A standalone checkout can supply
+another released G1 contract. For house1 and apt1, use the existing renderer:
 
 ```bash
 ALICE_SCENE=apt1 python tools/make_docs_images.py        # all of that scene's shots
@@ -640,15 +646,21 @@ textures/ · docs/images/<scene>/  generated textures · README screenshots
 
 ## Quick Start
 
-```bash
-git clone https://github.com/Yanshi-Robotics/alice-house.git
-cd alice-house
-pip install mujoco numpy pillow
+On a fresh clone, regenerate the scenes for the assets available locally. Missing downloaded
+furniture uses the generator's simpler geometry. Fetch the decor assets below to reproduce
+the fully furnished screenshots.
 
-# Take a look at the house (scenes are already generated — just open them)
+```bash
+git clone https://github.com/Yanshi-Robotics/nerv-world.git
+cd nerv-world
+pip install mujoco numpy pillow
+python tools/make_house.py
+
+# Open a generated scene
 python -m mujoco.viewer --mjcf=build/house1-go2.xml    # single-floor apartment, with the quadruped
-python -m mujoco.viewer --mjcf=build/house2-g1.xml     # three-storey house with stairs, with the humanoid
+python -m mujoco.viewer --mjcf=build/house2-g1.xml     # hillside estate, with the humanoid
 python -m mujoco.viewer --mjcf=build/apt1-g1.xml     # 62nd floor over Central Park, with the humanoid
+python -m mujoco.viewer --mjcf=build/apt2-g1.xml     # 62nd–63rd floor duplex, with the humanoid
 
 python tools/walkthrough.py --scene apt1             # or walk in yourself (first person)
 ```
@@ -660,7 +672,7 @@ python tools/make_textures.py                        # textures (only if you cha
 python tools/make_house.py                           # every place x every robot
 python tools/make_house.py --scene house2 --robot g1 # just the three-storey house, humanoid
 python tools/check_scene.py                          # ⭐ always run this after generating
-ALICE_SCENE=house2 python tools/make_docs_images.py  # re-render the screenshots
+python tools/render_residences.py --scene house2    # re-render the estate screenshots
 ```
 
 Optional. apt1's textures and its 2716 buildings are **already committed**, so it compiles

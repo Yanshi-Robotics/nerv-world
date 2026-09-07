@@ -421,11 +421,10 @@ Poly Haven 餐椅座面 42.3–46.1 cm、单椅 53.0–70.9 cm，两者都在失
 由 `scenes/apply_pose.py` 装配并**推物理到稳态**再拍：
 
 ```bash
-ALICE_SCENE=apt2 python tools/make_docs_images.py S1
-#   沉降后：骨盆 +0.046 m / 滑移 0.031 m / 倾角 11.4° / 接触 11
+python tools/render_residences.py --scene apt2 --shots S1 --contract ../policies/g1-29dof-turn/contract.json
 ```
 
-出图时把判据一起打出来，是因为「图看着对」和「机器人真坐住了」是两回事。
+配图工具将沉降测量结果保存在图片同目录的 `seated-poses.json` 中。
 
 ⚠️ **还没做的**：家具的**铰接**（冰箱门、抽屉还打不开）和**会操作的策略**
 （现役 G1 是平地行走策略，不含坐下/抓取——它是被摆成坐姿的，不是自己走过去坐下的）。
@@ -452,7 +451,16 @@ ALICE_SCENE=apt2 python tools/make_docs_images.py S1
 
 ### 图是怎么出的
 
-**别手工截图。** 机位全写在 `make_docs_images.py` 里，改了场景就重跑：
+固定机位保存在各场景的 `shots.py` 中。house2 和 apt2 使用住宅配图工具；
+apt2 的坐姿配图还需要已发布的 G1 策略契约文件：
+
+```bash
+python tools/render_residences.py --scene house2
+python tools/render_residences.py --scene apt2 --contract ../policies/g1-29dof-turn/contract.json
+```
+
+上述契约路径对应 NERV 的子模块布局。独立检出的仓库可以指定另一份已发布的 G1 契约。
+house1 和 apt1 继续使用原有配图工具：
 
 ```bash
 ALICE_SCENE=apt1 python tools/make_docs_images.py        # 该场景全出
@@ -576,15 +584,20 @@ textures/ · docs/images/<场景>/   生成的贴图 · README 配图
 
 ## 快速开始
 
-```bash
-git clone https://github.com/Yanshi-Robotics/alice-house.git
-cd alice-house
-pip install mujoco numpy pillow
+首次克隆后，先按本地已有资产重新生成场景。尚未下载的家具会使用生成器的简化几何；
+按照下方说明下载装饰资产后，才能复现配图中的完整家具效果。
 
-# 看一眼（场景已经生成好了，直接就能开）
+```bash
+git clone https://github.com/Yanshi-Robotics/nerv-world.git
+cd nerv-world
+pip install mujoco numpy pillow
+python tools/make_house.py
+
+# 打开生成的场景
 python -m mujoco.viewer --mjcf=build/house1-go2.xml    # 单层大平层，四足那份
-python -m mujoco.viewer --mjcf=build/house2-g1.xml     # 三层小楼带楼梯，人形那份
+python -m mujoco.viewer --mjcf=build/house2-g1.xml     # 山坡豪宅，G1 人形版本
 python -m mujoco.viewer --mjcf=build/apt1-g1.xml    # 62 层俯瞰中央公园，人形那份
+python -m mujoco.viewer --mjcf=build/apt2-g1.xml    # 62—63 层复式豪宅，G1 人形版本
 
 python tools/walkthrough.py --scene apt1            # 自己走进去看（第一人称）
 ```
@@ -596,7 +609,7 @@ python tools/make_textures.py                        # 贴图（只在改过贴�
 python tools/make_house.py                           # 全场景 × 全机器人
 python tools/make_house.py --scene house2 --robot g1 # 只出三层楼的人形那份
 python tools/check_scene.py                          # ⭐ 生成之后必跑
-ALICE_SCENE=house2 python tools/make_docs_images.py  # 重出配图
+python tools/render_residences.py --scene house2    # 重新生成豪宅配图
 ```
 
 下面这些是可选的。apt1 的贴图和那 2716 栋楼**已经入库**，clone 下来直接就能编译；
