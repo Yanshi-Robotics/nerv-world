@@ -30,7 +30,7 @@ apt 在同一曼哈顿环境中扩展为两层复式，增加双高客厅、双�
 
 | 双高客厅 | 沙发承托 G1 的坐姿 |
 |---|---|
-| ![apt 双高客厅](docs/images/apt/X3-双高客厅-挑空.png) | ![G1 在 apt 沙发上的坐姿](docs/images/apt/S1-机器人坐在沙发上.png) |
+| ![apt 双高客厅](docs/images/apt/V2-大客厅-三开间落地窗.png) | ![G1 在 apt 沙发上的坐姿](docs/images/apt/S1-机器人坐在沙发上.png) |
 
 | 能力 | apt 的实现 |
 |---|---|

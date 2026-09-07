@@ -35,7 +35,7 @@ view at room scale and robot camera height.
 
 | Double-height living room | G1 supported by the sofa |
 |---|---|
-| ![apt double-height living room](docs/images/apt/X3-双高客厅-挑空.png) | ![G1 seated on apt sofa](docs/images/apt/S1-机器人坐在沙发上.png) |
+| ![apt double-height living room](docs/images/apt/V2-大客厅-三开间落地窗.png) | ![G1 seated on apt sofa](docs/images/apt/S1-机器人坐在沙发上.png) |
 
 | Capability | Implementation in apt |
 |---|---|
