@@ -1,0 +1,134 @@
+{
+  "date": "2026-09-07",
+  "mujoco": "3.12.0",
+  "same_camera_luminance": {
+    "day": 101.5,
+    "morning": 93.4,
+    "dusk": 86.6,
+    "night": 31.6
+  },
+  "night_rooms": [
+    {
+      "room": "kitchen",
+      "mean_luminance": 39.7,
+      "usable_views": 5
+    },
+    {
+      "room": "dining",
+      "mean_luminance": 42.4,
+      "usable_views": 5
+    },
+    {
+      "room": "great_room",
+      "mean_luminance": 52.5,
+      "usable_views": 5
+    },
+    {
+      "room": "library",
+      "mean_luminance": 39.9,
+      "usable_views": 5
+    },
+    {
+      "room": "stair_f62",
+      "mean_luminance": 108.2,
+      "usable_views": 3
+    },
+    {
+      "room": "gallery",
+      "mean_luminance": 46.7,
+      "usable_views": 5
+    },
+    {
+      "room": "east_hall",
+      "mean_luminance": 37.8,
+      "usable_views": 5
+    },
+    {
+      "room": "guest_bed",
+      "mean_luminance": 38.8,
+      "usable_views": 5
+    },
+    {
+      "room": "guest_bath",
+      "mean_luminance": 41.1,
+      "usable_views": 5
+    },
+    {
+      "room": "laundry",
+      "mean_luminance": 52.0,
+      "usable_views": 5
+    },
+    {
+      "room": "foyer",
+      "mean_luminance": 36.0,
+      "usable_views": 5
+    },
+    {
+      "room": "media",
+      "mean_luminance": 34.7,
+      "usable_views": 5
+    },
+    {
+      "room": "primary_bed",
+      "mean_luminance": 35.1,
+      "usable_views": 5
+    },
+    {
+      "room": "study",
+      "mean_luminance": 35.3,
+      "usable_views": 5
+    },
+    {
+      "room": "mezzanine",
+      "mean_luminance": 25.3,
+      "usable_views": 3
+    },
+    {
+      "room": "sitting",
+      "mean_luminance": 35.2,
+      "usable_views": 5
+    },
+    {
+      "room": "stair_f63",
+      "mean_luminance": 70.9,
+      "usable_views": 3
+    },
+    {
+      "room": "upper_hall",
+      "mean_luminance": 35.1,
+      "usable_views": 5
+    },
+    {
+      "room": "dressing",
+      "mean_luminance": 35.1,
+      "usable_views": 5
+    },
+    {
+      "room": "primary_bath",
+      "mean_luminance": 34.2,
+      "usable_views": 5
+    },
+    {
+      "room": "closet",
+      "mean_luminance": 36.1,
+      "usable_views": 5
+    },
+    {
+      "room": "gym",
+      "mean_luminance": 41.2,
+      "usable_views": 5
+    },
+    {
+      "room": "family",
+      "mean_luminance": 34.6,
+      "usable_views": 5
+    },
+    {
+      "room": "terrace_room",
+      "mean_luminance": 34.6,
+      "usable_views": 5
+    }
+  ],
+  "minimum_required_luminance": 8,
+  "passed": true
+}

@@ -26,6 +26,8 @@ the living-room sofa retains its 0.35 m seat and existing G1 sitting pose.
 
 ![Duplex living room](../images/apt2/V2-大客厅-三开间落地窗.png)
 
+The duplex also supports [interactive kitchen fixtures, movable task objects and four lighting presets](../interactions/README.md).
+
 ## Reproduction
 
 Run these commands from the scene-library root after installing the dependencies and

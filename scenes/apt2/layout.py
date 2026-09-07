@@ -687,3 +687,10 @@ STAIR_SLOPE_DEG = math.degrees(math.atan2(STEP_RISE, STEP_RUN))
 # 只在 apt2 应用住宅精修；所有来自 apt1 的嵌套声明先深复制。
 from scenes.apt2.refinement import apply as _refine_residence
 globals().update(_refine_residence(globals()))
+
+from scenes.apt2.interactivity import apply as _interactive_residence
+globals().update(_interactive_residence(globals()))
+
+from scenes.apt2.time_presets import PHASES, presets as _time_presets
+LIGHTS_BY_TIME = _time_presets(_A1)
+LIGHT0_IS_ROBOT_LIGHT = True

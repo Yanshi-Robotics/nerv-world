@@ -54,7 +54,7 @@ class LocalBus:
         pass
 
 
-async def measure(scene, seconds, out, pose=None):
+async def measure(scene, seconds, out, pose=None, walk_m=0.0):
     from PIL import Image
     from nerv import paths
     from nerv.platform.registry import Registry
@@ -101,6 +101,11 @@ async def measure(scene, seconds, out, pose=None):
             encoded = frame.split(b"\r\n\r\n", 1)[1][:-2]
             Image.open(io.BytesIO(encoded)).save(folder / (label + "-warmup.png"))
         await asyncio.sleep(3.0)
+        walk_result = None
+        if walk_m > 0:
+            walk_result = await asyncio.to_thread(body.invoke, 'move_forward', meters=walk_m)
+            assert walk_result.get('ok'), walk_result
+            assert walk_result.get('data', {}).get('moved_m', 0) >= walk_m * 0.5, walk_result
         with sim._lock:
             sim_start = float(sim.data.time)
         start = time.perf_counter()
@@ -143,6 +148,7 @@ async def measure(scene, seconds, out, pose=None):
         report = dict(
             scene=scene,
             spawn=spawn,
+            walk=walk_result,
             seconds=elapsed,
             head=head,
             chase=chase,
@@ -189,6 +195,8 @@ def main():
     parser.add_argument("--scene", nargs="+", default=["house2", "apt2"])
     parser.add_argument("--seconds", type=float, default=30.0)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument('--walk', type=float, default=0.0, metavar='METRES',
+                        help='Optional real G1 walk before measuring both streams')
     parser.add_argument(
         "--pose",
         nargs=3,
@@ -199,7 +207,7 @@ def main():
     args = parser.parse_args()
     ok = True
     for scene in args.scene:
-        ok = asyncio.run(measure(scene, args.seconds, args.output, args.pose)) and ok
+        ok = asyncio.run(measure(scene, args.seconds, args.output, args.pose, args.walk)) and ok
     if not ok:
         raise SystemExit(1)
 

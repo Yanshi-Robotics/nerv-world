@@ -910,6 +910,7 @@ FURNITURE_MAY_OVERLAP = [
     ("kt_counter_top", "kt_range", "同上，台面板那一层"),
     ("kt_counter_top", "kt_sink", "同上，台面板那一层"),
     ("kt_upper", "kt_hood", "抽油烟机嵌在吊柜中间"),
+    ("a2i_island_top_*", "a2_sink", "水槽边缘搭接开孔四周的石材；台面没有跨过池盆，龙头行程另做物理验证"),
     # 软装：抱枕本来就该陷进沙发里
     ("gr_sofa_back", "gr_pillows", "抱枕靠在沙发背上"),
     ("gr_sofa_arm*", "gr_pillows", "抱枕挨着扶手"),
@@ -1240,7 +1241,36 @@ def check_decor_inside_box(key: str, layout) -> list[str]:
         return lo, hi
 
     errs: list[str] = []
+    articulated = {i['name'] for i in layout.FURNITURE if i.get('articulated')}
     for item, gids in sorted(meshes.items()):
+        if item in articulated:
+            # Articulated pieces deliberately have no enclosing box: a door
+            # must carry its own visual and analytic collision geometry.
+            root = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, 'ix_' + item)
+            if root < 0:
+                _fail(errs, f'Articulated furniture {item} has no body tree')
+                continue
+            for g in gids:
+                body = int(m.geom_bodyid[g])
+                ancestor = body
+                while ancestor and ancestor != root:
+                    ancestor = int(m.body_parentid[ancestor])
+                if ancestor != root:
+                    _fail(errs, f'Articulated visual {m.geom(g).name} is outside its body tree')
+                # Glass can be a fixed child of the corresponding door.
+                collision_body = body
+                colliders = []
+                while collision_body and collision_body != root:
+                    colliders = [c for c in range(m.ngeom) if m.geom_bodyid[c] == collision_body
+                                 and (m.geom_contype[c] or m.geom_conaffinity[c])]
+                    if colliders:
+                        break
+                    if m.body_jntnum[collision_body]:
+                        break
+                    collision_body = int(m.body_parentid[collision_body])
+                if not colliders:
+                    _fail(errs, f'Articulated visual {m.geom(g).name} has no attached collider')
+            continue
         hg = hulls.get(item)
         if hg:
             # ⭐ 真碰撞体那条路：网格包围盒必须在凸块并集的包围盒里（理由见 docstring）

@@ -28,6 +28,7 @@ import math
 import os
 import re
 import sys
+import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))     # tools/
 ROOT = os.path.dirname(HERE)                          # 仓根
@@ -396,6 +397,21 @@ def _furniture_parts(item: dict) -> list[str]:
        `check_furniture_overlap` / `check_furniture_not_through_wall` 三道都读
        `layout.FURNITURE` 的声明、不读产物，所以它们照常按"关着门的整件外廓"保守判定。
     """
+    if item.get("articulated"):
+        from scenes.articulated import fixture
+        scale, quat, position = _mesh_placement(item)
+        xml, excludes = fixture(item, scale, quat, position, _BUILD_ANGLE)
+        _CONTACT_EXCLUDES.extend(excludes)
+        return ["    " + xml]
+    if item.get("movable"):
+        from scenes.articulated import movable
+        static = {k:v for k,v in item.items() if k != "movable"}
+        geometry = _furniture_parts(static)
+        if _has_mesh_coat(item):
+            wrapped = ET.fromstring("<root>" + "\n".join(_decor_geoms([item])) + "</root>")
+            geometry += [ET.tostring(g, encoding="unicode") for g in wrapped.iter("geom")]
+        x, y, z = item["pos"]
+        return ["    " + movable(dict(item, world_pos=(x, y, z + _zbase(item["room"]))), geometry)]
     if _has_hulls(item):
         return _hull_geoms(item)
     out = [_furniture_geom(item)]
@@ -1266,9 +1282,10 @@ def _hull_geoms(item: dict) -> list[str]:
     return out
 
 
-def _decor_geoms() -> list[str]:
+def _decor_geoms(items=None) -> list[str]:
     """装饰网格几何。整体收在一个 body 里，方便自检做 bodyexclude 的 A/B 对照。"""
-    items = _decor_items()
+    if items is None:
+        items = [item for item in _decor_items() if not item.get("articulated") and not item.get("movable")]
     if not items:
         return []
     out = ['    <!-- ===== 装饰网格（纯视觉外衣；碰撞仍由下面那些 box 承担）=====',
@@ -1295,7 +1312,11 @@ def _decor_geoms() -> list[str]:
 
 # ---------------------------------------------------------------------- 组装
 def build(robot_key: str) -> str:
+    global _CONTACT_EXCLUDES, _BUILD_ANGLE
+    _CONTACT_EXCLUDES = []
     r = ROBOTS.get(robot_key)
+    compiler = ET.parse(os.path.join(ROOT, r["xml"])).find("compiler")
+    _BUILD_ANGLE = compiler.get("angle", "degree") if compiler is not None else "degree"
     parts: list[str] = []
     parts.append(f'<mujoco model="sim_house_nav_{robot_key}">')
     parts.append('  <!-- 本文件由 make_house.py 从 layout.py 生成，请勿手改；改屋子改 layout.py 后重跑生成器。 -->')
@@ -1406,6 +1427,11 @@ def build(robot_key: str) -> str:
     for item in getattr(L, "BACKGROUND_GEOMS", []):
         parts.extend(_residence_parts(item))
     parts.append('  </worldbody>')
+    if _CONTACT_EXCLUDES:
+        contact = ET.Element("contact")
+        for first, second in _CONTACT_EXCLUDES:
+            ET.SubElement(contact, "exclude", body1=first, body2=second)
+        parts.append("  " + ET.tostring(contact, encoding="unicode"))
     parts.append('</mujoco>')
     return "\n".join(parts) + "\n"
 

@@ -1,0 +1,38 @@
+{
+  "ix_a2_fridge__freezer_door_joint": {
+    "name": "ix_a2_fridge__freezer_door_joint",
+    "value": 1.558690580261996,
+    "fraction": 0.9922932422683185,
+    "result": "reached"
+  },
+  "ix_a2_fridge__fridge_door_joint": {
+    "name": "ix_a2_fridge__fridge_door_joint",
+    "value": 1.5491885908946197,
+    "fraction": 0.9862440879610102,
+    "result": "reached"
+  },
+  "ix_a2_stove__Door001_joint": {
+    "name": "ix_a2_stove__Door001_joint",
+    "value": 1.5714864966814237,
+    "fraction": 1.0004393756654255,
+    "result": "reached"
+  },
+  "ix_a2_fridge__freezer_drawer0_joint": {
+    "name": "ix_a2_fridge__freezer_drawer0_joint",
+    "value": 0.24161032797769122,
+    "fraction": 0.6422390713419984,
+    "result": "reached"
+  },
+  "ix_a2_fridge__fridge_drawer0_joint": {
+    "name": "ix_a2_fridge__fridge_drawer0_joint",
+    "value": 0.2425722241501495,
+    "fraction": 0.6447959459164333,
+    "result": "reached"
+  },
+  "ix_a2_stove__Shelf001_joint": {
+    "name": "ix_a2_stove__Shelf001_joint",
+    "value": 0.18886934858760085,
+    "fraction": 0.6359237536015274,
+    "result": "reached"
+  }
+}

@@ -99,3 +99,14 @@ POSED = [
      (_SOFA[0] + 0.05, _SOFA[1] + 3.1, 1.05), (_SOFA[0], _SOFA[1] + 0.1, 0.70),
      "同一坐姿的正面：背靠靠背，前面是茶几"),
 ]
+
+# Kitchen inspection camera: offset from fixture centres to show door swing and basin.
+from scenes.apt2.interactivity import FRIDGE_XY, STOVE_XY, SINK_XY
+INTERACTIVE = [
+    ('kitchen', (SINK_XY[0]+2.0, SINK_XY[1]-2.5, 1.75),
+     (SINK_XY[0]-.3, SINK_XY[1]+1.2, .95)),
+    ('fridge', (FRIDGE_XY[0]+.15, FRIDGE_XY[1]-2.0, 1.4),
+     (*FRIDGE_XY, 1.0)),
+    ('oven', (STOVE_XY[0]+1.4, STOVE_XY[1]-1.7, 1.25),
+     (*STOVE_XY, .5)),
+]

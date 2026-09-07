@@ -28,8 +28,8 @@
 轨道语义，想进屋里看得一边转一边缩距离，很难落到某个房间中间，更别说在三层楼里上下。
 这里自己开窗口，就为了拿到鼠标——FPS 的手感全在鼠标上。
 
-⚠️ 这个脚本**不推物理**（只做 mj_forward）。屋里那台机器人保持初始姿态站着当比例尺，
-不会自己走；走路的碰撞是拿射线自己算的，不是让 MuJoCo 去解算一个玩家刚体。
+普通场景只做 mj_forward；apt2 的交互模式会推进家具物理。检查器中的机器人保持停机姿态，
+不会自己走。视角行走的碰撞由射线计算，不是 MuJoCo 玩家刚体。
 """
 from __future__ import annotations
 
@@ -410,7 +410,27 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     scene = mujoco.MjvScene(m, maxgeom=20000)
     ctx = mujoco.MjrContext(m, mujoco.mjtFontScale.mjFONTSCALE_150)
 
-    state = {"last": None, "captured": True, "quit": False}
+    interaction = physics = cycle = None
+    if getattr(layout, 'INTERACTIVE', False):
+        from scenes.interaction import Interaction, InspectionPhysics
+        from scenes.time_cycle import TimeCycle
+        from types import SimpleNamespace
+        interaction = Interaction(m, d)
+        physics = InspectionPhysics(m, d, interaction)
+        renderer_adapter = SimpleNamespace(_mjr_context=ctx, _gl_context=SimpleNamespace(
+            make_current=lambda: glfw.make_context_current(window)))
+        cycle = TimeCycle(m, scene_key, renderer_adapter)
+        opt.geomgroup[4] = 0  # analytic collision shells are never visual surfaces
+
+    def direction():
+        yaw, pitch = np.radians([player.yaw, player.pitch])
+        return np.array([np.cos(yaw)*np.cos(pitch), np.sin(yaw)*np.cos(pitch), np.sin(pitch)])
+
+    def selection():
+        return interaction.select(player.eye, direction()) if interaction else None
+
+    state = {"last": None, "captured": True, "quit": False,
+             "joint_index": 0, "grab_distance": 1.0}
     glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
     def probe(origin, direction) -> float:
@@ -463,6 +483,34 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
             e = player.eye
             print(f"   x={e[0]:.2f} y={e[1]:.2f} z={e[2]:.2f} 朝向{player.yaw % 360:.0f}°"
                   f"  在「{player.room()}」")
+        elif interaction and key == glfw.KEY_J:
+            state['joint_index'] += 1
+        elif interaction and key in (glfw.KEY_E, glfw.KEY_LEFT_BRACKET, glfw.KEY_RIGHT_BRACKET):
+            target = selection()
+            if target and target['body'] not in interaction.free_bodies:
+                name = target['names'][state['joint_index'] % len(target['names'])]
+                fraction = interaction.status(name)['fraction']
+                wanted = (0.0 if fraction > 0.5 else 1.0) if key == glfw.KEY_E else np.clip(
+                    fraction + (0.15 if key == glfw.KEY_RIGHT_BRACKET else -0.15), 0, 1)
+                interaction.command(name, float(wanted))
+        elif interaction and key == glfw.KEY_G:
+            if interaction.held:
+                interaction.release()
+            else:
+                target = selection()
+                if target and target['body'] in interaction.free_bodies:
+                    interaction.grab(target['body'], target['point'])
+                    state['grab_distance'] = target['distance']
+        elif interaction and key == glfw.KEY_BACKSPACE:
+            interaction.cancel()
+            interaction.results.clear()
+            mujoco.mj_resetData(m, d)
+            park_robot(m, d, layout, robot)
+            mujoco.mj_forward(m, d)
+            physics.accumulated = 0.0
+        elif cycle and key == glfw.KEY_L:
+            phases = cycle.phases
+            cycle.set(phases[(phases.index(cycle.phase)+1) % len(phases)])
         elif glfw.KEY_1 <= key <= glfw.KEY_9:
             n = getattr(layout, "N_FLOORS", 1)
             f = key - glfw.KEY_1
@@ -480,6 +528,9 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     print("鼠标转头 · WASD 走 · 空格跳 · Shift 跑 · F 飞行 · T 透视 · 数字键跳层 · "
           "C 天花板 · P 报坐标 · Esc 放鼠标 · Q 退出")
     print(f"当前：{'飞行' if fly else '走路'}模式，透视{'开' if xray else '关'}\n")
+    if interaction:
+        print('E 开合/按压 · [ ] 调整开度 · J 切换同一部件的关节 · G 抓取/松手 · '
+              'L 切换时段 · Backspace 复位家具。瞄准 2 米内可见的活动部件。')
 
     down = lambda k: glfw.get_key(window, k) == glfw.PRESS  # noqa: E731
     prev = glfw.get_time()
@@ -493,6 +544,10 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
         up = (1.0 if down(glfw.KEY_R) else 0.0) - (1.0 if down(glfw.KEY_LEFT_CONTROL) else 0.0)
         running = down(glfw.KEY_LEFT_SHIFT) or down(glfw.KEY_RIGHT_SHIFT)
         player.move(probe, ax, ay, dt, running, up)
+        if physics:
+            if interaction.held:
+                interaction.move_grab(player.eye + direction()*state['grab_distance'])
+            physics.advance(dt)
 
         room = player.announce_room()
         if room:
@@ -506,11 +561,30 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
         rect = mujoco.MjrRect(0, 0, w, h)
         mujoco.mjv_updateScene(m, d, opt, None, cam, mujoco.mjtCatBit.mjCAT_ALL, scene)
         mujoco.mjr_render(rect, scene, ctx)
+        if interaction:
+            # A small centre marker makes the actual selection ray visible.
+            mujoco.mjr_rectangle(mujoco.MjrRect(w//2-5,h//2-1,10,2),1,1,1,.8)
+            mujoco.mjr_rectangle(mujoco.MjrRect(w//2-1,h//2-5,2,10),1,1,1,.8)
+        help_text = player.room()
+        if interaction:
+            help_text = f'APT2 inspection | {cycle.phase} | E operate | G grab | L time | Backspace reset'
+            target = selection()
+            if target:
+                name = target['names'][state['joint_index'] % len(target['names'])]
+                info = interaction.status(name)
+                help_text += '\n' + name
+                if 'fraction' in info:
+                    help_text += f" | {info['fraction']:.0%} | {info['result']} | [ ] adjust | J joint"
+            if interaction.held:
+                help_text += '\nHolding object: G releases into gravity'
         mujoco.mjr_overlay(mujoco.mjtFont.mjFONT_NORMAL, mujoco.mjtGridPos.mjGRID_TOPLEFT,
-                           rect, player.room(), "", ctx)
+                           rect, help_text, "", ctx)
         glfw.swap_buffers(window)
         glfw.poll_events()
 
+    if interaction:
+        interaction.cancel()
+    ctx.free()
     glfw.terminate()
     return 0
 

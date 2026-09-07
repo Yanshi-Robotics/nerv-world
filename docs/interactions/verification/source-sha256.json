@@ -1,0 +1,13 @@
+{
+  "build/apt2-g1.xml": "09704dfae123fdcb733fc8302f774c6aa938cebff9201dd0a087e7eebff84183",
+  "build/apt2-go2.xml": "b8d6d88afbfacbd6d2d244887b5f42ccc358ac8aada7a27cc2df3f1bff042515",
+  "decor/articulation.lock.json": "fb712f2c6fc66f2f97eb7792916c20b99422f651b434ed2e2cdfa53a695547af",
+  "scenes/apt2/interactivity.py": "2ef71573ad07b93ca24b8a7ec54c683ec68fb4557560c1cf6037a0232ed35030",
+  "scenes/interaction.py": "c930fb4d038b635f6efac50aa9c1955862eba8db46e62c3b764ac5c56a865c6c",
+  "scenes/articulated.py": "40cec7cc65e402621159b3600fe8812036e88ddfa5e21c961b971463a21198e0",
+  "tools/check_interactions.py": "620112a9c7dec973b71011a711e71b0696439cd846fdbee876c496b676d14004",
+  "tools/check_scene.py": "c557a34b80b3f78814ab7cb728f085201b001c5cffc6a7d5710e4ae2348134b3",
+  "tools/make_house.py": "6cf164ec19d7fee925f6692041cd2cf990402db999ab2125899fc8bd0edba2ef",
+  "../src/nerv/world/mujoco_node.py": "2ec48799b65ee6a2a7ed31c9147eee5851ee5cc554c16f0f1c378d5825dfd1df",
+  "../tests/test_world_movable_objects.py": "ef168bdac8bcec3617eb45c8160bc441affdc6bcb3dacb75d1b83960aa42eae9"
+}

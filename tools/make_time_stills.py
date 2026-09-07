@@ -58,14 +58,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scene", default="apt1")
     ap.add_argument("--robot", default="g1")
-    ap.add_argument("--out", default=os.path.join("docs", "images", "apt1", "time-presets"))
+    ap.add_argument("--out", help="Output directory; defaults to docs/images/<scene>/time-presets")
     a = ap.parse_args()
 
     manifest = _load("ah_manifest_tp", "scenes/manifest.py")
     preset = _load("ah_preset_tp", "scenes/apply_time_preset.py")
     L = manifest.load_layout(a.scene)
     phases = getattr(L, "PHASES", ("day",))
-    out_dir = os.path.join(ROOT, a.out)
+    out_dir = os.path.join(ROOT, a.out or os.path.join("docs", "images", a.scene, "time-presets"))
     os.makedirs(out_dir, exist_ok=True)
 
     xml = os.path.join(ROOT, manifest.scene_filename(a.scene, a.robot))
@@ -135,6 +135,12 @@ def main() -> None:
 
     # 门禁②：night 每间屋的地面亮度（segmentation 掩码）
     if "night" in phases:
+        if getattr(L, 'INTERACTIVE', False):
+            # A roof camera cannot see the duplex's lower floor. Sample inside
+            # every room instead, below that room's ceiling, using floor IDs.
+            check_room_nights(xml, L, preset, a.scene)
+            print('✅ 三道门禁全过（逐房间检查两层）')
+            return
         m = mujoco.MjModel.from_xml_path(xml)
         d = mujoco.MjData(m)
         d.qpos[0:2] = L.ROBOT_HOME_XY
@@ -178,6 +184,49 @@ def main() -> None:
         r.close()
 
     print("✅ 三道门禁全过")
+
+
+def check_room_nights(xml, layout, preset, scene_key):
+    m = mujoco.MjModel.from_xml_path(xml)
+    d = mujoco.MjData(m)
+    d.qpos[:2] = layout.ROBOT_HOME_XY
+    mujoco.mj_forward(m, d)
+    minimum_brightness = 8.0  # Retain the original floor readability threshold.
+    minimum_pixels = 50
+    camera_height = 2.6  # Below the duplex ceiling, above ordinary furniture.
+    opt = mujoco.MjvOption()
+    opt.geomgroup[2:5] = 0
+    with mujoco.Renderer(m, 480, 640) as renderer:
+        preset.apply(m, renderer, 'night', scene_key=scene_key)
+        cam = m.camera('film').id
+        for name, room in layout.ROOMS.items():
+            surfaces = {a['name']+'_finish' for a in getattr(layout,'ARCHITECTURE', [])
+                        if ('_'+name+'_finish') in a['name']}
+            gids = [g for g in range(m.ngeom) if (m.geom(g).name or '').startswith(name+'_floor')
+                    or m.geom(g).name in surfaces]
+            assert gids, f'No floor geometry for {name}'
+            x0,y0,x1,y1 = room['rect']
+            z = layout.FLOOR_Z(room.get('floor', 0))
+            samples = []
+            for u,v in ((.5,.5),(.2,.2),(.8,.8),(.2,.8),(.8,.2)):
+                eye = (x0+(x1-x0)*u, y0+(y1-y0)*v, z+camera_height)
+                m.cam_pos[cam] = eye
+                m.cam_quat[cam] = _look_at_quat(eye,(eye[0],eye[1]+.001,z))
+                m.cam_fovy[cam] = 65
+                mujoco.mj_camlight(m,d)
+                renderer.update_scene(d,camera=cam,scene_option=opt)
+                rgb = renderer.render().astype(float)
+                renderer.enable_segmentation_rendering()
+                renderer.update_scene(d,camera=cam,scene_option=opt)
+                seg = renderer.render()
+                renderer.disable_segmentation_rendering()
+                mask = np.isin(seg[...,0],gids) & (seg[...,1] == int(mujoco.mjtObj.mjOBJ_GEOM))
+                if mask.sum() >= minimum_pixels:
+                    samples.append(float(rgb[mask].mean()))
+            assert samples, f'No visible floor pixels in room {name}; night coverage incomplete'
+            value = min(samples)
+            print(f'  night {name}: {value:.1f}/255 ({len(samples)} views)', flush=True)
+            assert value >= minimum_brightness, f'Night floor too dark: {name} = {value}'
 
 
 if __name__ == "__main__":

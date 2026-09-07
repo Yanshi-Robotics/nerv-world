@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "opened": {
+    "name": "ix_a2_fridge__fridge_door_joint",
+    "value": 1.549154229866841,
+    "fraction": 0.9862222130513302,
+    "result": "reached"
+  },
+  "checks": [
+    "real GLFW context",
+    "E door",
+    "four L phases",
+    "G grab and release",
+    "Backspace reset"
+  ],
+  "method": "Hidden real GLFW window; production key callbacks invoked by the integration harness. No physical keyboard input or manual user acceptance."
+}
