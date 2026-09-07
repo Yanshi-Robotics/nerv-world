@@ -25,10 +25,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # alice-hou
 
 SCENES: dict[str, dict] = {
     "house2": {
-        "label": "三层小楼（带两组可通行楼梯）",
+        "label": "加州山坡豪宅（三层住宅、草坪与泳池）",
         "layout": "scenes/house2/layout.py",
         "floors": 3,
-        "note": "为人形的爬楼与跨层导航建的。楼梯踏面按 G1 脚长留了真余量，层高从楼梯反推。",
+        "note": "带封闭宅地的三层豪宅。室内、庭院和外大门之间可通行，泳池下沉，山坡社区仅作远景。",
     },
     "house1": {
         "label": "单层大平层（12 空间，约 364 ㎡）",

@@ -1,0 +1,19 @@
+{
+  "reference_scenes": {
+    "source_files": 171,
+    "generated": {
+      "build/house1-go2.xml": "5f04960e515400728a2573ceb7f87d1763c67cfd1aa6c2e4ba0032a199b8a9de",
+      "build/house1-g1.xml": "cad4b700830fe4afa697d78d86b976eea6755cafcc9bfbfac2ae1a073b9011b1",
+      "build/apt1-go2.xml": "508fdfae953405ef5e65df348f45ce04667fddca7922bc58a5cdec5296b75bed",
+      "build/apt1-g1.xml": "ca9ab1216ebd3a8cf1d2557ab0d5b521e576518c1cbba1a172e8b60b817483f4"
+    }
+  },
+  "house2_estate": {
+    "route_samples": 586,
+    "boundary_samples": 1800,
+    "pool_samples": 336,
+    "water_fault_injection": true,
+    "hollow_baths": true
+  },
+  "passed": true
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "scene": "house2",
+    "view": "home",
+    "head_fps": 11.9,
+    "chase_fps": 11.9,
+    "realtime_factor": 0.9998811919044241,
+    "seconds": 30.03356823103968,
+    "ngeom": 3665,
+    "nmesh": 595,
+    "passed": true,
+    "report": "house2/home/runtime.json"
+  },
+  {
+    "scene": "apt2",
+    "view": "entry",
+    "head_fps": 11.8,
+    "chase_fps": 11.8,
+    "realtime_factor": 1.0000077835872754,
+    "seconds": 30.049766105017625,
+    "ngeom": 2038,
+    "nmesh": 568,
+    "passed": true,
+    "report": "apt2/entry/runtime.json"
+  },
+  {
+    "scene": "house2",
+    "view": "pool",
+    "head_fps": 11.866666666666667,
+    "chase_fps": 11.866666666666667,
+    "realtime_factor": 0.9999229785440198,
+    "seconds": 30.052314673026558,
+    "ngeom": 3665,
+    "nmesh": 595,
+    "passed": true,
+    "report": "house2/pool/runtime.json"
+  },
+  {
+    "scene": "house2",
+    "view": "gate",
+    "head_fps": 11.933333333333334,
+    "chase_fps": 11.933333333333334,
+    "realtime_factor": 0.9997498188599799,
+    "seconds": 30.06752232700819,
+    "ngeom": 3665,
+    "nmesh": 595,
+    "passed": true,
+    "report": "house2/gate/runtime.json"
+  },
+  {
+    "scene": "apt2",
+    "view": "window",
+    "head_fps": 11.9,
+    "chase_fps": 11.9,
+    "realtime_factor": 0.9998280853673608,
+    "seconds": 30.05516692297533,
+    "ngeom": 2038,
+    "nmesh": 568,
+    "passed": true,
+    "report": "apt2/window/runtime.json"
+  }
+]

@@ -48,6 +48,7 @@ from __future__ import annotations
 
 import math
 
+from scenes.residence import Builder, material_set, interior_finish, WHITE, LINEN
 from scenes import furniture as F  # noqa: E402  家具零件库住 scenes/furniture.py，所有场景共用
 
 # ────────────────────────────────────────────────────────── 构造尺度
@@ -85,12 +86,12 @@ TREADS_PER_FLIGHT = RISERS_PER_FLIGHT - 1   # = 8 块实体踏板，第 9 级就
 STEP_SLAB = 0.25
 STEP_FRICTION = 1.0    # ⭐ 有意留的旋钮：上楼滑不滑是想扫的变量
 STEP_RGBA = (0.72, 0.63, 0.50, 1.0)
-STEP_MAT = "mat_wood_light"
+STEP_MAT = "h2_oak"
 LANDING_THICK = 0.10   # 中间平台的板厚（它是块楼板，不是踏步）
 
 RAIL_HEIGHT = 0.95     # 扶手高出踏面中线。规范 ≥0.90
 RAIL_THICK = 0.06
-RAIL_RGBA = (0.35, 0.26, 0.18, 1.0)
+RAIL_RGBA = (0.19, 0.20, 0.19, 1.0)
 
 # 梯井隔墙：两跑之间那道墙。
 # ⛔ 这里**不留空槽**。真实楼梯的梯井常留 0.1–0.2 m 的缝，但那种缝正好能卡住
@@ -131,10 +132,10 @@ STAIR_Y0 = 0.6                                          # 南隔墙 = 南北两�
 STAIR_Y1 = STAIR_Y0 + _SHAFT_D + 2 * WALL_THICK         # = 6.08
 
 # ⭐ 房子的北边界**由楼梯定**。一部合规双跑楼梯就是要 5.2 m 进深，房子得让位。
-NORTH_Y = STAIR_Y1
+NORTH_Y = 17.5
 SOUTH_Y = -4.5
-WEST_X = -6.0
-EAST_X = STAIR_X1
+WEST_X = -15.0
+EAST_X = 15.0
 
 # 净空（内缩**整个**墙厚，不是半个：墙体占据 [边, 边±t] 一整条）
 _IN_X0, _IN_X1 = STAIR_X0 + WALL_THICK, STAIR_X1 - WALL_THICK   # 3.34 … 5.86
@@ -161,158 +162,129 @@ assert STAIR_HEADROOM >= 2.20, f"梯段净高只有 {STAIR_HEADROOM:.2f} m，低
 #    从楼上走出楼梯间那一步正好踩空。只有北边取净空里的梯段起跑线。
 FLOOR_LANDING_RECT = (STAIR_X0, STAIR_Y0, STAIR_X1, _FLOOR_LANDING_Y1)
 
-# ────────────────────────────────────────────────────────── 房间
-# rect = (x0, y0, x1, y1)；floor = 楼层（0 底层）。
-ROOMS: dict[str, dict] = {
-    # ═══ 0 层：门厅 / 客厅 / 厨房 ═══
-    "entry": {
-        "rect": (WEST_X, SOUTH_Y, -1.5, STAIR_Y0), "label": "门厅", "floor": 0,
-        "wall_rgba": (0.88, 0.86, 0.82, 1.0), "floor_rgba": (0.72, 0.70, 0.68, 1.0),
-        "floor_mat": "mat_marble_grey", "wall_mat": "mat_wall",
-    },
-    "living_room": {
-        "rect": (WEST_X, STAIR_Y0, STAIR_X0, NORTH_Y), "label": "客厅", "floor": 0,
-        "wall_rgba": (0.90, 0.88, 0.84, 1.0), "floor_rgba": (0.74, 0.62, 0.48, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-    },
-    "kitchen": {
-        "rect": (-1.5, SOUTH_Y, EAST_X, STAIR_Y0), "label": "厨房", "floor": 0,
-        "wall_rgba": (0.86, 0.88, 0.87, 1.0), "floor_rgba": (0.76, 0.78, 0.80, 1.0),
-        "floor_mat": "mat_tile", "wall_mat": "mat_tile",
-    },
-    "stair_f0": {
-        "rect": (STAIR_X0, STAIR_Y0, STAIR_X1, STAIR_Y1), "label": "楼梯间", "floor": 0,
-        "wall_rgba": (0.84, 0.82, 0.79, 1.0), "floor_rgba": (0.70, 0.62, 0.50, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-        "no_ceiling": True,   # ⛔ 梯井竖着通，封了顶就从上面堵死
-    },
-    # ═══ 1 层：主卧 / 书房 / 卫生间 ═══
-    "study": {
-        "rect": (WEST_X, SOUTH_Y, -1.5, STAIR_Y0), "label": "书房", "floor": 1,
-        "wall_rgba": (0.84, 0.86, 0.88, 1.0), "floor_rgba": (0.70, 0.58, 0.44, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-    },
-    "bedroom": {
-        "rect": (WEST_X, STAIR_Y0, STAIR_X0, NORTH_Y), "label": "主卧", "floor": 1,
-        "wall_rgba": (0.88, 0.84, 0.80, 1.0), "floor_rgba": (0.72, 0.60, 0.46, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-    },
-    "bathroom": {
-        "rect": (-1.5, SOUTH_Y, EAST_X, STAIR_Y0), "label": "卫生间", "floor": 1,
-        "wall_rgba": (0.86, 0.89, 0.90, 1.0), "floor_rgba": (0.78, 0.80, 0.82, 1.0),
-        "floor_mat": "mat_tile", "wall_mat": "mat_tile",
-    },
-    "stair_f1": {
-        "rect": (STAIR_X0, STAIR_Y0, STAIR_X1, STAIR_Y1), "label": "二层楼梯间", "floor": 1,
-        "wall_rgba": (0.84, 0.82, 0.79, 1.0), "floor_rgba": (0.70, 0.62, 0.50, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-        # ⛔ 只铺**楼层平台**那一条带：整层不铺的话人从下面爬上来脚下是空的，
-        #    当场掉回下一层；整层都铺又把下面的梯段封死。
-        "no_ceiling": True,
-        "floor_rects": [FLOOR_LANDING_RECT],
-    },
-    # ═══ 2 层：阁楼工作间 / 储藏 ═══
-    "storage": {
-        "rect": (WEST_X, SOUTH_Y, EAST_X, STAIR_Y0), "label": "储藏间", "floor": 2,
-        "wall_rgba": (0.82, 0.81, 0.78, 1.0), "floor_rgba": (0.68, 0.66, 0.63, 1.0),
-        "floor_mat": "mat_tile_grey", "wall_mat": "mat_wall",
-    },
-    "studio": {
-        "rect": (WEST_X, STAIR_Y0, STAIR_X0, NORTH_Y), "label": "阁楼工作间", "floor": 2,
-        "wall_rgba": (0.90, 0.89, 0.86, 1.0), "floor_rgba": (0.71, 0.59, 0.45, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-    },
-    "stair_f2": {
-        "rect": (STAIR_X0, STAIR_Y0, STAIR_X1, STAIR_Y1), "label": "三层楼梯间", "floor": 2,
-        "wall_rgba": (0.84, 0.82, 0.79, 1.0), "floor_rgba": (0.70, 0.62, 0.50, 1.0),
-        "floor_mat": "mat_wood_light", "wall_mat": "mat_wall",
-        # ⭐ 顶层**要封顶**：上面没有梯段要升上去了，不封就是从屋里看见天。
-        "floor_rects": [FLOOR_LANDING_RECT],
-    },
-}
+# 房间坐标仍是唯一真相源；三层主楼、真实宅地和远景分别声明。
+B = Builder("h2")
+TEXTURES_EXTRA, MATERIALS_EXTRA = material_set("h2")
+DOOR_HEIGHT = 2.25
+DOOR_FRAME_THICK = .065
+DOOR_FRAME_RGBA = (.24,.24,.22,1)
+WINDOW_FRAME_T = .045
+WINDOW_FRAME_RGBA = (.18,.20,.20,1)
+ART_FRAME_T = .035
+ART_FRAME_RGBA = (.22,.20,.17,1)
+GLASS_RGBA = (.72,.85,.90,.13)
+GLASS_THICK = .018
+STEP_MAT = "h2_oak"
+WELL_WALL_MAT = "h2_plaster"
+ROOMS = {}
 
-# ────────────────────────────────────────────────────────── 门 / 通道
-# orient: "h" = 沿 x 的水平墙（coord 是 y）；"v" = 沿 y 的竖直墙（coord 是 x）。
-# kind "open" = 整段拆除的宽通道，不画门框门楣。
-# ⚠️ 门宽下限：G1 站立宽度约 0.5 m，走动时手臂摆动更宽；一律 ≥1.0 m，
-#    check_scene.py 会按机器人宽度复核。
-_STAIR_DOOR_X = _WELL_X    # 楼梯间的门开在梯井中线：进门左手上行、右手下行
-DOORS: list[dict] = [
-    # 0 层
-    {"orient": "v", "coord": -1.5, "center": -2.0, "width": 1.30, "note": "门厅-厨房"},
-    {"orient": "h", "coord": STAIR_Y0, "center": -3.5, "width": 1.60, "kind": "open",
-     "note": "门厅-客厅"},
-    {"orient": "h", "coord": STAIR_Y0, "center": _STAIR_DOOR_X, "width": 1.20, "kind": "open",
-     "note": "厨房-楼梯间（对着楼层平台）"},
-    # 1 层
-    {"orient": "v", "coord": -1.5, "center": -2.0, "width": 1.30, "note": "书房-卫生间"},
-    {"orient": "h", "coord": STAIR_Y0, "center": -3.5, "width": 1.60, "kind": "open",
-     "note": "书房-主卧"},
-    {"orient": "h", "coord": STAIR_Y0, "center": _STAIR_DOOR_X, "width": 1.20, "kind": "open",
-     "note": "卫生间-楼梯间（对着楼层平台）"},
-    # 2 层
-    {"orient": "h", "coord": STAIR_Y0, "center": -3.5, "width": 1.60, "kind": "open",
-     "note": "储藏-工作间"},
-    {"orient": "h", "coord": STAIR_Y0, "center": _STAIR_DOOR_X, "width": 1.20, "kind": "open",
-     "note": "储藏-楼梯间（对着楼层平台）"},
-]
+def room(key, label, rect, floor, **extra):
+    ROOMS[key] = dict(label=label,rect=rect,floor=floor,wall_rgba=WHITE,
+                     floor_rgba=(1,1,1,1),wall_mat="h2_plaster",floor_mat="h2_oak",**extra)
 
-# 门框 / 窗框 / 画框（纯视觉，让洞口看起来是"一扇门"而不是墙上一个豁口）
-DOOR_FRAME_THICK = 0.10
-DOOR_FRAME_RGBA = (0.40, 0.29, 0.20, 1.0)
-WINDOW_FRAME_T = 0.08
-WINDOW_FRAME_RGBA = (0.93, 0.93, 0.91, 1.0)
-ART_FRAME_T = 0.06
-ART_FRAME_RGBA = (0.22, 0.18, 0.15, 1.0)
+# 一层：门厅与服务带、日常起居带、朝花园的公共起居带。
+room("guest", "客房", (-15,-4.5,-6,.6),0)
+room("entry", "门厅", (-6,-4.5,3.2,.6),0)
+room("lobby0", "楼梯前厅", (3.2,-4.5,6,.6),0)
+room("robot_home", "机器人停机房", (6,-4.5,10,.6),0)
+room("laundry", "洗衣间", (10,-4.5,15,.6),0)
+room("living_room", "客厅", (-15,.6,-6,6.08),0)
+room("dining", "餐厅", (-6,.6,3.2,6.08),0)
+room("kitchen", "厨房", (6,.6,15,6.08),0)
+room("family_room", "花园起居室", (-15,6.08,-3,17.5),0)
+room("gallery", "花园廊厅", (-3,6.08,6,17.5),0)
+room("garden_room", "休闲厅", (6,6.08,15,17.5),0)
+# 二层：保留楼梯核心，重新组织完整套间与工作区。
+room("bedroom", "客卧", (-15,-4.5,-6,.6),1)
+room("study", "书房", (-6,-4.5,3.2,.6),1)
+room("lobby1", "二层前厅", (3.2,-4.5,6,.6),1)
+room("bathroom", "客卫", (6,-4.5,15,.6),1)
+room("bedroom_w", "西侧卧室", (-15,.6,-6,6.08),1)
+room("family_lounge", "家庭厅", (-6,.6,3.2,6.08),1)
+room("dressing", "衣帽间", (6,.6,15,6.08),1)
+room("master_bedroom", "主卧", (-15,6.08,-3,17.5),1)
+room("master_lounge", "主卧起居室", (-3,6.08,6,17.5),1)
+room("master_bath", "主卫", (6,6.08,15,17.5),1)
+# 三层退台，楼梯外壳尺寸保持一致。
+room("lobby2", "观景前厅", (-11,-1,11,.6),2)
+room("studio", "工作室", (-11,.6,3.2,6.08),2)
+room("gym", "健身房", (6,.6,11,6.08),2)
+room("sky_lounge", "观景休闲厅", (-11,6.08,0,15),2)
+room("library", "阅读室", (0,6.08,11,15),2)
+for f in range(N_FLOORS):
+    extra = dict(no_ceiling=f < N_FLOORS-1)
+    if f: extra['floor_rects']=[FLOOR_LANDING_RECT]
+    room(f"stair_f{f}",f"{f+1}层楼梯间",(STAIR_X0,STAIR_Y0,STAIR_X1,STAIR_Y1),f,**extra)
 
-# 入户门（视觉件）：门厅西外墙上。机器人在屋里活动、不出门。
-# ⛔ 不写厚度、不写 pos —— 门厚由生成器从 WALL_THICK 推（见 make_house._front_door 的注释）。
-#    写法和 WINDOWS 一致：开在哪间屋的哪面墙、沿墙哪个位置、多宽多高。
-FRONT_DOOR = {
-    "room": "entry", "side": "w", "center": -3.4, "width": 1.20, "height": 2.10,
-    "mat": "mat_wood", "rgba": (0.38, 0.27, 0.18, 1.0),
-    "casing_rgba": (0.52, 0.50, 0.47, 1.0),
-    "handle_rgba": (0.72, 0.70, 0.66, 1.0), "handle_side": 1,
-}
+# The estate foundation, exterior trim and windows read these same room bounds.
+BUILDING_FOOTPRINTS=[]
+for floor in range(N_FLOORS):
+    rects=[r['rect'] for r in ROOMS.values() if r['floor']==floor]
+    BUILDING_FOOTPRINTS.append((min(r[0] for r in rects),min(r[1] for r in rects),
+                               max(r[2] for r in rects),max(r[3] for r in rects)))
 
-# ────────────────────────────────────────────────────────── 窗
-# ⚠️ 楼梯间的窗开在**楼层平台**外侧那段东墙上（y 落在楼层平台的中线）。
-#    早先开在梯段那一段，窗户正好被斜着升上去的踏步挡住，白开。
-_STAIR_WINDOW_Y = _IN_Y0 + LANDING_DEPTH / 2.0
-WINDOWS: list[dict] = [
-    {"room": "living_room", "side": "n", "center": -2.0, "width": 3.0, "sill": FLOOR_WINDOW_SILL},
-    {"room": "living_room", "side": "w", "center": 3.0, "width": 1.8},
-    {"room": "kitchen", "side": "s", "center": 2.0, "width": 2.2},
-    {"room": "entry", "side": "w", "center": -2.0, "width": 1.2},
-    {"room": "bedroom", "side": "n", "center": -2.0, "width": 3.0, "sill": FLOOR_WINDOW_SILL},
-    {"room": "study", "side": "w", "center": -2.0, "width": 1.6},
-    {"room": "bathroom", "side": "s", "center": 2.0, "width": 1.4},
-    {"room": "studio", "side": "n", "center": -2.0, "width": 3.4, "sill": FLOOR_WINDOW_SILL},
-    {"room": "storage", "side": "s", "center": 0.0, "width": 1.6},
-    # 楼梯间三层各开一扇，上楼时窗外掠过景色，也让人一眼看出自己在第几层
-    {"room": "stair_f0", "side": "e", "center": _STAIR_WINDOW_Y, "width": 1.2},
-    {"room": "stair_f1", "side": "e", "center": _STAIR_WINDOW_Y, "width": 1.2},
-    {"room": "stair_f2", "side": "e", "center": _STAIR_WINDOW_Y, "width": 1.2},
-]
-
-# ────────────────────────────────────────────────────────── 出生点
-# 门厅中间，朝东（+x，面向厨房与楼梯方向）。
-START_POS_XY = (-3.8, -2.0)
-START_YAW = 0.0
-
-# ────────────────────────────────────────────────────────── 机器人停机位（「保姆间」）
-# ⭐ Jeff 2026-08-08 定：那台当比例尺 / 待命的机器人得有个**自己的房间**，别杵在通行流线正中。
-# ⛔ 它和 START_POS_XY 是**两个不同的量**，别合并：
-#    · START_POS_XY = **任务出生点**，消费方（anima-zero 的 sim-house-nav）读它写 qpos；
-#    · ROBOT_HOME_XY = **停机位**，`tools/walkthrough.py` 把静态机器人摆在这儿。
-#    合并会悄悄改变消费方的行为，而那个仓这一轮一个字都不许动。
-# 选二层储藏间：空地 54 ㎡，只有两排贴南墙的货架（y ∈ [-4.15, -3.65]）；
-# 门直通楼层平台，stair_route(1) 的终点就在门口。
-# ⚠️ 它在 **2 层**，和 0 层门厅的出生点不同层——这是有意的：0 层唯一的次要空间就是门厅本身，
-#    而门厅是主流线。停机位的判据是"不挡路"，不是"和出生点同层"。
-ROBOT_HOME_XY = (0.0, -2.0)
-ROBOT_HOME_YAW = math.pi / 2        # 朝北面向门
-ROBOT_HOME_FLOOR = 2                # ⚠️ 只有多层场景才有这一项（单层场景不写，消费方按 0 处理）
+DOORS=[]
+# 相邻房间从共享边界计算门位置，楼层显式声明，绝不在上层意外开外门。
+for ka,a in ROOMS.items():
+    ax,ay,bx,by=a['rect']; f=a['floor']
+    for kb,b in ROOMS.items():
+        if kb<=ka or b['floor']!=f: continue
+        cx,cy,dx,dy=b['rect']
+        if abs(bx-cx)<1e-6 or abs(dx-ax)<1e-6:
+            lo,hi=max(ay,cy),min(by,dy)
+            if hi-lo<1.5: continue
+            fixed=bx if abs(bx-cx)<1e-6 else ax
+            # 梯间只能从南侧楼层平台进入，侧边是正在上升的梯段。
+            if ka.startswith('stair') or kb.startswith('stair'): continue
+            orient='v'
+        elif abs(by-cy)<1e-6 or abs(dy-ay)<1e-6:
+            lo,hi=max(ax,cx),min(bx,dx)
+            if hi-lo<1.5: continue
+            fixed=by if abs(by-cy)<1e-6 else ay
+            if (ka.startswith('stair') or kb.startswith('stair')) and abs(fixed-STAIR_Y0)>1e-6: continue
+            orient='h'
+        else: continue
+        width=min(2.4,hi-lo-.5)
+        center=(lo+hi)/2
+        if orient=='h' and hi-lo>4:
+            width=1.8; center=hi-1.6
+        if ka.startswith('stair') or kb.startswith('stair'): width=1.2; center=(lo+hi)/2
+        DOORS.append(dict(orient=orient,coord=fixed,center=center,width=width,kind='door',floor=f,note=f'{ka}-{kb}'))
+# Ground-floor public rooms form a connected living suite around the stair core.
+_PUBLIC={'entry','living_room','dining','family_room','gallery','garden_room'}
+for d in DOORS:
+    ka,kb=d['note'].split('-')
+    if d['floor']==0 and ka in _PUBLIC and kb in _PUBLIC:
+        a,b=ROOMS[ka]['rect'],ROOMS[kb]['rect']; axis=0 if d['orient']=='h' else 1
+        lo,hi=max(a[axis],b[axis]),min(a[axis+2],b[axis+2])
+        d.update(center=(lo+hi)/2,width=hi-lo-.6,kind='open')
+_STAIR_DOOR_X=_WELL_X
+ENTRY_X=-1.4
+DOORS.append(dict(orient='h',coord=SOUTH_Y,center=ENTRY_X,width=2.0,kind='door',floor=0,note='entry-forecourt'))
+DOORS.append(dict(orient='v',coord=EAST_X,center=2.6,width=2.2,kind='door',floor=0,note='kitchen-pool_terrace'))
+DOORS.append(dict(orient='h',coord=-1.,center=0.,width=2.,kind='door',floor=2,note='lobby2-view_terrace'))
+DOORS.append(dict(orient='v',coord=WEST_X,center=3.6,width=2.,kind='door',floor=0,note='living_room-west_walk'))
+FRONT_DOOR=dict(room='entry',side='s',center=ENTRY_X,width=2.,height=DOOR_HEIGHT,
+                state='fixed_open',open_angle=90,mat='h2_walnut',rgba=WHITE,
+                casing_mat='h2_stone',casing_rgba=WHITE,handle_mat='h2_metal',handle_rgba=WHITE)
+WINDOWS=[]
+for key,r in ROOMS.items():
+    x0,y0,x1,y1=r['rect']; f=r['floor']
+    bounds=BUILDING_FOOTPRINTS[f]
+    for side,fixed,edge,lo,hi in [('w',x0,bounds[0],y0,y1),('s',y0,bounds[1],x0,x1),
+                                   ('e',x1,bounds[2],y0,y1),('n',y1,bounds[3],x0,x1)]:
+        if abs(fixed-edge)>1e-6 or key in ('entry','lobby2') and side=='s': continue
+        # 一层厨房东侧保留实际出入口。
+        if key=='kitchen' and side=='e' or key=='living_room' and side=='w': continue
+        width=min(3.7,(hi-lo)*.60)
+        if width<.8: continue
+        WINDOWS.append(dict(room=key,side=side,center=(lo+hi)/2,width=width,sill=.16,top=WALL_HEIGHT-.18,glass=True))
+START_POS_XY=(ENTRY_X,-2.5)
+START_YAW=math.pi/2
+ROBOT_HOME_XY=(8.,-2.7)
+ROBOT_HOME_YAW=math.pi/2
+ROBOT_HOME_FLOOR=0
+FLOOR_ENTRIES={f:((_WELL_X,STAIR_Y0-.55),FLOOR_Z(f)) for f in range(N_FLOORS)}
 
 # ══════════════════════════════════════════════════════════ 楼梯本体
 # 每一跑写三样：**起跑线 = 它下面那块平台的边缘**、前进方向、起始标高。
@@ -385,140 +357,114 @@ assert abs((_HALF_STOREY - _last_tread_top) - STEP_RISE) < 1e-9, \
 assert abs((STOREY_H - (_HALF_STOREY + _last_tread_top)) - STEP_RISE) < 1e-9, \
     "回头跑顶端到上一层楼面不是一个踢面 —— 楼梯断了"
 
-# ────────────────────────────────────────────────────────── 家具
-# ⚠️ z 写的是**该楼层内的高度**（桌面 0.75 就是 0.75），生成器加楼层基面。
-# 大件（沙发/床/柜/灶台）是这个户型自己的形状，写成原始 dict；
-# 小件（桌椅/灯/绿植）走 furniture.py 的零件库，那是所有场景共用的。
-_WOOD = (0.55, 0.42, 0.30, 1.0)
-_FABRIC = (0.62, 0.58, 0.52, 1.0)
-_WHITE = (0.90, 0.90, 0.88, 1.0)
 
-# 北侧那条房间带的"贴墙"参照线——家具跟着墙走，墙动了不用逐件手改
-_N_ROOM_E = STAIR_X0 - WALL_THICK          # 东墙内表面 = 3.06
-_N_ROOM_N = NORTH_Y - WALL_THICK           # 北墙内表面 = 5.94
-_N_ROOM_MID_Y = (STAIR_Y0 + NORTH_Y) / 2.0  # 房间进深中线 = 3.34
+FURNITURE=[]
+for key in ('guest','bedroom','bedroom_w','master_bedroom'):
+    x0,y0,x1,y1=ROOMS[key]['rect']
+    FURNITURE+=B.bed(key,key,x0+2.1,y1-1.55)
+for key in ('living_room','family_room','family_lounge','garden_room','master_lounge','sky_lounge'):
+    x0,y0,x1,y1=ROOMS[key]['rect']; x=x0+2.0; y=(y0+y1)/2
+    FURNITURE+=B.sofa(key,key,x,y,width=2.9)
+    FURNITURE+=F.mesh_piece('h2_'+key+'_coffee',key,x+1.5,y,size=(1.05,1.05,.397),mesh='coffee_table',collide=True)
+    FURNITURE+=F.mesh_piece('h2_'+key+'_armchair',key,x+3.0,y-1.6,size=(.82,.987,1.023),mesh='armchair',collide=True,yaw=0)
+    FURNITURE+=B.cabinet(key+'_console',key,x1-1.0,y,2.2,.52,.65,yaw=90)
+for key in ('study','studio','library'):
+    x0,y0,x1,y1=ROOMS[key]['rect']; x=x0+2.;y=y1-1.5
+    FURNITURE+=F.table('h2_'+key+'_desk',key,x,y,2.1,.9,mat='h2_walnut')
+    FURNITURE+=F.chair('h2_'+key+'_chair',key,x,y-1.,yaw=90,mat='h2_oak')
+    FURNITURE+=B.cabinet(key+'_library',key,x1-1.2,y,2.2,.45,1.6,yaw=90)
+    FURNITURE+=F.books_stack('h2_'+key+'_books',key,x+.5,y,.77)
+# 餐厅长桌、六把真碰撞椅。
+FURNITURE+=F.table('h2_dining_table','dining',-1.4,3.4,3.2,1.1,mat='h2_oak')
+for i,x in enumerate((-2.5,-1.4,-.3)):
+    for side in (-1,1):
+        FURNITURE+=F.mesh_piece(f'h2_dining_chair{i}_{side}','dining',x,3.4+side*.95,
+            size=(.434,.576,.973),mesh='dining_chair',yaw=0 if side==1 else 180,collide=True)
+FURNITURE+=B.cabinet('kitchen_wall_left','kitchen',9.,5.45,1.7,.68,.90)
+FURNITURE+=B.cabinet('kitchen_wall_right','kitchen',11.2,5.45,1.7,.68,.90)
+FURNITURE+=B.cabinet('kitchen_island','kitchen',11.,3.,3.6,1.1,.92)
+FURNITURE+=F.mesh_piece('h2_fridge','kitchen',14.3,5.1,size=(.916,.856,1.892),mesh='rc_fridge')
+FURNITURE+=F.mesh_piece('h2_sink','kitchen',9.,5.35,z=1.09,size=(.775,.424,.408),mesh='rc_sink')
+# Cut the stone counter around the actual sink envelope, retaining the basin.
+FURNITURE=[it for it in FURNITURE if it['name']!='h2_kitchen_wall_left_top']
+_SINK_X,_SINK_Y=9.,5.35
+_COUNTER=(8.1325,5.0875,9.8675,5.8125)
+_HOLE=(_SINK_X-.395,_SINK_Y-.22,_SINK_X+.395,_SINK_Y+.22)
+_a,_b,_c,_d=_COUNTER;_e,_f,_g,_h=_HOLE
+for i,(a,b,c,d) in enumerate([(_a,_b,_e,_d),(_g,_b,_c,_d),(_e,_b,_g,_f),(_e,_h,_g,_d)]):
+    FURNITURE.append(B.box(f'kitchen_sink_counter{i}',((a+c)/2,(b+d)/2,.90),(c-a,d-b,.045),'stone',room='kitchen',radius=.006))
+FURNITURE+=F.mesh_piece('h2_stove','kitchen',12.7,5.25,size=(.761,.704,1.133),mesh='rc_stove')
+for key in ('bathroom','master_bath','laundry','dressing'):
+    x0,y0,x1,y1=ROOMS[key]['rect']
+    FURNITURE+=B.cabinet(key+'_cab',key,(x0+x1)/2,y1-.7,2.2,.65,.85 if 'bath' in key else 1.8)
+    if 'bath' in key:
+        # 空心浴缸：底板、四面侧壁，而不是实心白砖。
+        x,y=x1-1.11,y0+1.6
+        for tag,dx,dy,z,size in [('base',0,0,.15,(1.9,.9,.18)),('l',-.92,0,.35,(.10,.95,.5)),
+             ('r',.92,0,.35,(.10,.95,.5)),('n',0,.43,.35,(1.8,.10,.5)),('s',0,-.43,.35,(1.8,.10,.5))]:
+            fixture=B.box(key+'_tub_'+tag,(x+dx,y+dy,z),size,'ceramic',room=key,radius=.045)
+            if tag=='base': fixture['enclosed_fixture']=True
+            FURNITURE.append(fixture)
+# 跑步机框架与跑带；不增加控制器或执行器。
+FURNITURE.append(B.box('treadmill_base',(9.,3.5,.12),(1.,2.1,.16),'metal',room='gym',radius=.05))
+for x in (8.52,9.48):
+    FURNITURE.append(B.box('treadmill_upright'+str(x),(x,4.2,.68),(.065,.065,1.2),'metal',room='gym'))
+FURNITURE.append(B.box('treadmill_panel',(9.,4.2,1.29),(1.,.24,.06),'metal',room='gym'))
+for item in FURNITURE: B.detail(item,.025,1.2)
+WALL_ARTS=[]
+from types import SimpleNamespace as _Namespace
+ARCHITECTURE=interior_finish(_Namespace(**globals()),B)
+from scenes.house2.estate import build_estate
+EXTERIOR_GEOMS,EXTERIOR_AREAS,BACKGROUND_GEOMS,ESTATE=build_estate(B,FLOOR_Z,STOREY_H,BUILDING_FOOTPRINTS)
+TEXTURES_EXTRA += [ESTATE['grass_texture'],dict(name='h2_tex_pool',type='2d',file='textures/residences/pool_tile.png',colorspace='sRGB')]
+MATERIALS_EXTRA += [dict(name='h2_grass',texture='h2_tex_grass',specular=.015,shininess=.05),
+                    dict(name='h2_pool_tile',texture='h2_tex_pool',specular=.25,shininess=.4),
+                    dict(name='h2_road',rgba='.30 .31 .29 1',specular=.02,shininess=.1)]
+RES_MESHES=B.meshes
+CITY_BACKDROP=None
+SKYBOX={f'file{side}':f'textures/house3/sky_file{side}.png'
+        for side in ('right','left','up','down','front','back')}
+OUTDOOR_GROUND=None
+TREES=[]
+BUILDINGS=[]
+TRUNK_RGBA=(.32,.26,.18,1)
+FOLIAGE_RGBA=(.24,.36,.16,1)
+PHYSICAL_WALKTHROUGH=True
+LIGHT_BUDGET=7
+LIGHTS=[dict(name='h2_sun',pos='-30 -45 60',dir='.35 .45 -.82',directional='true',
+             diffuse='.48 .47 .45',specular='.18 .17 .14',castshadow='true')]
+for floor in range(N_FLOORS):
+    for wing,x in [('west',-7.),('east',8.)]:
+        LIGHTS.append(dict(name=f'h2_fill_{floor}_{wing}',pos=f'{x} 6 {FLOOR_Z(floor)+WALL_HEIGHT-.20}',
+            dir='0 0 -1',diffuse='.12 .12 .115',ambient='.095 .095 .09',specular='.04 .04 .04',
+            attenuation='1 0 .02',castshadow='false'))
+STATISTIC=dict(center='0 0 3',extent=12)
+VISUAL=dict(znear=.001,zfar=120,shadowclip=4,shadowsize=2048,
+            headlight_diffuse='.32 .32 .31',headlight_ambient='.43 .43 .42',headlight_specular='.04 .04 .04')
+DECOR_MATERIAL_OVERRIDES={'armchair':{'1':dict(texture=None,rgba='.78 .74 .66 1',specular=.035,shininess=.10),
+                                    '0':dict(specular=.2,shininess=.3)},
+                          'dining_chair':{'all':dict(texture=None,rgba='.70 .63 .52 1',specular=.12,shininess=.24)}}
 
-FURNITURE: list[dict] = [
-    # ── 0 层 · 客厅：转角沙发 + 电视柜 ──
-    {"name": "h2_sofa_seat", "room": "living_room", "type": "box",
-     "pos": (-4.6, _N_ROOM_MID_Y, 0.22), "size": (0.95, 2.40, 0.44),
-     "rgba": _FABRIC, "mat": "mat_fabric"},
-    {"name": "h2_sofa_back", "room": "living_room", "type": "box",
-     "pos": (-5.2, _N_ROOM_MID_Y, 0.55), "size": (0.25, 2.40, 0.66),
-     "rgba": _FABRIC, "mat": "mat_fabric"},
-    {"name": "h2_tv_console", "room": "living_room", "type": "box",
-     "pos": (_N_ROOM_E - 0.56, _N_ROOM_MID_Y, 0.26), "size": (0.42, 2.20, 0.52), "rgba": _WOOD},
-    {"name": "h2_tv_screen", "room": "living_room", "type": "box",
-     "pos": (_N_ROOM_E - 0.11, _N_ROOM_MID_Y, 1.25), "size": (0.06, 1.60, 0.92),
-     "rgba": (0.05, 0.05, 0.07, 1), "mat": "mat_screen"},
-    # ── 0 层 · 厨房：灶台 + 吊柜 ──
-    {"name": "h2_counter", "room": "kitchen", "type": "box",
-     "pos": (0.2, -4.1, 0.45), "size": (2.80, 0.62, 0.90), "rgba": _WHITE,
-     "mat": "mat_marble_grey"},
-    {"name": "h2_upper_cab", "room": "kitchen", "type": "box",
-     "pos": (0.2, -4.2, 1.75), "size": (2.80, 0.36, 0.70), "rgba": _WHITE},
-    # ── 0 层 · 门厅：鞋柜 ──
-    {"name": "h2_shoe_cab", "room": "entry", "type": "box",
-     "pos": (-5.6, -1.2, 0.55), "size": (0.38, 1.60, 1.10), "rgba": _WOOD},
-    # ── 1 层 · 主卧：床 + 衣柜 ──
-    {"name": "h2_bed", "room": "bedroom", "type": "box",
-     "pos": (-4.2, _N_ROOM_MID_Y + 0.2, 0.28), "size": (2.05, 1.85, 0.56),
-     "rgba": (0.78, 0.74, 0.68, 1), "mat": "mat_fabric"},
-    {"name": "h2_bed_head", "room": "bedroom", "type": "box",
-     "pos": (-5.4, _N_ROOM_MID_Y + 0.2, 0.62), "size": (0.14, 1.95, 1.10), "rgba": _WOOD},
-    {"name": "h2_wardrobe", "room": "bedroom", "type": "box",
-     "pos": (_N_ROOM_E - 0.34, _N_ROOM_MID_Y + 0.8, 1.10), "size": (0.58, 2.00, 2.20),
-     "rgba": _WOOD},
-    # ── 1 层 · 卫生间：台盆 + 浴缸 ──
-    {"name": "h2_vanity", "room": "bathroom", "type": "box",
-     "pos": (0.0, -4.1, 0.42), "size": (1.60, 0.55, 0.84), "rgba": _WHITE,
-     "mat": "mat_marble_grey"},
-    {"name": "h2_tub", "room": "bathroom", "type": "box",
-     "pos": (4.4, -3.6, 0.28), "size": (1.70, 0.80, 0.56), "rgba": _WHITE},
-    # ── 2 层 · 储藏：两排货架 ──
-    {"name": "h2_rack_a", "room": "storage", "type": "box",
-     "pos": (-4.6, -3.9, 0.95), "size": (2.40, 0.50, 1.90), "rgba": (0.58, 0.56, 0.53, 1)},
-    {"name": "h2_rack_b", "room": "storage", "type": "box",
-     "pos": (3.4, -3.9, 0.95), "size": (2.40, 0.50, 1.90), "rgba": (0.58, 0.56, 0.53, 1)},
-]
+def floor_at(z):
+    return max(0,min(N_FLOORS-1,int((z+.30)//STOREY_H)))
 
-FURNITURE += (
-    # 0 层：餐桌四椅 + 客厅茶几与落地灯
-    F.table("h2_dining", "kitchen", 3.2, -2.2, 1.40, 0.90, h=0.75)
-    + F.chair("h2_dc_n1", "kitchen", 2.75, -1.45, yaw=-90)
-    + F.chair("h2_dc_n2", "kitchen", 3.65, -1.45, yaw=-90)
-    + F.chair("h2_dc_s1", "kitchen", 2.75, -2.95, yaw=90)
-    + F.chair("h2_dc_s2", "kitchen", 3.65, -2.95, yaw=90)
-    + F.round_table("h2_coffee", "living_room", -3.0, _N_ROOM_MID_Y, dia=1.05, h=0.40)
-    + F.floor_lamp("h2_flamp", "living_room", -5.4, _N_ROOM_N - 0.6)
-    + F.potted_plant("h2_plant_lr", "living_room", _N_ROOM_E - 0.5, _N_ROOM_N - 0.5)
-    # 1 层：书房桌椅
-    + F.table("h2_desk", "study", -4.4, -2.4, 1.40, 0.70, h=0.75)
-    + F.chair("h2_desk_chair", "study", -4.4, -1.60, yaw=180)
-    + F.table_lamp("h2_dlamp", "study", -4.9, -2.55, 0.78)
-    + F.books_stack("h2_books", "study", -3.95, -2.30, 0.78)
-    # 2 层：工作间长桌 + 绿植。
-    # ⛔ 楼梯间不摆任何家具：那间屋的地面就是楼梯本身，摆上去就是路障。
-    #    第一版在 stair_f0 放了盆栽，射线自检直接打到叶子（落差 +0.80 m）。
-    + F.table("h2_studio_desk", "studio", -4.0, _N_ROOM_MID_Y, 2.00, 0.80, h=0.75)
-    + F.chair("h2_studio_chair", "studio", -4.0, _N_ROOM_MID_Y - 0.85, yaw=180)
-    + F.potted_plant("h2_plant_st", "studio", _N_ROOM_E - 0.5, STAIR_Y0 + 0.8)
-)
-
-WALL_ARTS: list[dict] = []
-
-# ────────────────────────────────────────────────────────── 屋外
-CITY_BACKDROP = {"dist": 46.0, "width": 130.0, "height": 34.0, "z": 12.0}
-OUTDOOR_GROUND = {"size": (120.0, 120.0, 0.10), "pos": (0.0, 0.0, -0.06),
-                  "rgba": (0.36, 0.46, 0.30, 1.0)}
-TRUNK_RGBA = (0.36, 0.25, 0.16, 1.0)
-FOLIAGE_RGBA = (0.24, 0.45, 0.22, 1.0)
-TREES: list[tuple[float, float, float, float]] = [
-    (-11.0, 8.0, 3.4, 1.9), (-4.0, 10.5, 4.0, 2.2), (4.0, 10.0, 3.2, 1.8),
-    (11.0, 5.0, 3.8, 2.1), (11.5, -6.0, 3.0, 1.7), (-11.5, -6.5, 3.6, 2.0),
-]
-# (x, y, 宽sx, 深sy, 高h, rgba) —— 与 house1 同一个元组格式，生成器按 6 项解包
-BUILDINGS: list[tuple] = [
-    (-34.0, 40.0, 10.0, 10.0, 26.0, (0.55, 0.57, 0.60, 1.0)),
-    (-10.0, 46.0, 14.0, 12.0, 32.0, (0.50, 0.52, 0.56, 1.0)),
-    (18.0, 42.0, 12.0, 11.0, 24.0, (0.58, 0.60, 0.62, 1.0)),
-    (40.0, 38.0, 11.0, 13.0, 30.0, (0.52, 0.54, 0.58, 1.0)),
-]
-
-# ────────────────────────────────────────────────────────── 房间归属判定
-_FLOOR_EPS = 0.30   # 站在楼梯上时，用脚下略微下探的容差判楼层
-
-
-def floor_at(z: float) -> int:
-    """世界高度 z 落在第几层。楼梯中途按**已经踏上的那一层**算。"""
-    n = int((z + _FLOOR_EPS) // STOREY_H)
-    return max(0, min(N_FLOORS - 1, n))
-
-
-def room_at(x: float, y: float, z: float | None = None) -> str | None:
-    """(x, y[, z]) 在哪间屋。
-
-    ⚠️ 多层场景**必须给 z**：三层的平面轮廓是重叠的，只给 (x, y) 无法区分
-    "一层客厅"和"三层工作间"。不给 z 时按 0 层算，并且这是个有意的保守默认——
-    宁可答错成底层，也不猜。
-    """
-    floor = 0 if z is None else floor_at(z)
-    for key, room in ROOMS.items():
-        if room.get("floor", 0) != floor:
-            continue
-        x0, y0, x1, y1 = room["rect"]
-        if x0 <= x <= x1 and y0 <= y <= y1:
-            return key
+def room_at(x,y,z=None):
+    floor=0 if z is None else floor_at(z)
+    for key,r in ROOMS.items():
+        a,b,c,d=r['rect']
+        if r['floor']==floor and a<=x<=c and b<=y<=d: return key
+    px,py,qx,qy=ESTATE['pool']
+    if px<x<qx and py<y<qy and (z or 0)<STOREY_H: return 'swimming_pool'
+    for area in EXTERIOR_AREAS:
+        a,b,c,d=area['rect']
+        if area['floor_z']-.3 <= (z or 0) < area['floor_z']+STOREY_H-.1 and a<=x<=c and b<=y<=d: return area['name']
     return None
 
+def room_label(key):
+    if key in ROOMS: return ROOMS[key]['label']
+    if key=='swimming_pool': return '泳池'
+    return next((a['label'] for a in EXTERIOR_AREAS if a['name']==key),'宅地外')
 
-def room_label(key: str | None) -> str:
-    if key is None:
-        return "屋外"
-    return ROOMS[key]["label"]
-
-
-# ────────────────────────────────────────────────────────── 楼梯路线（给自检与漫游用）
 def stair_route(floor: int) -> list[tuple[float, float, float]]:
     """从第 `floor` 层走到第 `floor+1` 层的完整路线（世界坐标折线的拐点）。
 

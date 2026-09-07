@@ -140,7 +140,8 @@ def _openings_on(room_key: str, side: str, horizontal: bool, fixed: float,
     """
     want = "h" if horizontal else "v"
     doors = [(d["center"], d["width"], d.get("kind", "door")) for d in L.DOORS
-             if d["orient"] == want and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
+             if d.get("floor", L.ROOMS[room_key].get("floor", 0)) == L.ROOMS[room_key].get("floor", 0)
+             and d["orient"] == want and abs(d["coord"] - fixed) < 1e-6 and lo <= d["center"] <= hi]
     # 窗多带窗台高和窗楣高：普通窗用默认值，落地窗在 layout 里用 "sill"/"top" 各自覆盖
     # （落地窗 sill≈0、top≈层高，一整片玻璃从地到顶）
     windows = [(w["center"], w["width"], w.get("sill", L.WINDOW_SILL_H),
@@ -350,7 +351,7 @@ def _furniture_geom(item: dict) -> str:
     #    实测：alpha=0 之后 `mj_ray` 直接跳过这个 geom——碰撞盒等于被悄悄挖空，
     #    导航和雷达全变，而**编译不报错**。是本仓的射线不变性自检当场抓到的
     #    （3 条射线穿过茶几打到了后面）。
-    hide_box = _has_mesh_coat(item)
+    hide_box = _has_mesh_coat(item) or bool(item.get("visual_mesh"))
     # ⭐ walkover = 「脚可以踩过去当它不存在」的薄铺装（地毯、门垫）。
     #    2026-08-09 实测：G1 的盲策略（无外感知）踩上 1.6 cm 的地毯盒当场步态崩坏——
     #    玄关轴线 vx=0.6 走 5 秒只挪 0.35 m、原地趔趄漂移；把毯的碰撞关掉立刻恢复 2.82 m。
@@ -358,7 +359,7 @@ def _furniture_geom(item: dict) -> str:
     #    真机器人本来就踩着毯走，仿真里让脚踩地板、毯只管看，反而更接近真实。
     #    ⚠️ mj_ray 不看 contype，毯照样挡射线——但它平贴地面（顶面 ≤2.4 cm），
     #    胸高的水平雷达射线从它上方过，读数不受影响。
-    walkover = bool(item.get("walkover"))
+    walkover = bool(item.get("walkover")) or not item.get("collide", True)
     zb = _zbase(item["room"])
     px, py, pz = item["pos"]
     item = {**item, "pos": (px, py, pz + zb)}
@@ -397,7 +398,14 @@ def _furniture_parts(item: dict) -> list[str]:
     """
     if _has_hulls(item):
         return _hull_geoms(item)
-    return [_furniture_geom(item)]
+    out = [_furniture_geom(item)]
+    if item.get("visual_mesh"):
+        visual = dict(item, name="furn_" + item["name"] + "_finish", type="mesh",
+                      mesh_name=item["visual_mesh"], collide=False)
+        x, y, z = visual["pos"]
+        visual["pos"] = (x, y, z + _zbase(item["room"]))
+        out.append(_residence_geom(visual))
+    return out
 
 
 def _ceiling_geom(room_key: str) -> str:
@@ -518,7 +526,7 @@ def _lights() -> list[str]:
 
     场景可以声明 `LIGHTS` 自己排灯位（apt1 那种朝北大平层要的是"沿窗墙一排天光"，
     不是"一房一盏"）。声明了就整份接管，不再走下面的默认规则。
-    ⚠️ 灯数没有 8 盏上限那回事——实测 mjMAXLIGHT = 100，house1 的 14 盏一直正常。
+    原生 OpenGL 灯槽有限；新场景须通过 check_lights_render，不能用 mjMAXLIGHT 推断可见灯数。
     """
     if getattr(L, "LIGHTS", None):
         out = ['    <!-- ===== 灯光（场景自排）===== -->']
@@ -663,6 +671,9 @@ def _assets(robot_key: str) -> list[str]:
     #    MJCF 的 schema 不认 <asset> 外面的 <mesh>，报的是
     #    "Schema violation: unrecognized element"，看不出是位置错了。
     out.extend(_mesh_assets(robot_key))
+    for name, mesh in getattr(L, "RES_MESHES", {}).items():
+        attrs = " ".join(f'{k}="{_flatten(v)}"' for k, v in mesh.items())
+        out.append(f'    <mesh name="{name}" {attrs}/>')
     out.append('  </asset>')
     return out
 
@@ -787,7 +798,9 @@ def _view() -> list[str]:
             out.append(_box(s["name"], s["pos"], s["size"], s.get("rgba", (1, 1, 1, 1)),
                             mat=s.get("mat", ""), extra=_DECOR))
     skyline = getattr(L, "SKYLINE", [])
-    if skyline:
+    if getattr(L, 'SKYLINE_GEOMS', None):
+        out.extend(_residence_geom(item) for item in L.SKYLINE_GEOMS)
+    elif skyline:
         out.append('')
         out.append('    <!-- ===== 窗景 B 层：120–600 m 的实体塔楼（真视差 + 真遮挡）===== -->')
         for name, x, y, sx, sy, top, mat in skyline:
@@ -854,6 +867,45 @@ _HANDLE_LEN = 1.10      # 竖向长拉手。公寓入户门用的是这种，不
 _HANDLE_T = 0.045
 
 
+def _flatten(values):
+    """Serialize authored mesh/transform values deterministically."""
+    if isinstance(values, (list, tuple)):
+        return " ".join(_flatten(v) for v in values)
+    return f"{values:.7g}"
+
+
+def _residence_geom(item):
+    attrs = {"name": item["name"], "type": item["type"]}
+    if item.get("fromto"):
+        attrs["fromto"] = _flatten(item["fromto"])
+        attrs["size"] = _flatten(item["radius"])
+    else:
+        attrs["pos"] = _flatten(item["pos"])
+        typ = item["type"]
+        size = item.get("size", ())
+        if typ == "mesh": attrs["mesh"] = item["mesh_name"]
+        elif typ == "sphere": attrs["size"] = _flatten(size[0]/2)
+        elif typ == "cylinder": attrs["size"] = _flatten((size[0]/2,size[2]/2))
+        else: attrs["size"] = _flatten(tuple(v/2 for v in size))
+    if item.get("quat"): attrs["quat"] = _flatten(item["quat"])
+    if item.get("mat"): attrs["material"] = item["mat"]
+    else: attrs["rgba"] = _flatten(item.get("rgba", (1,1,1,1)))
+    attrs["group"] = item.get("group", 0)
+    if not item.get("collide", True):
+        attrs.update(contype=0, conaffinity=0)
+    return '    <geom ' + ' '.join(f'{k}="{v}"' for k,v in attrs.items()) + '/>'
+
+
+def _residence_parts(item):
+    if not item.get("visual_mesh"): return [_residence_geom(item)]
+    out = []
+    if item.get("collide", True):
+        out.append(_residence_geom(dict(item, group=HIDDEN_BOX_GROUP)))
+    out.append(_residence_geom(dict(item, name=item["name"]+"_finish", type="mesh",
+                                   mesh_name=item["visual_mesh"], collide=False)))
+    return out
+
+
 def _front_door() -> list[str]:
     """入户门：门扇 + 三面门套 + 竖向长拉手。⛔ 纯视觉件，碰撞由墙承担。
 
@@ -891,6 +943,19 @@ def _front_door() -> list[str]:
          cmat, d["casing_rgba"])
     _put("front_door_casing_t", c, cw, zb + h + _CASING_W / 2.0, _CASING_W, case_t,
          cmat, d["casing_rgba"])
+    if d.get("state") == "fixed_open":
+        angle = math.radians(d.get("open_angle", 90))
+        hinge = (c-w/2, fixed, zb) if horiz else (fixed, c-w/2, zb)
+        q = yaw_quat(d.get("open_angle", 90))
+        leaf = (w/2, 0, h/2) if horiz else (0, w/2, h/2)
+        size = (w, leaf_t, h) if horiz else (leaf_t, w, h)
+        out.append(f'    <body name="front_door_fixed" pos="{_flatten(hinge)}" quat="{_flatten(q)}">')
+        out.append(_box("front_door", leaf, size, d["rgba"], mat=mat))
+        handle = (w-.11, leaf_t/2+.02, 1.05) if horiz else (leaf_t/2+.02, w-.11, 1.05)
+        out.append(_box("front_door_handle", handle, (_HANDLE_T,_HANDLE_T,_HANDLE_LEN),
+                        d["handle_rgba"], mat=d.get("handle_mat", "")))
+        out.append('    </body>')
+        return out
     # 门扇
     _put("front_door", c, w, zc, h, leaf_t, mat, d["rgba"])
     # 竖向长拉手：贴在门扇**室内**那一面（凸出来一点，不然又埋进门里）
@@ -1116,8 +1181,15 @@ def _mesh_assets(robot_key: str) -> list[str]:
                 seen_tex.add((key, i))
                 out.append(f'    <texture type="2d" name="dt_{key}_{i}" '
                            f'file="{_root_rel(lock.rel_path(key, p["png"]))}" colorspace="sRGB"/>')
-                out.append(f'    <material name="dmat_{key}_{i}" texture="dt_{key}_{i}" '
-                           f'specular="0.15" shininess="0.25" reflectance="0.02"/>')
+                override = getattr(L, "DECOR_MATERIAL_OVERRIDES", {}).get(key, {})
+                if override:
+                    props = dict(texture=f"dt_{key}_{i}",specular=.15,shininess=.25,reflectance=0)
+                    props.update(override.get(str(i), override.get("all", {})))
+                    attrs = " ".join(f'{k}="{v}"' for k,v in props.items() if v is not None)
+                    out.append(f'    <material name="dmat_{key}_{i}" {attrs}/>')
+                else:
+                    out.append(f'    <material name="dmat_{key}_{i}" texture="dt_{key}_{i}" '
+                               f'specular="0.15" shininess="0.25" reflectance="0.02"/>')
     # ⭐ 碰撞凸块的 <mesh>。去重粒度和视觉网格一样是 (资产, 第几块, **缩放**)——
     #    8 把餐椅只声明一套，所以"重复摆放几乎免费"（实测 nmeshgraph 与件数无关）。
     hull_items = [it for it in items if _has_hulls(it)]
@@ -1315,6 +1387,10 @@ def build(robot_key: str) -> str:
         parts.extend(stair_geoms)
         parts.append('')
     parts.extend(_front_door())
+    for item in getattr(L, "ARCHITECTURE", []):
+        parts.extend(_residence_parts(item))
+    for item in getattr(L, "EXTERIOR_GEOMS", []):
+        parts.extend(_residence_parts(item))
     parts.append('')
     # ── 窗外的一切放在最后发射（理由见上面那段 ⛔）────────────────────────
     parts.extend(_outdoor())
@@ -1327,6 +1403,8 @@ def build(robot_key: str) -> str:
     if view:
         parts.extend(view)
         parts.append('')
+    for item in getattr(L, "BACKGROUND_GEOMS", []):
+        parts.extend(_residence_parts(item))
     parts.append('  </worldbody>')
     parts.append('</mujoco>')
     return "\n".join(parts) + "\n"

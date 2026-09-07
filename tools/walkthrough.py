@@ -119,6 +119,8 @@ class Player:
         x, y = self.layout.START_POS_XY
         floor_z = getattr(self.layout, "FLOOR_Z", None)
         base = float(floor_z(floor)) if floor_z else 0.0
+        if floor in getattr(self.layout, 'FLOOR_ENTRIES', {}):
+            (x, y), base = self.layout.FLOOR_ENTRIES[floor]
         self.feet = [x, y, base + 0.02]     # 脚底位置；眼睛在它上面 eye_h
         self.vz = 0.0
 
@@ -271,6 +273,9 @@ def selftest(scene_key: str, eye_h: float) -> int:
     mujoco.mj_forward(m, d)
 
     def probe(origin, direction) -> float:
+        if getattr(layout, "PHYSICAL_WALKTHROUGH", False):
+            from scenes.collision import collision_ray
+            return collision_ray(m, d, origin, direction)[0]
         gid = np.zeros(1, dtype=np.int32)
         return mujoco.mj_ray(m, d, np.array(origin, dtype=float),
                              np.array(direction, dtype=float), None, 1, -1, gid)
@@ -409,6 +414,9 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     glfw.set_input_mode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
     def probe(origin, direction) -> float:
+        if getattr(layout, "PHYSICAL_WALKTHROUGH", False):
+            from scenes.collision import collision_ray
+            return collision_ray(m, d, origin, direction)[0]
         gid = np.zeros(1, dtype=np.int32)
         return mujoco.mj_ray(m, d, np.array(origin, dtype=float),
                              np.array(direction, dtype=float), None, 1, -1, gid)

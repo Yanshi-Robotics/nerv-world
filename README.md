@@ -2,7 +2,7 @@
 
 # nerv-world
 
-> Formerly **alice-house**. Since 2026-09-03 this repository is the `worlds/` submodule of [NERV](https://github.com/Yanshi-Robotics/nerv): each top-level `<world>/world.yaml` (today: `apt2/`) is a NERV world descriptor, and everything else is the scene library it always was. Policies do not live here. · A House for Robots to Live In
+> Formerly **alice-house**. Since 2026-09-03 this repository is the `worlds/` submodule of [NERV](https://github.com/Yanshi-Robotics/nerv): each top-level `<world>/world.yaml` (`apt2/` and `house2/`) is a NERV world descriptor, and everything else is the scene library it always was. Policies do not live here. · A House for Robots to Live In
 
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Simulator](https://img.shields.io/badge/simulator-MuJoCo-blue?style=flat-square)](https://mujoco.org) [![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](https://www.python.org) [![Version](https://img.shields.io/badge/version-v0.15-lightgrey?style=flat-square)](CHANGELOG.md)
 
@@ -51,9 +51,9 @@ It also ships **robots** (Unitree Go2 quadruped, Unitree G1 humanoid) and their 
 | Key | Layout | Size | Why it exists |
 |---|---|---|---|
 | **house1** | 3 bedrooms, 2 living areas, 2 baths — single floor | 12 spaces / 364 m² | Modelled after a real floor plan: open living-dining, master suite (walk-in closet + ensuite with freestanding tub), separate wet/dry kitchens. Flat ground throughout |
-| **house2** | Entry / living / kitchen, bedroom / study / bath, attic studio / storage — **three storeys** | 11 spaces / 381 m² | Built for height. A humanoid's stair climbing, cross-floor navigation and "fell on the stairs" failures cannot be tested on flat ground |
+| **house2** | California hillside estate: three floors, garden, pool and closed gate | 29 interior spaces / 1,672 m² floor area; 80 × 70 m property | Indoor and outdoor navigation, two stair flights per storey, physical pool basin and a hillside neighborhood backdrop |
 | **apt1** | Full-floor Manhattan apartment, **62nd storey** — foyer / gallery / great room / dining / kitchen / primary suite / guest rooms | 13 spaces / 345 m² | Built for **what's outside**. Floor-to-ceiling glass on three sides, 232 m of air below, and a real aerial of Central Park in front. Tests perception where the visual signal is overwhelmingly out of reach |
-| **apt2** | Duplex penthouse, **62nd–63rd storeys** — double-height great room + a real two-flight staircase | 24 spaces / 690 m² | Built for **what's within reach**. In the other three scenes every piece of furniture is a welded solid block; a robot can only bump into it. Here the dining chairs, armchairs and coffee table get **real collision** via convex decomposition (a ray passes between the chair legs), and the sofa is authored to the G1's leg length — seat at 0.35 m, so **the robot can actually sit on it** |
+| **apt2** | Duplex penthouse, **62nd–63rd storeys** — double-height great room + a real two-flight staircase | 24 spaces / 690 m² | Warm oak, stone and linen interiors with detailed furniture and window finishes. Dining chairs, armchairs and coffee tables retain decomposed collision shapes, including the gaps between their legs; the sofa retains its 0.35 m seat and G1 sitting pose. |
 
 **Build order: house1 → house2 → apt1 → apt2.**
 
@@ -120,12 +120,14 @@ and the middle is left clear to walk through. **This was re-laid out on 2026-07-
 that, a full-height cabinet wall sat in the middle of the room and blocked a door, cutting
 45 m² into three pieces; the robot dog would crawl into a 54 cm gap and get stuck.
 
-### house2 — Three Storeys and a Staircase
+### house2 — California Hillside Estate
 
 ![Three-storey exterior](docs/images/house2/X1-整栋外景.png)
 
-The staircase is the reason this place exists, and it is built the way a **real** staircase is
-built, not as "two rows of steps".
+The three-storey house sits above a hillside neighborhood, with a large lawn, swimming pool
+and enclosed driveway. Its entrance stays open; the outer gate stays closed.
+[Scene details and reproduction](docs/residences/README.md) cover the property, apt2 interior
+refinement and asset sources. The original stair dimensions are retained.
 
 A half-turn stair is **five parts, two of which are landings** — floor landing → up flight →
 half-landing → return flight → the floor landing above. Neither landing is optional: without the
@@ -141,7 +143,7 @@ so the stair is continuous by construction rather than by remembering to line th
 |---|---|
 | ![Flights joined](docs/images/house2/S3-中间平台-回头跑从脚下起步.png) | ![Looking back](docs/images/house2/S4-中间平台-回望上行跑.png) |
 
-| The whole stair, from the doorway | Top floor: no flight above, so a solid parapet |
+| Entrance portico and hall | Top floor: no flight above, so a solid parapet |
 |---|---|
 | ![From the door](docs/images/house2/X2-从门口平视楼梯.png) | ![Parapet](docs/images/house2/X3-顶层梯口栏板俯视.png) |
 
@@ -163,7 +165,7 @@ The derivation, the code clauses it follows, and the two ways this got built wro
 |---|---|---|
 | ![Living room](docs/images/house2/R1-底层客厅.png) | ![Bedroom](docs/images/house2/R2-二层主卧.png) | ![Attic studio](docs/images/house2/R3-三层工作间.png) |
 
-A top-down view only catches the topmost storey (the three floor plans overlap), so this is floor 2:
+The top-down view shows the property and the uppermost floor:
 
 ![Three-storey plan](docs/images/house2/A1-三层楼-顶视.png)
 
@@ -304,13 +306,14 @@ python tools/make_time_stills.py --scene apt1
 
 ![Robot sitting on the sofa](docs/images/apt2/S1-机器人坐在沙发上.png)
 
-In the other three scenes every piece of furniture is welded to the world with zero degrees of
-freedom — and for the mesh-clothed ones, the collision body is **a single solid box wrapping the
-whole thing**. A robot can only bump into it: it cannot push it, pick it up, or sit on it.
+apt2 uses decomposed collision shapes for dining chairs, armchairs and coffee tables, preserving
+the gaps between their legs. The sofa has a low seat matched to G1. These furniture bodies are
+fixed to the world; sitting support and collision gaps do not imply grasping or movable furniture.
 
-apt2 exists to fix that. The shot above is not staged: the robot is placed in a seated pose and
-then **3 seconds of physics are simulated** before the frame is taken. The pelvis rises 4.6 cm,
-slides 3.1 cm horizontally, and the torso tilts 11.4° — it really is sitting.
+The picture above is captured after placing G1 in the saved sitting pose and simulating
+**3 seconds of physics**. In the current scene, the pelvis rises 4.6 cm, slides 3.0 cm horizontally,
+and the torso tilts 11.5°. The [residence upgrade](docs/residences/README.md) retains this behavior
+while adding independent materials and architectural details.
 
 #### Why it could not sit before: the parts are split by *material*
 
@@ -524,7 +527,7 @@ city skyline backdrop. In apt1 that backdrop is replaced by real data all the wa
 
 ### Real Meshes as Clothing
 
-house1 and house2 build every piece of furniture out of primitives. apt1 keeps doing that — and
+house1 builds its furniture out of primitives. apt1 keeps doing that — and
 then puts a **downloaded mesh on top as clothing**. The box underneath is still the collision
 truth; the mesh is purely visual (`contype="0" conaffinity="0"`).
 

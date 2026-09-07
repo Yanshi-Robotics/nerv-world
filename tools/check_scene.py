@@ -387,10 +387,16 @@ def check_door_passable(key: str, layout) -> list[str]:
         horiz = door["orient"] == "h"
         note = door.get("note", "?")
         for floor in floors:
+            if "floor" in door and door["floor"] != floor:
+                continue
             for sgn, lbl in ((-1, "南/西"), (+1, "北/东")):
                 px, py = ((c, co + sgn * (t / 2 + 0.30)) if horiz
                           else (co + sgn * (t / 2 + 0.30), c))
-                if _room_at(px, py, floor) is None:
+                external = any(a['rect'][0] <= px <= a['rect'][2] and
+                               a['rect'][1] <= py <= a['rect'][3] and
+                               abs(a['floor_z'] - layout.FLOOR_Z(floor)) < 1e-6
+                               for a in getattr(layout, 'EXTERIOR_AREAS', []))
+                if _room_at(px, py, floor) is None and not external:
                     if floor == floors[0]:
                         _fail(errs, f"门「{note}」{lbl}侧 0.30 m 处 ({px:.2f}, {py:.2f}) "
                                     f"不在任何房间里 —— 这道门通向墙里或屋外")
@@ -461,7 +467,8 @@ def _reach_obstacles(layout, floor: int) -> list:
             continue
         px, py, pz = it["pos"]
         sx, sy, sz = it["size"]
-        if pz + sz / 2.0 <= DOOR_STEPOVER_M:      # 跨得过去
+        if pz + sz / 2.0 <= DOOR_STEPOVER_M and not it.get('enclosed_fixture'):
+            # An enclosed tub bottom is below step height but is not room floor.
             continue
         if pz - sz / 2.0 >= BODY_TOP_M:           # 钻得过去
             continue
@@ -632,6 +639,20 @@ def check_front_door_visible(key: str, layout) -> list[str]:
     m = mujoco.MjModel.from_xml_path(_scene_path(key, "g1"))
     data = mujoco.MjData(m)
     mujoco.mj_forward(m, data)
+    if d.get("state") == "fixed_open":
+        from scenes.collision import collision_ray
+        for frac in (.25, .5, .85):
+            z = zb + d["height"]*frac
+            for offset in (-.30, 0, .30):
+                origin = [d["center"]+offset, fixed+inward*.6, z] if horiz else [fixed+inward*.6,d["center"]+offset,z]
+                vec = [0.,-inward,0.] if horiz else [-inward,0.,0.]
+                distance, _ = collision_ray(m,data,origin,vec)
+                if 0 <= distance < 1.2:
+                    _fail(errs, "固定敞开的入户门没有留下完整通行净宽")
+        leaf=mujoco.mj_name2id(m,mujoco.mjtObj.mjOBJ_GEOM,"front_door")
+        if leaf < 0 or not m.geom_contype[leaf]:
+            _fail(errs, "固定敞开门扇缺失或没有真实碰撞")
+        return errs
     for frac in (0.25, 0.5, 0.85):           # 门下段/中段/上段各打一条
         z = zb + d["height"] * frac
         o = ([d["center"], fixed + inward * 0.6, z] if horiz
@@ -1137,7 +1158,7 @@ def check_void(key: str, layout) -> list[str]:
         for side in ss:
             vx, vy = outward[side]
             for z in (0.30, 1.00, 1.60):
-                origin = np.array([cx, cy, z])
+                origin = np.array([cx, cy, z + _zbase_of(layout, room)])
                 vec = np.array([float(vx), float(vy), 0.0])
                 # ⚠️ 必须**穿过非碰撞体继续走**，不能只看第一个命中：
                 #    `mj_ray` 不看 contype，装饰网格、纯视觉挂画都会挡在前面；

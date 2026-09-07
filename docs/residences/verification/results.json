@@ -1,0 +1,118 @@
+{
+  "date": "2026-09-07",
+  "baseline": "0c1fdcebdeb21134b368b170fbe7a12810e812a2",
+  "mujoco": "3.12.0",
+  "gpu": "NVIDIA GeForce RTX 5070 Ti",
+  "driver": "580.159.03",
+  "resolution": [
+    640,
+    480
+  ],
+  "configured_fps": 12,
+  "min_stream_fps": 10.8,
+  "min_realtime_factor": 0.95,
+  "runtime": [
+    {
+      "scene": "house2",
+      "view": "home",
+      "head_fps": 11.9,
+      "chase_fps": 11.9,
+      "realtime_factor": 0.9998811919044241,
+      "seconds": 30.03356823103968,
+      "ngeom": 3665,
+      "nmesh": 595,
+      "passed": true,
+      "report": "house2/home/runtime.json"
+    },
+    {
+      "scene": "apt2",
+      "view": "entry",
+      "head_fps": 11.8,
+      "chase_fps": 11.8,
+      "realtime_factor": 1.0000077835872754,
+      "seconds": 30.049766105017625,
+      "ngeom": 2038,
+      "nmesh": 568,
+      "passed": true,
+      "report": "apt2/entry/runtime.json"
+    },
+    {
+      "scene": "house2",
+      "view": "pool",
+      "head_fps": 11.866666666666667,
+      "chase_fps": 11.866666666666667,
+      "realtime_factor": 0.9999229785440198,
+      "seconds": 30.052314673026558,
+      "ngeom": 3665,
+      "nmesh": 595,
+      "passed": true,
+      "report": "house2/pool/runtime.json"
+    },
+    {
+      "scene": "house2",
+      "view": "gate",
+      "head_fps": 11.933333333333334,
+      "chase_fps": 11.933333333333334,
+      "realtime_factor": 0.9997498188599799,
+      "seconds": 30.06752232700819,
+      "ngeom": 3665,
+      "nmesh": 595,
+      "passed": true,
+      "report": "house2/gate/runtime.json"
+    },
+    {
+      "scene": "apt2",
+      "view": "window",
+      "head_fps": 11.9,
+      "chase_fps": 11.9,
+      "realtime_factor": 0.9998280853673608,
+      "seconds": 30.05516692297533,
+      "ngeom": 2038,
+      "nmesh": 568,
+      "passed": true,
+      "report": "apt2/window/runtime.json"
+    }
+  ],
+  "source_sha256": {
+    "tools/make_house.py": "5dcae1ef3350ebdba74beac3c47c97f1620e4bf702f4e38e6afbadfc792f84ab",
+    "tools/walkthrough.py": "1dfad82d9271219b8e64cdfb02077363a4a971f9fc373902d75f0aea858a9510",
+    "tools/check_scene.py": "c7e53c7df14179476dbef3a904ac2f709a1e2da5b116aa92306769035349c6e8",
+    "tools/check_residences.py": "513f438d8e0fa6f56bf1dda975147a68445d638d35cd292b09e3c55ffe5cf688",
+    "tools/benchmark_residences.py": "34ad7736d8c67bf55ed306f17e22e542340bc1b5dd9cd1b93c8a9e0f56409bb8",
+    "scenes/residence.py": "742f9e79993587899624a47eb786fa8d818f95bc8b9303471f5e43b36293b242",
+    "scenes/collision.py": "151b5141f000ba3fd442d1ac76cf622b15f0d8f6cf705061fcef8364d1ac0621",
+    "scenes/house2/layout.py": "a4235f81a73a58e0edcdecf99d67b2cd6bfd1aeffe74c94a09fba790529b616e",
+    "scenes/house2/estate.py": "77ad8c9d7a382f25a906ae837cc537ac37ccbb45188eda322611aee16f82a33d",
+    "scenes/house2/shots.py": "9144d9cda2f84c8f8175851324a763bdd0a4b9e1e2276a370fca6603186a4244",
+    "scenes/apt2/layout.py": "7deddc36186f208aa1e1574cc9effa76c5cdfc01fc5dfab1c5ee2677317f10aa",
+    "scenes/apt2/refinement.py": "9b5c7df93fc27731d78d238c6af18e7cfce227cd9226fecd9ccf513ce2aa602b",
+    "house2/world.yaml": "85d24940c898d58af79456b811987a023b824bf44066445e2ce5cccb869943c9",
+    "house2/guidance.md": "5dac8cd5bce6580a3c8e866c1dc9b3cdf585573a7e969d5b9570cef7752e9615",
+    "build/house2-g1.xml": "760aab5a607855e3a5e3649d655c9105de206b0e198d11f8a8f5ea8464eb0e7f",
+    "build/house2-go2.xml": "fd9278b1adecc824759a15d7acdca5e79d118148ff74626830e809745243010e",
+    "build/apt2-g1.xml": "3746547c0b3115dfb840d152207e08462b4ec4a62479305ba6d45380fa83413b",
+    "build/apt2-go2.xml": "591bafcea4a00e9aebc71be62785760255bf8cc870aed33d631df9033fbc8ead"
+  },
+  "nerv_stream_source_sha256": "4abfc2c46a06044631e59c19af2fff70369fafb2bf3e53d9533aa1eefe7b6653",
+  "policy_contract_sha256": "1fdbe2ecc5d60945b5b630074425b053dbbca058b6a55be91833697083c8d6ef",
+  "policy_sha256": "07400671a8fffae172d261688bc84f0e60d3d656156b564dbdc0a4638fb695c6",
+  "reference_checks": {
+    "reference_scenes": {
+      "source_files": 171,
+      "generated": {
+        "build/house1-go2.xml": "5f04960e515400728a2573ceb7f87d1763c67cfd1aa6c2e4ba0032a199b8a9de",
+        "build/house1-g1.xml": "cad4b700830fe4afa697d78d86b976eea6755cafcc9bfbfac2ae1a073b9011b1",
+        "build/apt1-go2.xml": "508fdfae953405ef5e65df348f45ce04667fddca7922bc58a5cdec5296b75bed",
+        "build/apt1-g1.xml": "ca9ab1216ebd3a8cf1d2557ab0d5b521e576518c1cbba1a172e8b60b817483f4"
+      }
+    },
+    "house2_estate": {
+      "route_samples": 586,
+      "boundary_samples": 1800,
+      "pool_samples": 336,
+      "water_fault_injection": true,
+      "hollow_baths": true
+    },
+    "passed": true
+  }
+}
