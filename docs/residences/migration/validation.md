@@ -124,10 +124,17 @@ MUJOCO_GL=glfw python docs/residences/migration/verification/render/check_inspec
 python tools/benchmark_residences.py --scene apt house --seconds 30 --output temp/residence-check/runtime
 ```
 
-## Running-service boundary
+## Resident NERV acceptance
 
-The source and isolated runtime checks use apt and house. The existing resident backend,
-world and body processes were not restarted; their in-memory registry/model may still use
-apt2. Existing session records were not changed.
-The canonical names need a separately authorized service reload before resident browser
-acceptance. No old session is rewritten to appear as a session in the new map.
+The resident NERV backend and simulation nodes were switched with operator authorization
+on 2026-09-07. The actual web interface completed `apt → house → apt`, including both live
+cameras, operator motion, emergency hold, reset, and paired body/world shutdown. The final
+apartment session was left active and disarmed.
+
+Both 640 × 480 camera streams sustained approximately 11.9 fps against a 12 fps configuration;
+the measured simulation-to-wall-time ratio was approximately 1.0. All 11 existing sessions
+and 22 stored image hashes were preserved. Old sessions retained their original map names
+and epochs, and became read-only where their simulation was stopped.
+
+The [NERV activation report](https://github.com/Yanshi-Robotics/nerv/blob/main/docs/validation/residence-activation/README.md)
+contains browser images, exact measurements, the 88-test regression result and scope limits.
