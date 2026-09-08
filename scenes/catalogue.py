@@ -22,6 +22,7 @@ FIXTURE_LABELS = {
     "rc_hood": {"en": "Range hood", "zh": "油烟机"},
     "plant_a": {"en": "Potted plant", "zh": "盆栽"},
     "plant_b": {"en": "Potted plant", "zh": "盆栽"},
+    "dining_chair": {"en": "Modern leather dining chair", "zh": "现代皮质餐椅"},
 }
 ROOM_EN = {
     "great_room": "Double-height living room",

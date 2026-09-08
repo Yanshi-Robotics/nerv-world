@@ -29,7 +29,7 @@
     "meshes": 338,
     "triangles": 450150,
     "bytes": 49308988,
-    "source_hash": "93af7a09421a2cc209c3179e565188514067fad333e82f4eec86d50e6951f87f"
+    "source_hash": "718f51d24b5809cf5dc7de5397403cdae904714cbdaa8ffe7c3e943c5dc08b16"
   },
   {
     "scene": "house",
@@ -78,6 +78,6 @@
     "meshes": 493,
     "triangles": 1060776,
     "bytes": 87310004,
-    "source_hash": "aec6784698e042334b89db03f589f0e64429f5d23998251b61a3ce7570b1214c"
+    "source_hash": "f14460841e04973d8d57878e23f932233da4c243a7b6f470b6602b4799c55fc2"
   }
 ]
