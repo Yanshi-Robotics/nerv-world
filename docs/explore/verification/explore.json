@@ -29,7 +29,7 @@
     "meshes": 338,
     "triangles": 450150,
     "bytes": 49308988,
-    "source_hash": "623afe6d5c365cfe5e50a82cb43ca907eb01d46d4db4406c344fcd35d1855ac9"
+    "source_hash": "93af7a09421a2cc209c3179e565188514067fad333e82f4eec86d50e6951f87f"
   },
   {
     "scene": "house",
@@ -61,7 +61,7 @@
       },
       {
         "id": "pool_loop",
-        "samples": 390,
+        "samples": 387,
         "min_headroom": null
       },
       {
@@ -78,6 +78,6 @@
     "meshes": 493,
     "triangles": 1060776,
     "bytes": 87310004,
-    "source_hash": "418961608c8603807bf74f79fbe8cac163ce563260eb781da4539d5f8eeb3b7d"
+    "source_hash": "aec6784698e042334b89db03f589f0e64429f5d23998251b61a3ce7570b1214c"
   }
 ]

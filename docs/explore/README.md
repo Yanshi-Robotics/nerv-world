@@ -57,8 +57,10 @@ The catalogue provides English and Chinese labels, facility operations and speci
 instructions. Its stair checkpoints require stopping on level ground; they do not certify G1
 stair climbing. House routes include the gate approach, lawn access, complete pool circuit,
 west and east paths, and rear garden. The pool's water surface is visual and does not support
-weight. The gate is a fixed closed boundary. Apt provides entrance/gallery, living/dining and
-kitchen routes. Kitchen access stays on the lowest floor beneath the eastern stair landing;
+weight. The pool circuit shares its first two points with the pool approach,
+keeping the front corner farther from the pergola posts. The gate is a fixed closed boundary.
+Apt provides entrance/gallery, living/dining and kitchen routes. Kitchen access stays on the
+lowest floor beneath the eastern stair landing;
 the verified minimum headroom is 1.775 m. Furniture movement can change route clearance.
 
 The CPU checker verifies source freshness, embedded assets, finite geometry and normals, UV

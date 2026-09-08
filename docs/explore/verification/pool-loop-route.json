@@ -1,0 +1,112 @@
+{
+  "created_utc": "2026-09-08T05:59:44.475650+00:00",
+  "scope": "Source-route equivalence, generated-scene byte equality; no physical gait or renderer run",
+  "baseline_commit": "b0793444c2f5813e4a52de25e6715567436058ce",
+  "source_path": "scenes/paths.py",
+  "source_before_sha256": "6973348b0d91cb44448f9ab0ad626636fbdf69141910c36a13f97268771fcfb9",
+  "source_after_sha256": "6c6ce4557f73cfdb5bc80ce39f608e2bf995947e9b7c754988ac7a29528c451a",
+  "changed_route": "pool_loop",
+  "before_points": [
+    [
+      -1.4,
+      -7.5,
+      0
+    ],
+    [
+      17.5,
+      -7.5,
+      0
+    ],
+    [
+      17.5,
+      -11.5,
+      0
+    ],
+    [
+      17.5,
+      -29.25,
+      0
+    ],
+    [
+      26.99,
+      -29.25,
+      0
+    ],
+    [
+      26.99,
+      -11.5,
+      0
+    ],
+    [
+      17.5,
+      -11.5,
+      0
+    ]
+  ],
+  "after_points": [
+    [
+      -1.4,
+      -8,
+      0
+    ],
+    [
+      17.5,
+      -8,
+      0
+    ],
+    [
+      17.5,
+      -11.5,
+      0
+    ],
+    [
+      17.5,
+      -29.25,
+      0
+    ],
+    [
+      26.99,
+      -29.25,
+      0
+    ],
+    [
+      26.99,
+      -11.5,
+      0
+    ],
+    [
+      17.5,
+      -11.5,
+      0
+    ]
+  ],
+  "shared_prefix_route": "pool_approach",
+  "unchanged_house_routes": [
+    "gate_approach",
+    "pool_approach",
+    "lawn_approach",
+    "residence_loop",
+    "rear_branch"
+  ],
+  "remaining_pool_points_unchanged": true,
+  "apartment_routes_unchanged": true,
+  "generated_scene_bytes_unchanged": [
+    {
+      "path": "build/apt-g1.xml",
+      "sha256": "397d0330f435d5560896b3232adadde0c84c8ebce8d6a6ea7c0833212a78f15e"
+    },
+    {
+      "path": "build/apt-go2.xml",
+      "sha256": "f4d76ce185feb33d293cfba454a8118e8f6678921fcc3b1549713e5334c35fb2"
+    },
+    {
+      "path": "build/house-g1.xml",
+      "sha256": "504d12a89c4923e0998e5468c69b50cbf6731ef597c5dc0a37001c5f36a51a0b"
+    },
+    {
+      "path": "build/house-go2.xml",
+      "sha256": "6bfb2c702f85718749e558e7ae6fb6b81063b529effb916c71f1a94ba2f4efe0"
+    }
+  ],
+  "passed": true
+}

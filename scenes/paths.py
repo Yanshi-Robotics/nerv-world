@@ -27,6 +27,7 @@ def residence_routes(layout):
             estate["routes"],
         )
     ]
+    pool_approach = next(route["points"] for route in routes if route["id"] == "pool_approach")
     fore, terrace, pool = areas["forecourt"], areas["pool_terrace"], estate["pool"]
     west, side, rear = areas["west_walk"], areas["side_walk"], areas["rear_garden"]
     geoms = {g["name"]: g for g in layout.EXTERIOR_GEOMS}
@@ -53,8 +54,9 @@ def residence_routes(layout):
             "Complete pool circuit",
             "泳池完整环线",
             [
-                junction,
-                (west_x, front_y),
+                # Reuse the authored approach's turning clearance from pergola posts.
+                pool_approach[0][:2],
+                pool_approach[1][:2],
                 (west_x, north_y),
                 (west_x, south_y),
                 (east_x, south_y),
