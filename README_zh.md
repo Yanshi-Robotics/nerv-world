@@ -5,11 +5,12 @@
 [English](README.md) · [简体中文](README_zh.md)
 
 面向 MuJoCo 和 [NERV](https://github.com/Yanshi-Robotics/nerv) 的住宅场景库，提供宇树 G1 和 Go2 版本。
-建筑、家具、碰撞体和机器人场景均由布局定义生成。下方配图来自 MuJoCo 原生渲染器。
+建筑、家具、碰撞体和机器人场景均由布局定义生成。MuJoCo 原生截图呈现仿真场景，
+World Explore 配图则来自独立的 Three.js 浏览器导览。
 
 ![house：山坡豪宅、草坪与泳池](docs/images/house/X1-整栋外景.png)
 
-[场景](#场景) · [快速开始](#快速开始) · [可交互家具](docs/interactions/README.md) · [住宅指南](docs/residences/README.md)
+[场景](#场景) · [快速开始](#快速开始) · [三维导览](#三维导览) · [可交互家具](docs/interactions/README.md) · [住宅指南](docs/residences/README.md)
 
 **AI agent**：修改仓库前请阅读 [AGENTS.md](AGENTS.md)。
 
@@ -18,7 +19,7 @@
 | 场景 | 空间 | 主要用途 |
 |---|---|---|
 | [apt](#apt) | 曼哈顿 62—63 层复式，24 个空间 | 中央公园窗景、四时段氛围、真实家具碰撞与操作者交互 |
-| [house](#house) | 三层加州山坡豪宅，宅地约 80 × 70 m | 室内外通行、楼梯、草坪、泳池和封闭宅地 |
+| [house](#house) | 三层加州山坡豪宅，宅地约 80 × 70 m | 四时段光照、庭院路线、草坪、泳池和封闭宅地 |
 
 本仓维护这两张住宅地图。apt 结合原复式的交互能力与原单层公寓的城市环境和时段效果；house 延续山坡豪宅。
 旧编号地图已退役，历史版本可按[迁移说明](docs/residences/migration/README.md)恢复。
@@ -39,7 +40,7 @@ apt 在同一曼哈顿环境中扩展为两层复式，增加双高客厅、双�
 | 厨房 | 四件电器具有 22 个被动关节，覆盖冰箱门与抽屉、烤箱门与烤架、旋钮、龙头及烟机按钮 |
 | 可移动物体 | 六把餐椅以及罐子、水果、书具有质量、重力和碰撞 |
 | 时段 | 保留早晨、白天、黄昏、夜晚，复用城市资产并单独配置室内灯光；切换不会重置家具状态 |
-| 检查器操作 | 瞄准附近活动部件后开合、调整开度，抓取物体并松手让其参与物理运动 |
+| 操作者控制 | NERV 场景测试和原生检查器可操作附近部件、调整开度，抓取物体并松手让其参与物理运动 |
 
 | 冰箱开门、抽屉拉出 | 烤箱开门、烤架拉出 |
 |---|---|
@@ -47,8 +48,16 @@ apt 在同一曼哈顿环境中扩展为两层复式，增加双高客厅、双�
 
 ![apt 四时段](docs/images/apt/time-presets/T0-四时段对比.png)
 
-**交互范围**：家具操作和时段切换位于原生漫游检查器。NERV 可以载入这些被动物体并运行 G1 行走策略，
-目前尚未提供家具操作接口，也没有 G1 自主抓取、开门、坐下或上楼梯技能。坐姿配图来自真实物理沉降，不代表自主坐下策略。
+NERV 的**场景测试**面板已接入 22 个电器关节和九个可移动物体，通过受限物理力操作家具，并显示实际运动与碰撞反馈。
+进入测试前，系统取得独占控制租约，让机器人停止并解除武装；测试结束后，需要操作者重新武装才能恢复普通机器人命令。
+选取范围限于操作员相机两米内的可见表面，墙壁和关闭的门会遮挡选取。取消操作或租约到期会清除交互施力。
+
+冰箱任务要求罐子整体进入右侧冷藏室标出的中层目标区域，松手后由指定搁板稳定承托，再关闭冰箱门。
+任务根据几何范围、实际运动和真实接触判定，抓住罐子悬停在目标内不能完成任务。
+物理重复测试、浏览器操作及中断检查见 [NERV 运行验收](https://github.com/Yanshi-Robotics/nerv/tree/main/docs/validation/world-explore)。
+
+原生漫游仍保留独立的检查器操作。已发布的 G1 策略提供行走和转向；自主抓取、开门、坐下和上下楼梯需要额外的机器人技能。
+坐姿配图来自真实物理沉降，不代表自主坐下策略。
 电器控制部件可以运动，但水流、加热、烹饪及通风尚未模拟。
 
 [操作方法与能力说明](docs/interactions/README.md) · [apt 布局](scenes/apt/layout.py) · [验证记录](docs/residences/migration/validation.md)
@@ -67,7 +76,8 @@ apt 在同一曼哈顿环境中扩展为两层复式，增加双高客厅、双�
 | 黄昏 | 西侧暖光，上西区和上东区呈现不同的冷暖色调 |
 | 夜晚 | 点亮的城市窗格、压暗的公园与本楼立面，室内保留暖光和地面可见度 |
 
-这些是可选择的时段预设，不包含连续时钟、天气或季节模拟。按 **L** 循环切换，家具的开合、位置和速度保持不变。
+这些是可选择的时段预设，不包含连续时钟、天气或季节模拟。可在 NERV 中选择时段，或在原生漫游中按 **L** 切换，
+家具的开合、位置和速度保持不变。
 
 | 左侧窗景 | 向右横移约 3.67 m 后的同向窗景 |
 |---|---|
@@ -80,12 +90,20 @@ apt 在同一曼哈顿环境中扩展为两层复式，增加双高客厅、双�
 
 入户门固定敞开。一层停机房、住宅、庭院和关闭的外大门之间具有连续可通行路线。
 大门与外围围墙具有连续碰撞。泳池具有真实池壁、池底与台阶，水面不承重；道路、邻宅与下降的山坡构成不可进入的社区远景。
+布局定义了通往大门、草坪、泳池的检查路线，以及绕池、侧院和后庭路线。对于使用平地步态的 G1，楼梯入口是停止检查点。
+
+NERV 与原生漫游均可选择早晨、白天、黄昏和夜晚。夜间灯光覆盖入口、大门、西侧步道与池畔，同时保留深色天空。
+时段切换只改变光照，不会重置机器人或家具。
 
 | 草坪与主楼 | 泳池露台 |
 |---|---|
 | ![house 草坪](docs/images/house/X4-草坪与主楼.png) | ![house 泳池](docs/images/house/X5-泳池露台.png) |
 | 客厅 | 山坡社区 |
 | ![house 客厅](docs/images/house/R1-底层客厅.png) | ![house 社区远景](docs/images/house/X6-山坡社区.png) |
+
+![MuJoCo 原生渲染的 house 西侧池畔夜景](docs/images/explore/house-west_pool-night.png)
+
+西侧池畔夜景，来自 MuJoCo 原生渲染器。
 
 [house 布局](scenes/house/layout.py) · [宅地定义](scenes/house/estate.py) · [配图与复现](docs/residences/README.md)
 
@@ -127,13 +145,41 @@ python tools/check_residences.py
 定义场景与 G1 身体的组合。行走策略由独立的 [nerv-policies](https://github.com/Yanshi-Robotics/nerv-policies) 提供；
 启动方式见 [NERV](https://github.com/Yanshi-Robotics/nerv)。
 
+## 三维导览
+
+从 NERV 侧栏打开 **Nerv World Explore**，无需启动仿真即可查看两张地图。
+Three.js 导览支持旋转、平移、缩放、楼层剖切、房间搜索、设施高亮及检查说明。
+画面显示场景初始布局和白天材质；选择设施会定位视角，不会操作家具或改变正在运行的世界。
+物理操作请使用活动仿真中的场景测试。
+
+![Three.js World Explore 中的 apt 楼层剖面](docs/images/explore/apt-cutaway.png)
+
+![Three.js World Explore 中的 house 庭院](docs/images/explore/house-courtyard.png)
+
+以上两张导览图来自浏览器，光照效果与原生相机不同。
+完成[家具资产准备](docs/interactions/README.md#asset-setup)后，在本仓目录生成导览资源：
+
+```bash
+pip install -r requirements-explore.txt
+python tools/make_house.py --scene apt
+python tools/make_house.py --scene house
+python tools/export_explore.py --scene apt
+python tools/export_explore.py --scene house
+python tools/check_explore.py
+```
+
+导出器将 `scene.glb` 和 `manifest.json` 写入 `.cache/explore/<scene>/`。
+NERV 会核对源指纹和资源哈希；缺失、过期或被修改的导出会明确报错，场景源码或资产变化后应重新生成。
+下载的家具和派生 GLB 均不进入 Git。详见[导出说明](docs/explore/README.md)和[场景库检查记录](docs/explore/verification/README.md)。
+
 ## 开发
 
 修改 `scenes/<场景>/layout.py` 及其相关模块，再生成 `build/<场景>-<机器人>.xml`，不要手改生成文件。
 场景清单和机器人清单相互独立，下载资产与临时产物不进入 Git。
 
 - [住宅几何、配图与 NERV 检查](docs/residences/README.md)
-- [家具交互结构与后续开发方向](docs/interactions/README.md)
+- [家具交互结构与任务判定](docs/interactions/README.md)
+- [NERV 交互、路线、相机与浏览器验收](https://github.com/Yanshi-Robotics/nerv/tree/main/docs/validation/world-explore)
 - [变更记录](CHANGELOG.md)
 
 ## 许可

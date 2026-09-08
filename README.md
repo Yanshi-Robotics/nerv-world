@@ -6,11 +6,12 @@
 
 Residential environments for MuJoCo and [NERV](https://github.com/Yanshi-Robotics/nerv),
 with Unitree G1 and Go2 variants. Layout definitions generate the architecture, furniture,
-collision geometry and robot scenes. Screenshots below come from MuJoCo's native renderer.
+collision geometry and robot scenes. Native MuJoCo screenshots show the simulated scenes;
+the World Explore images show the separate Three.js browser guide.
 
 ![house: hillside mansion, lawn and pool](docs/images/house/X1-整栋外景.png)
 
-[Scenes](#scenes) · [Quick Start](#quick-start) · [Interactive furniture](docs/interactions/README.md) · [Residence guide](docs/residences/README.md)
+[Scenes](#scenes) · [Quick Start](#quick-start) · [World Explore](#world-explore) · [Interactive furniture](docs/interactions/README.md) · [Residence guide](docs/residences/README.md)
 
 **AI agents:** read [AGENTS.md](AGENTS.md) before changing the repository.
 
@@ -19,7 +20,7 @@ collision geometry and robot scenes. Screenshots below come from MuJoCo's native
 | Scene | Setting | Main purpose |
 |---|---|---|
 | [apt](#apt) | Manhattan duplex on floors 62–63, 24 spaces | Central Park views, four lighting phases, physical furniture and operator interaction |
-| [house](#house) | Three-storey California mansion on an 80 × 70 m property | Indoor–outdoor navigation, stairs, lawn, pool and a closed property boundary |
+| [house](#house) | Three-storey California mansion on an 80 × 70 m property | Four lighting phases, courtyard routes, lawn, pool and a closed property boundary |
 
 These are the two maintained residential maps. apt combines the duplex and its interaction
 capabilities with the original apartment's city environment and time-of-day effects.
@@ -44,7 +45,7 @@ view at room scale and robot camera height.
 | Kitchen | Four appliances with 22 passive joints: refrigerator doors and drawers, oven door and rack, knobs, faucet and hood buttons |
 | Movable objects | Six dining chairs plus a can, fruit and book have mass, gravity and collision |
 | Time presets | Morning, day, dusk and night use the shared city assets with apt's own lighting; switching preserves furniture state |
-| Inspection controls | Aim at nearby parts to operate them, adjust opening, move objects and release them into physics |
+| Operator controls | NERV Scene testing and the native inspector operate nearby parts, adjust opening, move objects and release them into physics |
 
 | Refrigerator open, drawers extended | Oven open, rack extended |
 |---|---|
@@ -52,10 +53,22 @@ view at room scale and robot camera height.
 
 ![apt four lighting presets](docs/images/apt/time-presets/T0-四时段对比.png)
 
-**Interaction scope:** furniture operations and time switching are available in the native
-walkthrough inspector. NERV can load the passive furniture and run the G1 walking policy.
-It does not yet expose furniture controls or autonomous G1 grasping, opening, sitting or
-stair-climbing skills. The seated image is a pose settled in physics, not a sit-down policy.
+NERV's **Scene testing** panel operates the 22 appliance joints and nine movable objects with
+bounded forces, measured motion and collision feedback. An exclusive control lease stops and
+disarms the robot before testing; normal robot commands remain unavailable until testing ends
+and the operator arms it again. Selection checks visible surfaces within two metres of the
+operator camera, including occlusion by walls and closed doors. Cancellation or lease expiry
+clears the interaction forces.
+
+The refrigerator task requires the whole can inside the marked middle-shelf volume in the
+right compartment, released onto that shelf and stably supported before the door is closed.
+Its evaluator checks geometry, motion and actual contacts; holding the can in place does not
+complete the task. See the [running NERV validation](https://github.com/Yanshi-Robotics/nerv/tree/main/docs/validation/world-explore)
+for physical repetitions, browser operation and interruption tests.
+
+The native walkthrough retains its own inspection controls. The released G1 policy provides
+walking and turning; autonomous grasping, opening, sitting down and stair climbing require
+additional robot skills. The seated image is a pose settled in physics, not a sit-down policy.
 Appliance controls move physically; water flow, heating, cooking and ventilation are not simulated.
 
 [Interaction controls and capabilities](docs/interactions/README.md) · [apt layout](scenes/apt/layout.py) · [Verification](docs/residences/migration/validation.md)
@@ -77,7 +90,8 @@ are fixed architectural elements; elevator travel is not simulated.
 | Night | Lit city windows, darkened park and host tower, and warm interiors with visible floors |
 
 These are selectable presets, not a continuous clock, weather or seasonal simulation.
-Press **L** to cycle them without changing furniture opening, position or velocity.
+Use NERV's time selector or press **L** in the native walkthrough to change them without
+changing furniture opening, position or velocity.
 
 | Left window view | Same direction after moving approximately 3.67 m right |
 |---|---|
@@ -93,12 +107,22 @@ The entrance stays open. Continuous traversable routes connect the ground-floor 
 the house, the grounds and the closed outer gate. The gate and perimeter walls have continuous
 collision geometry. The pool has a real basin and steps; its water surface does not support
 weight. Roads, neighboring houses and descending hills form an inaccessible community backdrop.
+Layout-defined inspection routes cover the gate, lawn, pool approach and circuit, side paths
+and rear garden. Stair entrances are stopping checkpoints for the flat-ground G1 policy.
+
+Morning, day, dusk and night are selectable in both NERV and the native walkthrough. Night
+lighting covers the entrance, gate, west path and pool terrace while retaining the dark sky.
+Time switching changes the lighting without resetting the robot or furniture.
 
 | Lawn and house | Pool terrace |
 |---|---|
 | ![house lawn](docs/images/house/X4-草坪与主楼.png) | ![house pool](docs/images/house/X5-泳池露台.png) |
 | Living room | Hillside neighborhood |
 | ![house living room](docs/images/house/R1-底层客厅.png) | ![house neighborhood](docs/images/house/X6-山坡社区.png) |
+
+![house west pool terrace at night, rendered by MuJoCo](docs/images/explore/house-west_pool-night.png)
+
+The west pool terrace at night, captured with MuJoCo's native renderer.
 
 [house layout](scenes/house/layout.py) · [Estate definition](scenes/house/estate.py) · [Gallery and reproduction](docs/residences/README.md)
 
@@ -143,6 +167,36 @@ For NERV, this repository is the `worlds/` submodule. The descriptors in
 and G1 body. Locomotion policies live in [nerv-policies](https://github.com/Yanshi-Robotics/nerv-policies),
 not in this repository. See [NERV](https://github.com/Yanshi-Robotics/nerv) for its launcher.
 
+## World Explore
+
+Open **Nerv World Explore** from NERV's sidebar to browse either map without starting a
+simulation. The Three.js guide provides orbit, pan and zoom, floor cutaways, room search,
+facility highlights and inspection instructions. It displays the generated starting layout
+with daytime materials; selecting a fixture focuses the view without operating it or changing
+a running world. Use Scene testing in an active simulation for physical actions.
+
+![apt floor cutaway in the Three.js World Explore guide](docs/images/explore/apt-cutaway.png)
+
+![house courtyard in the Three.js World Explore guide](docs/images/explore/house-courtyard.png)
+
+Both guide images show the browser display, whose lighting differs from the native cameras.
+After the [furniture asset setup](docs/interactions/README.md#asset-setup), prepare its resources
+from this repository:
+
+```bash
+pip install -r requirements-explore.txt
+python tools/make_house.py --scene apt
+python tools/make_house.py --scene house
+python tools/export_explore.py --scene apt
+python tools/export_explore.py --scene house
+python tools/check_explore.py
+```
+
+Each export writes `scene.glb` and `manifest.json` to `.cache/explore/<scene>/`. NERV checks
+source fingerprints and asset hashes; missing, stale or modified exports produce an error.
+Regenerate after changing scene sources or assets. Downloaded furniture and derived GLBs remain
+outside Git. See the [export guide](docs/explore/README.md) and [world-library checks](docs/explore/verification/README.md).
+
 ## Development
 
 Edit `scenes/<scene>/layout.py` and its supporting modules, then regenerate
@@ -150,7 +204,8 @@ Edit `scenes/<scene>/layout.py` and its supporting modules, then regenerate
 the two selections independent. Downloaded assets and temporary outputs remain outside Git.
 
 - [Residence geometry, rendering and NERV checks](docs/residences/README.md)
-- [Interactive furniture architecture and next development steps](docs/interactions/README.md)
+- [Interactive furniture architecture and task evaluation](docs/interactions/README.md)
+- [NERV interaction, route, camera and browser validation](https://github.com/Yanshi-Robotics/nerv/tree/main/docs/validation/world-explore)
 - [Changelog](CHANGELOG.md)
 
 ## License
