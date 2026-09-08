@@ -413,7 +413,7 @@ MATERIALS_EXTRA += [dict(name='h2_grass',texture='h2_tex_grass',specular=.015,sh
                     dict(name='h2_road',rgba='.30 .31 .29 1',specular=.02,shininess=.1)]
 RES_MESHES=B.meshes
 CITY_BACKDROP=None
-SKYBOX={f'file{side}':f'textures/house3/sky_file{side}.png'
+SKYBOX={f'file{side}':f'textures/residences/house/sky/sky_file{side}.png'
         for side in ('right','left','up','down','front','back')}
 OUTDOOR_GROUND=None
 TREES=[]
@@ -435,6 +435,10 @@ VISUAL=dict(znear=.001,zfar=120,shadowclip=4,shadowsize=2048,
 DECOR_MATERIAL_OVERRIDES={'armchair':{'1':dict(texture=None,rgba='.78 .74 .66 1',specular=.035,shininess=.10),
                                     '0':dict(specular=.2,shininess=.3)},
                           'dining_chair':{'all':dict(texture=None,rgba='.70 .63 .52 1',specular=.12,shininess=.24)}}
+
+from scenes.house.time_presets import PHASES, presets as _time_presets
+LIGHTS_BY_TIME = _time_presets(globals())
+TIME_VIEW = dict(eye=(42,-54,14),target=(2,-6,4))
 
 def floor_at(z):
     return max(0,min(N_FLOORS-1,int((z+.30)//STOREY_H)))

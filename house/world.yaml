@@ -3,6 +3,7 @@ kind: sim
 engine: mujoco
 label: Beverly Hills hillside mansion
 assets_root: worlds
+explore: .cache/explore/house/manifest.json
 supports:
   humanoid-unitree-g1: build/house-g1.xml
 spawn:

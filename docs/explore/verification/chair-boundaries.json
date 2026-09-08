@@ -1,0 +1,646 @@
+{
+  "chair_boundaries": [
+    {
+      "body": "ix_dn_w0",
+      "case": "table_leg_approach",
+      "outcome": "table_leg_contact",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 303,
+      "first_table_contact": "table_leg",
+      "other_contacts": {
+        "dining_floor": 7118,
+        "furn_dn_table_legd": 303
+      },
+      "final_position": [
+        -4.382529067521985,
+        3.8210890413703242,
+        0.15602507433283389
+      ],
+      "resting_contacts": 3,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5890,
+        "max_penetration": 0.0032830119809176897,
+        "max_linear_speed": 2.509179712694614,
+        "max_angular_speed": 5.927874473725616,
+        "max_owned_force": 91.97534524484547,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w0__h1"
+        ],
+        "worst_time": 6.493999999999507,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w0",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2516,
+      "leg_contacts": 0,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1697,
+        "furn_dn_table_top": 2516
+      },
+      "final_position": [
+        -3.772629174478702,
+        3.780600501627108,
+        0.30482653406985544
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473644753723,
+        "max_linear_speed": 3.4776465699003536,
+        "max_angular_speed": 8.942117638727636,
+        "max_owned_force": 98.98581525934276,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w0__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e0",
+      "case": "table_leg_approach",
+      "outcome": "table_leg_contact",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 173,
+      "first_table_contact": "table_leg",
+      "other_contacts": {
+        "dining_floor": 7132,
+        "furn_dn_table_legb": 173
+      },
+      "final_position": [
+        -1.2164969438070967,
+        3.8493671748203435,
+        0.1560262457673272
+      ],
+      "resting_contacts": 2,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5900,
+        "max_penetration": 0.003765946224855085,
+        "max_linear_speed": 2.515275619842125,
+        "max_angular_speed": 7.151193889228988,
+        "max_owned_force": 91.97534524484861,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e0__h2"
+        ],
+        "worst_time": 6.497999999999506,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e0",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2473,
+      "leg_contacts": 12,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1378,
+        "furn_dn_table_top": 2473,
+        "furn_dn_table_legb": 12
+      },
+      "final_position": [
+        -1.8038890051674343,
+        3.855636031970154,
+        0.3023109432107455
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473635419745,
+        "max_linear_speed": 3.4776465698889187,
+        "max_angular_speed": 8.942117638799084,
+        "max_owned_force": 98.9858152593523,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e0__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w1",
+      "case": "table_leg_approach",
+      "outcome": "other_boundary_obstructed",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 0,
+      "first_table_contact": null,
+      "other_contacts": {
+        "dining_floor": 7217,
+        "furn_dn_w0__h2": 253,
+        "furn_dn_w0__h16": 19
+      },
+      "final_position": [
+        -4.341820196356296,
+        4.33505750905734,
+        0.15602507435992513
+      ],
+      "resting_contacts": 3,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5680,
+        "max_penetration": 0.006528131535886356,
+        "max_linear_speed": 2.323370477438266,
+        "max_angular_speed": 5.217854339949702,
+        "max_owned_force": 91.97534524427344,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w1__h2"
+        ],
+        "worst_time": 6.149999999999545,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w1",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2516,
+      "leg_contacts": 0,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1697,
+        "furn_dn_table_top": 2516
+      },
+      "final_position": [
+        -3.772629179918733,
+        4.580600501029468,
+        0.3048265331341895
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473312208454,
+        "max_linear_speed": 3.4776465692654157,
+        "max_angular_speed": 8.942117627148862,
+        "max_owned_force": 98.985815259154,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w1__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e1",
+      "case": "table_leg_approach",
+      "outcome": "other_boundary_obstructed",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 0,
+      "first_table_contact": null,
+      "other_contacts": {
+        "dining_floor": 7172,
+        "furn_dn_e2__h2": 265,
+        "furn_dn_e2__h16": 20
+      },
+      "final_position": [
+        -1.257525268124461,
+        4.8651069308156965,
+        0.15602529820233918
+      ],
+      "resting_contacts": 2,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5680,
+        "max_penetration": 0.005227226708477556,
+        "max_linear_speed": 2.3152435525537998,
+        "max_angular_speed": 5.084887998365628,
+        "max_owned_force": 91.97534524434326,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e1__h2"
+        ],
+        "worst_time": 6.159999999999544,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e1",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2516,
+      "leg_contacts": 0,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1697,
+        "furn_dn_table_top": 2516
+      },
+      "final_position": [
+        -1.8273708205964057,
+        4.619399499300133,
+        0.3048265332230242
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473343503476,
+        "max_linear_speed": 3.477646569343063,
+        "max_angular_speed": 8.942117629379496,
+        "max_owned_force": 98.98581525920773,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e1__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w2",
+      "case": "table_leg_approach",
+      "outcome": "table_leg_contact",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 173,
+      "first_table_contact": "table_leg",
+      "other_contacts": {
+        "dining_floor": 7085,
+        "furn_dn_table_legc": 173
+      },
+      "final_position": [
+        -4.383453493059473,
+        5.35075314400928,
+        0.15602507433283402
+      ],
+      "resting_contacts": 3,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5900,
+        "max_penetration": 0.003759953783653125,
+        "max_linear_speed": 2.515265837031595,
+        "max_angular_speed": 7.149933269954674,
+        "max_owned_force": 91.97534524426129,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w2__h2"
+        ],
+        "worst_time": 6.497999999999506,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w2",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2473,
+      "leg_contacts": 12,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1379,
+        "furn_dn_table_top": 2473,
+        "furn_dn_table_legc": 12
+      },
+      "final_position": [
+        -3.7961107789516286,
+        5.344364201332098,
+        0.3023110049709959
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473297751213,
+        "max_linear_speed": 3.477646569240706,
+        "max_angular_speed": 8.94211762684666,
+        "max_owned_force": 98.98581525915239,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w2__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e2",
+      "case": "table_leg_approach",
+      "outcome": "table_leg_contact",
+      "passed": true,
+      "table_contacts": 0,
+      "leg_contacts": 303,
+      "first_table_contact": "table_leg",
+      "other_contacts": {
+        "dining_floor": 7142,
+        "furn_dn_table_lega": 303
+      },
+      "final_position": [
+        -1.2174748426862698,
+        5.378913647407463,
+        0.15602586482870318
+      ],
+      "resting_contacts": 3,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 5890,
+        "max_penetration": 0.00328292363917828,
+        "max_linear_speed": 2.5091792831279576,
+        "max_angular_speed": 5.9278567919154765,
+        "max_owned_force": 91.97534524430851,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e2__h1"
+        ],
+        "worst_time": 6.493999999999507,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e2",
+      "case": "table_edge_release",
+      "outcome": "edge_release",
+      "passed": true,
+      "table_contacts": 2516,
+      "leg_contacts": 0,
+      "first_table_contact": "tabletop",
+      "other_contacts": {
+        "dining_floor": 1697,
+        "furn_dn_table_top": 2516
+      },
+      "final_position": [
+        -1.8273708202870156,
+        5.419399499159816,
+        0.30482653316963
+      ],
+      "resting_contacts": 4,
+      "cancel_cleared": true,
+      "trajectory": {
+        "samples": 7700,
+        "max_penetration": 0.008464473324627741,
+        "max_linear_speed": 3.4776465692990346,
+        "max_angular_speed": 8.942117628223265,
+        "max_owned_force": 98.98581525918183,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e2__h2"
+        ],
+        "worst_time": 13.02600000000102,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    }
+  ],
+  "blocked_drags": [
+    {
+      "body": "ix_dn_w0",
+      "target": [
+        -4.650867703235974,
+        3.0325398794615728,
+        0.5625852168305656
+      ],
+      "leg_target": [
+        -3.25,
+        3.5,
+        0.5753274701856083
+      ],
+      "status": {
+        "name": "ix_dn_w0__free",
+        "position": [
+          -3.7405230982110904,
+          3.2214728836414164,
+          0.23891368834267274
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 4520,
+        "max_penetration": 0.003362119932067663,
+        "max_linear_speed": 2.326935404126043,
+        "max_angular_speed": 3.8415515227405597,
+        "max_owned_force": 93.18034348750777,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w0__h15"
+        ],
+        "worst_time": 6.061999999999554,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e0",
+      "target": [
+        -0.9484468322513261,
+        3.034801207403081,
+        0.5625852168305666
+      ],
+      "leg_target": [
+        -2.35,
+        3.5,
+        0.3092431555565132
+      ],
+      "status": {
+        "name": "ix_dn_e0__free",
+        "position": [
+          -1.854281760910089,
+          3.286822567659109,
+          0.21081862260498901
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 4490,
+        "max_penetration": 0.0033525764042492134,
+        "max_linear_speed": 2.0200261976765606,
+        "max_angular_speed": 3.073744808739488,
+        "max_owned_force": 99.89635257100153,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e0__h2"
+        ],
+        "worst_time": 5.82599999999958,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w1",
+      "target": [
+        -4.931911805119191,
+        4.598363930973565,
+        0.5625852168306129
+      ],
+      "leg_target": [
+        -3.25,
+        3.5,
+        0.3881901202387457
+      ],
+      "status": {
+        "name": "ix_dn_w1__free",
+        "position": [
+          -3.9713718882418996,
+          4.168857603585034,
+          0.2306698366720542
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 4270,
+        "max_penetration": 0.001292969033767133,
+        "max_linear_speed": 1.8025426796034536,
+        "max_angular_speed": 5.27992882948337,
+        "max_owned_force": 92.9347872143435,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w1__h2"
+        ],
+        "worst_time": 5.571999999999608,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e1",
+      "target": [
+        -0.6680881948808168,
+        4.601636069026623,
+        0.5625852168306076
+      ],
+      "leg_target": [
+        -2.35,
+        5.7,
+        0.5622036387955137
+      ],
+      "status": {
+        "name": "ix_dn_e1__free",
+        "position": [
+          -0.930783578694697,
+          4.674092618110762,
+          0.2306711710632708
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 3740,
+        "max_penetration": 0.002238462307842276,
+        "max_linear_speed": 2.3163991754660174,
+        "max_angular_speed": 5.4997983460756235,
+        "max_owned_force": 92.62354119151469,
+        "worst_pair": [
+          "great_room_floor",
+          "furn_dn_e1__h2"
+        ],
+        "worst_time": 4.3999999999997375,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_w2",
+      "target": [
+        -4.651553167747178,
+        6.165198792599618,
+        0.5625852168306142
+      ],
+      "leg_target": [
+        -3.25,
+        5.7,
+        0.6016739640537621
+      ],
+      "status": {
+        "name": "ix_dn_w2__free",
+        "position": [
+          -3.535441960392256,
+          5.880025237904222,
+          0.16651875516862016
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 4920,
+        "max_penetration": 0.0034288060661545883,
+        "max_linear_speed": 2.5762397606440084,
+        "max_angular_speed": 5.634770534972364,
+        "max_owned_force": 97.40427557456985,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_w2__h2"
+        ],
+        "worst_time": 6.809999999999472,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    },
+    {
+      "body": "ix_dn_e2",
+      "target": [
+        -0.9491322967657475,
+        6.167460120539888,
+        0.5625852168306105
+      ],
+      "leg_target": [
+        -2.35,
+        5.7,
+        0.23067024767779043
+      ],
+      "status": {
+        "name": "ix_dn_e2__free",
+        "position": [
+          -2.0901719949076476,
+          5.701991573653553,
+          0.23067067326844018
+        ],
+        "held": false,
+        "result": "blocked"
+      },
+      "cancelled_without_state_change": true,
+      "trajectory": {
+        "samples": 4860,
+        "max_penetration": 0.004068693563433742,
+        "max_linear_speed": 2.493579827008172,
+        "max_angular_speed": 4.405420217752781,
+        "max_owned_force": 94.42500552827363,
+        "worst_pair": [
+          "dining_floor",
+          "furn_dn_e2__h0"
+        ],
+        "worst_time": 3.765999999999807,
+        "max_joint_angular_speed": 0.0007131722606768415,
+        "linear_speed_limit": 6.76418390534633
+      }
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "scene": "apt",
+    "classification": {
+      "floor": 24,
+      "ceiling": 43,
+      "wall": 937,
+      "furniture": 343,
+      "stairs": 23,
+      "background": 797
+    },
+    "flat_routes": [
+      {
+        "id": "entry_gallery",
+        "samples": 38,
+        "min_headroom": 3.6
+      },
+      {
+        "id": "living_dining",
+        "samples": 44,
+        "min_headroom": 3.6
+      },
+      {
+        "id": "kitchen_access",
+        "samples": 71,
+        "min_headroom": 1.775
+      }
+    ],
+    "meshes": 338,
+    "triangles": 450150,
+    "bytes": 49308988,
+    "source_hash": "623afe6d5c365cfe5e50a82cb43ca907eb01d46d4db4406c344fcd35d1855ac9"
+  },
+  {
+    "scene": "house",
+    "classification": {
+      "floor": 30,
+      "ceiling": 54,
+      "wall": 1224,
+      "furniture": 460,
+      "stairs": 34,
+      "exterior": 478,
+      "roof": 1,
+      "background": 500
+    },
+    "flat_routes": [
+      {
+        "id": "gate_approach",
+        "samples": 369,
+        "min_headroom": 2.2175
+      },
+      {
+        "id": "pool_approach",
+        "samples": 156,
+        "min_headroom": null
+      },
+      {
+        "id": "lawn_approach",
+        "samples": 61,
+        "min_headroom": null
+      },
+      {
+        "id": "pool_loop",
+        "samples": 390,
+        "min_headroom": null
+      },
+      {
+        "id": "residence_loop",
+        "samples": 601,
+        "min_headroom": null
+      },
+      {
+        "id": "rear_branch",
+        "samples": 210,
+        "min_headroom": null
+      }
+    ],
+    "meshes": 493,
+    "triangles": 1060776,
+    "bytes": 87310004,
+    "source_hash": "418961608c8603807bf74f79fbe8cac163ce563260eb781da4539d5f8eeb3b7d"
+  }
+]

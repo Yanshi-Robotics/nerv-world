@@ -413,14 +413,15 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     interaction = physics = cycle = None
     if getattr(layout, 'INTERACTIVE', False):
         from scenes.interaction import Interaction, InspectionPhysics
-        from scenes.time_cycle import TimeCycle
-        from types import SimpleNamespace
         interaction = Interaction(m, d)
         physics = InspectionPhysics(m, d, interaction)
+        opt.geomgroup[4] = 0  # analytic collision shells are never visual surfaces
+    if getattr(layout, 'LIGHTS_BY_TIME', None):
+        from scenes.time_cycle import TimeCycle
+        from types import SimpleNamespace
         renderer_adapter = SimpleNamespace(_mjr_context=ctx, _gl_context=SimpleNamespace(
             make_current=lambda: glfw.make_context_current(window)))
         cycle = TimeCycle(m, scene_key, renderer_adapter)
-        opt.geomgroup[4] = 0  # analytic collision shells are never visual surfaces
 
     def direction():
         yaw, pitch = np.radians([player.yaw, player.pitch])
@@ -511,6 +512,7 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
         elif cycle and key == glfw.KEY_L:
             phases = cycle.phases
             cycle.set(phases[(phases.index(cycle.phase)+1) % len(phases)])
+            mujoco.mj_forward(m,d)  # Refresh moved light positions even in a static scene.
         elif glfw.KEY_1 <= key <= glfw.KEY_9:
             n = getattr(layout, "N_FLOORS", 1)
             f = key - glfw.KEY_1
@@ -531,6 +533,8 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
     if interaction:
         print('E 开合/按压 · [ ] 调整开度 · J 切换同一部件的关节 · G 抓取/松手 · '
               'L 切换时段 · Backspace 复位家具。瞄准 2 米内可见的活动部件。')
+    elif cycle:
+        print('L 切换白天、清晨、黄昏与夜间。')
 
     down = lambda k: glfw.get_key(window, k) == glfw.PRESS  # noqa: E731
     prev = glfw.get_time()
@@ -567,7 +571,7 @@ def run_viewer(scene_key: str, robot: str, eye_h: float, floor: int,
             mujoco.mjr_rectangle(mujoco.MjrRect(w//2-1,h//2-5,2,10),1,1,1,.8)
         help_text = player.room()
         if interaction:
-            help_text = f'APT2 inspection | {cycle.phase} | E operate | G grab | L time | Backspace reset'
+            help_text = f'{scene_key.upper()} inspection | {cycle.phase} | E operate | G grab | L time | Backspace reset'
             target = selection()
             if target:
                 name = target['names'][state['joint_index'] % len(target['names'])]

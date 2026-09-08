@@ -44,6 +44,9 @@ class LocalBus:
     def rays(self, angles_deg, max_range_m):
         return self.sim.rays(angles_deg, max_range_m)
 
+    def clearance(self, query):
+        return self.sim.clearance(query)
+
     def sensors(self):
         return self.sim.sensor_names()
 

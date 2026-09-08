@@ -1,0 +1,160 @@
+{
+  "runtime": [
+    {
+      "scene": "apt",
+      "robot": "g1",
+      "rooms": 24,
+      "facilities": 68,
+      "phases": [
+        "day",
+        "morning",
+        "dusk",
+        "night"
+      ]
+    },
+    {
+      "scene": "apt",
+      "robot": "go2",
+      "rooms": 24,
+      "facilities": 68,
+      "phases": [
+        "day",
+        "morning",
+        "dusk",
+        "night"
+      ]
+    },
+    {
+      "scene": "house",
+      "robot": "g1",
+      "rooms": 38,
+      "facilities": 73,
+      "phases": [
+        "day",
+        "morning",
+        "dusk",
+        "night"
+      ]
+    },
+    {
+      "scene": "house",
+      "robot": "go2",
+      "rooms": 38,
+      "facilities": 73,
+      "phases": [
+        "day",
+        "morning",
+        "dusk",
+        "night"
+      ]
+    }
+  ],
+  "negative": {
+    "floating": {
+      "opened": true,
+      "inside": true,
+      "released": true,
+      "settled": false,
+      "supported": false,
+      "contact_valid": true,
+      "closed": true
+    },
+    "partial": {
+      "opened": true,
+      "inside": false,
+      "released": true,
+      "settled": false,
+      "supported": false,
+      "contact_valid": false,
+      "closed": true
+    },
+    "wrong_shelf": {
+      "opened": true,
+      "inside": false,
+      "released": true,
+      "settled": false,
+      "supported": false,
+      "contact_valid": false,
+      "closed": true
+    },
+    "wedged": {
+      "opened": true,
+      "inside": false,
+      "released": true,
+      "settled": false,
+      "supported": false,
+      "contact_valid": false,
+      "closed": true
+    },
+    "falling": {
+      "opened": true,
+      "inside": true,
+      "released": true,
+      "settled": false,
+      "supported": false,
+      "contact_valid": true,
+      "closed": true
+    }
+  },
+  "physics": {
+    "held_rejected": true,
+    "open_door_rejected": true,
+    "physical_placement": {
+      "id": "put_can_in_fridge",
+      "label": {
+        "en": "Put the can in the refrigerator",
+        "zh": "将罐体放入冰箱"
+      },
+      "supported": true,
+      "stage": "complete",
+      "success": true,
+      "checks": {
+        "opened": true,
+        "inside": true,
+        "released": true,
+        "settled": true,
+        "supported": true,
+        "contact_valid": true,
+        "closed": true
+      },
+      "target": {
+        "body": "ix_a2_fridge__object",
+        "bounds": [
+          [
+            -0.024295925180000004,
+            -0.19358094811,
+            0.211191822218
+          ],
+          [
+            0.39185269743,
+            0.22719619419999998,
+            0.54533257292
+          ]
+        ],
+        "frame": "body",
+        "label": {
+          "en": "Refrigerator middle shelf target",
+          "zh": "冷藏室中层任务区"
+        },
+        "world_bounds": [
+          [
+            -10.72429592518,
+            3.6064190468899997,
+            1.1570688221179999
+          ],
+          [
+            -10.30814730257,
+            4.0271961892,
+            1.4912095728199999
+          ]
+        ],
+        "world_anchor": [
+          -10.516221613875,
+          3.816807618044999,
+          1.324139197469
+        ]
+      }
+    },
+    "sub_frame_hold_rejected": true
+  }
+}

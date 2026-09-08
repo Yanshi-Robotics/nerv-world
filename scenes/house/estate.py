@@ -228,8 +228,11 @@ def build_estate(b, floor_z, storey_h, footprints):
             )
         )
     # 三层前露台位于二层屋顶，地面与上层门厅标高一致。
+    architecture_start = len(exterior)
     tz = floor_z(2)
-    box("view_terrace_floor", (-15, -4.5, 15, -1), tz, 0.10, "stone", radius=0, tile=2.0)
+    box("view_terrace_floor", (-15, -4.5, 15, -1), tz, 0.10, "stone", radius=0, tile=2.0).update(
+        explore_role="floor", explore_floor=2
+    )
     area("view_terrace", "观景露台", (-15, -4.5, 15, -1), tz)
     for tag, pos, size in [
         ("front", (0, -4.45, tz + 0.6), (30, 0.06, 1.2)),
@@ -252,6 +255,7 @@ def build_estate(b, floor_z, storey_h, footprints):
     exterior.append(
         b.box("entry_canopy", (-1.4, -5.7, 2.55), (7.1, 2.65, 0.24), "stone", collide=False)
     )
+    exterior[-1]["explore_role"] = "roof"
     for x in (-4.65, 1.85):
         exterior.append(
             b.box("entry_column" + str(x), (x, -6.45, 1.20), (0.20, 0.20, 2.40), "metal")
@@ -259,6 +263,7 @@ def build_estate(b, floor_z, storey_h, footprints):
     exterior.append(
         b.box("entry_soffit", (-1.4, -5.7, 2.414), (6.7, 2.4, 0.02), "walnut", collide=False)
     )
+    exterior[-1]["explore_role"] = "ceiling"
     exterior.append(
         b.box("stone_chimney", (-7.45, -4.69, 3.0), (1.20, 0.36, 6.0), "stone", collide=False)
     )
@@ -279,6 +284,7 @@ def build_estate(b, floor_z, storey_h, footprints):
             exterior.append(
                 b.box(f"cornice{f}_{tag}", pos, size, "white", radius=0.02, collide=False)
             )
+            exterior[-1]["explore_floor"] = f
         for x in (a + 0.12, d - 0.12):
             for y in (c + 0.12, e - 0.12):
                 exterior.append(
@@ -290,6 +296,12 @@ def build_estate(b, floor_z, storey_h, footprints):
                         collide=False,
                     )
                 )
+                exterior[-1]["explore_floor"] = f
+
+    # Building envelopes follow floor cutaways; garden vegetation and paving
+    # preceding this section remain exterior regardless of their height.
+    for item in exterior[architecture_start:]:
+        item.setdefault("explore_role", "wall")
 
     # 山坡地形在宅地外下降；可见道路与邻宅放在同一个地形函数上。
     def height(x, y):

@@ -1932,7 +1932,8 @@ def check_time_presets(key: str, layout) -> list[str]:
         sky = spec.get("sky")
         if sky:
             for a in ("fileright", "fileleft", "fileup", "filedown", "filefront", "fileback"):
-                pth = os.path.join(ROOT, "textures", "house3", f"sky_{sky}_{a}.png")
+                from scenes.apply_time_preset import sky_files
+                pth = sky_files(layout, sky)[a]
                 if not os.path.isfile(pth):
                     _fail(errs, f"{phase}: 天空盒面缺文件 {os.path.relpath(pth, ROOT)}"
                                 "（先跑 tools/make_view.py --sky --sky-phase <时段>）")

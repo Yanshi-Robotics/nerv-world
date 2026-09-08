@@ -106,6 +106,20 @@ def load_sibling(key: str, module: str):
 OUT_SUBDIR = "build"
 
 
+def load_operator():
+    """Load the world-owned runtime without requiring a consumer package import."""
+    path=os.path.join(ROOT,"scenes","operator.py")
+    spec=importlib.util.spec_from_file_location("nerv_world_operator",path)
+    module=importlib.util.module_from_spec(spec)
+    injected=ROOT not in sys.path
+    if injected:sys.path.insert(0,ROOT)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if injected:sys.path.remove(ROOT)
+    return module
+
+
 def scene_filename(scene_key: str, robot_key: str) -> str:
     """(场景, 机器人) 对应的产物 —— **相对仓根**的路径，含 `build/` 目录。
 

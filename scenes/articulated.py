@@ -106,5 +106,8 @@ def movable(item, geometry):
         if geom.get("contype", "1") != "0":
             geom.set("density", str(item.get("density", 220)))
             geom.set("solref", CONTACT_SOLREF)
+            # Retain the movable object's firm contact time constant against a
+            # static countertop's default softer contact, instead of averaging.
+            geom.set("priority", "1")
         root.append(geom)
     return ET.tostring(root, encoding="unicode")

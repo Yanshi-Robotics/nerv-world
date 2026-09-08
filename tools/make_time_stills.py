@@ -72,8 +72,11 @@ def main() -> None:
     Wpx, Hpx = 1280, 720
 
     # 机位：贴大客厅中央开间玻璃，看上西区（同帧含天空/对岸楼/公园）
-    eye = (L.ENFILADE_X, L.Y3 - 0.45, 1.85)
-    target = (-L.PARK_W / 2.0 - 300.0, L.PARK_NEAR_Y + 900.0, -L.ELEV * 0.45)
+    if hasattr(L,"TIME_VIEW"):
+        eye,target=L.TIME_VIEW["eye"],L.TIME_VIEW["target"]
+    else:
+        eye = (L.ENFILADE_X, L.Y3 - 0.45, 1.85)
+        target = (-L.PARK_W / 2.0 - 300.0, L.PARK_NEAR_Y + 900.0, -L.ELEV * 0.45)
 
     frames: dict[str, np.ndarray] = {}
     means: dict[str, float] = {}
@@ -104,6 +107,7 @@ def main() -> None:
                 size = int(m.tex_height[tid]*m.tex_width[tid]*m.tex_nchannel[tid])
                 day_facades[tid] = (adr, m.tex_data[adr:adr+size].copy())
         warns = preset.apply(m, r, phase, scene_key=a.scene)
+        mujoco.mj_camlight(m, d)
         all_warns += warns
         r.update_scene(d, camera=cid)
         rgb = r.render()
@@ -156,11 +160,11 @@ def main() -> None:
 
     # 门禁②：night 每间屋的地面亮度（segmentation 掩码）
     if "night" in phases:
-        if getattr(L, 'INTERACTIVE', False):
+        if getattr(L, 'N_FLOORS', 1)>1:
             # A roof camera cannot see the duplex's lower floor. Sample inside
             # every room instead, below that room's ceiling, using floor IDs.
             check_room_nights(xml, L, preset, a.scene)
-            print('✅ 三道门禁全过（逐房间检查两层）')
+            print(f'✅ 三道门禁全过（逐房间检查 {L.N_FLOORS} 层）')
             return
         m = mujoco.MjModel.from_xml_path(xml)
         d = mujoco.MjData(m)

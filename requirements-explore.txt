@@ -1,0 +1,5 @@
+# Optional CPU-only export dependencies; not imported by scene generation/runtime.
+mujoco>=3.12,<4
+numpy>=2,<3
+Pillow>=10,<13
+trimesh>=4.5,<6

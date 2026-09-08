@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 import argparse
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -14,12 +15,91 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scenes import manifest  # noqa: E402
 from scenes.collision import collision_ray  # noqa: E402
+from scenes.paths import residence_routes  # noqa: E402
 from tools import make_house  # noqa: E402
 
 BASELINE = ROOT / "docs/residences/migration/baseline.json"
 BODY_RADIUS = 0.30
 BODY_LEVELS = (0.30, 0.75, 1.35)
 SAMPLE_SPACING = 0.20
+LEVEL_CLEARANCE = (
+    1.50  # Conservative clearance for the standing G1, not a stair-climbing certificate.
+)
+SEAM_TOLERANCE = 1e-7  # Adjacent float box faces may miss an exactly-on-seam ray.
+
+
+def flat_routes(m, d, layout):
+    # Static route acceptance excludes the robot itself. Preserve the compiled
+    # model and its contact masks; the private ray view shares only transforms.
+    m = copy.copy(m)
+    robot = np.isin(m.geom_group, (2, 3))
+    m.geom_contype[robot] = 0
+    m.geom_conaffinity[robot] = 0
+    reports = []
+    for route in residence_routes(layout):
+        samples = 0
+        minimum_headroom = float("inf")
+        for a, b in zip(route["points"], route["points"][1:]):
+            a, b = np.asarray(a), np.asarray(b)
+            count = max(2, int(np.linalg.norm(b - a) / SAMPLE_SPACING) + 1)
+            for p in np.linspace(a, b, count):
+                for dx, dy in (
+                    (0, 0),
+                    (BODY_RADIUS, 0),
+                    (-BODY_RADIUS, 0),
+                    (0, BODY_RADIUS),
+                    (0, -BODY_RADIUS),
+                ):
+                    distance, g = collision_ray(m, d, p + [dx, dy, 0.2], (0, 0, -1))
+                    if distance < 0:
+                        # All four nearby corners must agree on support. This
+                        # does not excuse a gap wider than floating-point seams.
+                        distances = [
+                            collision_ray(
+                                m,
+                                d,
+                                p + [dx + sx * SEAM_TOLERANCE, dy + sy * SEAM_TOLERANCE, 0.2],
+                                (0, 0, -1),
+                            )[0]
+                            for sx, sy in ((1, 1), (1, -1), (-1, 1), (-1, -1))
+                        ]
+                        if all(0 <= value <= 0.205 for value in distances):
+                            distance = max(distances)
+                    assert 0 <= distance <= 0.205, (
+                        route["id"],
+                        "unsupported",
+                        p.tolist(),
+                        distance,
+                    )
+                for height in BODY_LEVELS:
+                    for direction in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0)):
+                        distance, g = collision_ray(m, d, p + [0, 0, height], direction)
+                        assert distance < 0 or distance >= BODY_RADIUS - 0.002, (
+                            route["id"],
+                            "blocked",
+                            p.tolist(),
+                            m.geom(g).name,
+                            distance,
+                        )
+                distance, g = collision_ray(m, d, p + [0, 0, 0.02], (0, 0, 1))
+                if distance >= 0:
+                    minimum_headroom = min(minimum_headroom, distance + 0.02)
+                    assert distance + 0.02 >= LEVEL_CLEARANCE, (
+                        route["id"],
+                        "headroom",
+                        p.tolist(),
+                        m.geom(g).name,
+                        distance + 0.02,
+                    )
+                samples += 1
+        reports.append(
+            dict(
+                id=route["id"],
+                samples=samples,
+                min_headroom=None if minimum_headroom == float("inf") else minimum_headroom,
+            )
+        )
+    return reports
 
 
 def digest(value):
@@ -176,10 +256,10 @@ def estate():
         return collision_ray(m, d, p, v)
 
     samples = 0
-    for route in layout.ESTATE["routes"]:
-        for a, b in zip(route, route[1:]):
-            a = np.array(a, float)
-            b = np.array(b, float)
+    for route in residence_routes(layout):
+        for a, b in zip(route["points"], route["points"][1:]):
+            a = np.array(a[:2], float)
+            b = np.array(b[:2], float)
             delta = b - a
             n = max(2, int(np.linalg.norm(delta) / SAMPLE_SPACING) + 1)
             for p in np.linspace(a, b, n):

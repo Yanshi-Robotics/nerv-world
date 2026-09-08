@@ -5,6 +5,7 @@ kind: sim
 engine: mujoco
 label: Manhattan duplex penthouse (nerv-world apt)
 assets_root: worlds                               # the nerv-world submodule = this repository
+explore: .cache/explore/apt/manifest.json
 supports:
   humanoid-unitree-g1: build/apt-g1.xml          # the arena built for the G1 (relative to assets_root)
 spawn:

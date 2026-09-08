@@ -1,0 +1,47 @@
+{
+  "inherited_features": {
+    "source_revision": "7fb134f53c293474a8ead488e653f6fdc09c50ff",
+    "preserved_assets": 138,
+    "buildings": 2728,
+    "city_bands": {
+      "uws": 1024,
+      "ues": 1323,
+      "inpark": 80,
+      "neartw": 12
+    },
+    "rendered_bands": {
+      "uws": 248,
+      "ues": 368,
+      "inpark": 68,
+      "neartw": 12,
+      "host": 10
+    },
+    "wall_art": 8,
+    "time_phases": [
+      "day",
+      "morning",
+      "dusk",
+      "night"
+    ],
+    "parallax_distance_m": 3.6666000000000003
+  },
+  "house_estate": {
+    "route_samples": 1787,
+    "boundary_samples": 1800,
+    "pool_samples": 336,
+    "water_fault_injection": true,
+    "hollow_baths": true
+  },
+  "apartment_fixtures": {
+    "hollow_tub_samples": 35,
+    "tub_rim_samples": 4,
+    "static_service_fixtures": true
+  },
+  "mesh_texture_bindings": {
+    "apt/go2": 1259,
+    "apt/g1": 1259,
+    "house/go2": 781,
+    "house/g1": 781
+  },
+  "passed": true
+}

@@ -17,6 +17,10 @@ BUTTON_TRAVEL = 0.005  # metres: source hood buttons have millimetre travel.
 ACTION_TIMEOUT = 5.0
 TRAVEL_SECONDS = 1.2
 GRAB_KP, GRAB_KD, GRAB_FORCE = 160.0, 25.0, 100.0
+GRAB_TARGET_SPEED = 0.5  # m/s; operator cursor targets follow a deliberate carrying speed.
+# A velocity-driven PD spring lags by speed*KD/KP. Allow twice that steady
+# lag, then release a body that cannot follow instead of accumulating strain.
+GRAB_MAX_LAG = 2 * GRAB_TARGET_SPEED * GRAB_KD / GRAB_KP
 
 
 class Interaction:
@@ -29,6 +33,7 @@ class Interaction:
         self.targets = {}
         self.results = {}
         self.held = None
+        self.grab_target = None
         self.owned_force = np.zeros(model.nv)
         self.base_damping = model.dof_damping.copy()
 
@@ -54,7 +59,9 @@ class Interaction:
         self.clear_forces()
         for name in list(self.targets):
             self.finish(name, 'cancelled')
-        self.held = None
+        if self.held:
+            self.results[self.m.joint(self.free_bodies[self.held[0]]).name] = "cancelled"
+        self.held = self.grab_target = None
 
     def command(self, name, fraction):
         if name not in self.joints or not np.isfinite(fraction) or not 0 <= fraction <= 1:
@@ -77,7 +84,8 @@ class Interaction:
         if self.m.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE:
             body = int(self.m.jnt_bodyid[j])
             return dict(name=name, position=self.d.xpos[body].tolist(),
-                        held=bool(self.held and self.held[0] == body))
+                        held=bool(self.held and self.held[0] == body),
+                        result=self.results.get(name, "idle"))
         low, high = self.m.jnt_range[j]
         value = float(self.d.qpos[self.m.jnt_qposadr[j]])
         return dict(name=name, value=value, fraction=float((value-low)/(high-low)),
@@ -107,18 +115,28 @@ class Interaction:
         if body not in self.free_bodies:
             raise ValueError("Only declared movable furniture can be picked up")
         point = self.d.xipos[body].copy() if point is None else np.asarray(point, float)
+        if point.shape != (3,) or not np.isfinite(point).all():
+            raise ValueError("Grab point must be a finite 3D vector")
+        # Validate first: an invalid replacement preserves the existing hold.
+        if self.held:
+            self.release()
         rotation = self.d.xmat[body].reshape(3, 3)
         local = rotation.T @ (point - self.d.xpos[body])
         self.held = (body, local, point.copy())
+        self.grab_target = point.copy()
+        self.results[self.m.joint(self.free_bodies[body]).name] = "moving"
 
     def move_grab(self, target):
         if self.held:
-            if not np.all(np.isfinite(target)):
-                raise ValueError("Grab target must be finite")
-            self.held = (*self.held[:2], np.asarray(target, float))
+            target=np.asarray(target,float)
+            if target.shape != (3,) or not np.all(np.isfinite(target)):
+                raise ValueError("Grab target must be a finite 3D vector")
+            self.held = (*self.held[:2], target.copy())
 
     def release(self):
-        self.held = None
+        if self.held:
+            self.results[self.m.joint(self.free_bodies[self.held[0]]).name] = "released"
+        self.held = self.grab_target = None
         self.clear_forces()
 
     def update(self):
@@ -144,9 +162,19 @@ class Interaction:
         if self.held:
             body, local, wanted = self.held
             point = self.d.xpos[body] + self.d.xmat[body].reshape(3,3) @ local
+            change = wanted - self.grab_target
+            distance = np.linalg.norm(change)
+            if distance:
+                self.grab_target += change * min(1, GRAB_TARGET_SPEED*self.m.opt.timestep/distance)
+            error = self.grab_target - point
+            if np.linalg.norm(error) > GRAB_MAX_LAG:
+                self.results[self.m.joint(self.free_bodies[body]).name] = "blocked"
+                self.held = self.grab_target = None
+                self.d.qfrc_applied[:] += self.owned_force
+                return
             jac = np.zeros((3, self.m.nv))
             mujoco.mj_jac(self.m, self.d, jac, None, point, body)
-            force = GRAB_KP*(wanted-point) - GRAB_KD*(jac @ self.d.qvel)
+            force = GRAB_KP*error - GRAB_KD*(jac @ self.d.qvel)
             force -= self.m.body_mass[body]*self.m.opt.gravity
             norm = np.linalg.norm(force)
             if norm > GRAB_FORCE:
@@ -157,8 +185,9 @@ class Interaction:
 
 class InspectionPhysics:
     """Step furniture physics while preserving the walkthrough's parked robot."""
-    def __init__(self, model, data, interaction):
+    def __init__(self, model, data, interaction, observer=None):
         self.m, self.d, self.interaction = model, data, interaction
+        self.observer = observer
         movable = set(interaction.joints.values())
         self.qindices, self.vindices = [], []
         for j in range(model.njnt):
@@ -178,6 +207,8 @@ class InspectionPhysics:
         while self.accumulated >= dt:
             self.interaction.update()
             mujoco.mj_step(self.m, self.d)
+            if self.observer is not None:
+                self.observer(self.m, self.d)
             self.d.qpos[self.qindices] = self.parked
             self.d.qvel[self.vindices] = 0
             self.accumulated -= dt

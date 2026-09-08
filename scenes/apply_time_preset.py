@@ -63,6 +63,8 @@ def _apply_light(m, i: int, attrs: dict) -> None:
             m.light_dir[i] = d / np.linalg.norm(d)   # MJCF 编译时会归一化，运行期得自己来
         elif k == "diffuse":
             m.light_diffuse[i] = _f(v)
+        elif k == "ambient":
+            m.light_ambient[i] = _f(v)
         elif k == "specular":
             m.light_specular[i] = _f(v)
         elif k == "cutoff":
@@ -110,7 +112,14 @@ def _band_geoms(m, L, where: str) -> list[int]:
     return ids
 
 
-def _swap_skybox(m, renderer, phase_suffix: str, warns: list[str]) -> None:
+def sky_files(layout, phase=None):
+    """Resolve each scene's declared sky; phase files share the day file prefix."""
+    return {key: os.path.join(_ROOT, os.path.dirname(path),
+                os.path.basename(path).replace("sky_", f"sky_{phase}_", 1) if phase else os.path.basename(path))
+            for key,path in layout.SKYBOX.items()}
+
+
+def _swap_skybox(m, renderer, phase_suffix: str, warns: list[str], layout=None) -> None:
     """把天空盒六面换成 `textures/house3/sky_<时段>_file*.png`。
 
     ⛔ 两个都是实测过的坑：
@@ -136,13 +145,13 @@ def _swap_skybox(m, renderer, phase_suffix: str, warns: list[str]) -> None:
     adr = int(m.tex_adr[skyid])
     block = m.tex_data[adr: adr + H * W * nch].reshape(6, W, W, nch)
 
-    tex_dir = os.path.join(_ROOT, "textures", "house3")
+    layout = layout or _layout("apt")
     attrs = ("fileright", "fileleft", "fileup", "filedown", "filefront", "fileback")
 
-    def _load(prefix: str) -> dict[str, np.ndarray]:
+    def _load(phase=None) -> dict[str, np.ndarray]:
         out = {}
         for a in attrs:
-            p = os.path.join(tex_dir, f"{prefix}{a}.png")
+            p = sky_files(layout, phase)[a]
             if not os.path.isfile(p):
                 raise FileNotFoundError(
                     f"缺天空盒面 {p}（先跑 tools/make_view.py --sky --sky-phase <时段>）")
@@ -154,8 +163,8 @@ def _swap_skybox(m, renderer, phase_suffix: str, warns: list[str]) -> None:
             out[a] = img
         return out
 
-    day = _load("sky_")
-    new = _load(f"sky_{phase_suffix}_")
+    day = _load()
+    new = _load(phase_suffix)
     # 逐面匹配出「内存槽位 → 文件名」的真实顺序（拿白天那套对，误差最小者胜）
     order: list[str] = []
     for i in range(6):
@@ -343,7 +352,7 @@ def apply(model, renderer, phase: str, scene_key: str = "apt",
             _swap_gridcube(m, renderer, L, tex_name, night_file, warns)
         sky = spec.get("sky")
         if sky:
-            _swap_skybox(m, renderer, sky, warns)
+            _swap_skybox(m, renderer, sky, warns, L)
 
     for name, attrs in (light_patch or {}).items():
         _apply_light(m, _light_id(m, name), attrs)

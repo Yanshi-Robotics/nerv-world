@@ -27,6 +27,13 @@ house 的规矩是「先定台阶 → 推层高」。apt 有一个外部硬约�
 """
 from __future__ import annotations
 
+# Task authoring: bottom-up shelf rank 1 is the middle shelf, in the right-hand
+# chilled compartment. Its usable volume is derived from compiled collision parts.
+FRIDGE_TASK = dict(object="ix_a2_can",container="ix_a2_fridge__object",
+                  door="ix_a2_fridge__fridge_door_joint",compartment="right",
+                  shelf_rank=1,shelf_count=3,
+                  target_label={"en":"Refrigerator middle shelf target","zh":"冷藏室中层任务区"})
+
 import math
 
 from scenes import furniture as F        # noqa: E402  家具零件库，所有场景共用

@@ -48,7 +48,7 @@ oven before extending the rack. The overlay shows the selected joint, measured o
 and action result. A blocked action times out instead of passing through the obstacle.
 
 Dragging applies a limited force at the selected point. Moving the camera too quickly can
-make an object lag, rotate or collide. Releasing it restores unsupported motion under gravity.
+make an object lag, rotate or collide. Releasing an object restores unsupported motion under gravity.
 The inspector parks the robot while stepping furniture physics; its camera does not actuate
 the G1. A reset intentionally returns all furniture to its initial state, whereas changing
 the time preset preserves the current furniture positions.
@@ -73,7 +73,14 @@ reference coordinate; changing it alone does not visually open the door.
 Dining-chair collision comes from CoACD convex decomposition, not from enabling collision on
 a mesh split by material. The latter would fill concave spaces with convex hulls. Existing
 firm-contact settings (`solref="0.005 1"`) remain on the furniture collision parts and are
-checked by the scene verifier.
+checked by the scene verifier. Movable collision parts have priority 1 so their contact
+settings also apply against the otherwise softer static worktops.
+
+Grab targets advance at up to 0.5 m/s. If a held point falls more than twice the
+controller's expected steady carrying lag behind that target, the controller releases
+its force and reports `blocked`. The measured object position remains available to the
+operator. This also handles a cursor dragged through a wall without forcing the object
+through it. Releasing or cancelling clears the controller's own force.
 
 The four appliances reuse the existing 28 OBJ parts without reprocessing their vertices.
 The new extraction record contains archive, source XML and part checksums, source URLs and
@@ -114,33 +121,41 @@ NERV identifies the controlled robot from its actuated body tree, allowing passi
 objects to have their own free joints. Furniture adds no robot actuators: G1 still has 29,
 and the generated Go2 variant has 12. NERV currently registers the G1 variant of apt.
 
-The native inspection controls are not exposed as NERV tools. The released G1 policy provides
-walking and turning; it does not provide grasping, opening, sitting down or stair climbing.
-Water flow, temperature, cooking, fan operation, contents and task success conditions are also
-outside the current scene mechanics. Turning a knob changes its angle, not a simulated appliance's
-functional state.
+The world supplies `scenes.operator.SceneRuntime` for NERV's operator interface, separate from
+robot motor commands and brain tools. The same runtime supplies the facility catalogue, measured
+joint state, bounded-force interaction, task evaluation and reversible time presets. Its consumer
+owns simulation stepping, synchronization, camera access and operator control. The read-only
+[Explore export](../explore/README.md) uses that catalogue to display floors, rooms, fixtures,
+passage checkpoints and inspection routes.
 
-Further development should use apt in this order:
+The refrigerator task uses the right compartment's middle shelf, selected in `FRIDGE_TASK` in
+the apt layout. Its target volume is derived from the compiled shelf, divider, side wall and
+back-wall collision parts. To complete it, open the cold-compartment door, place the entire can
+inside the marked volume, release it onto that specific shelf, wait at least 0.5 simulated
+seconds for stable support, and close the door. The evaluator checks actual geometry, velocity,
+contact normal and support force. It rejects held, partially inserted, unsupported, moving or
+wrong-shelf placements. Contact penetration over 1 cm invalidates the attempt until reset;
+the consumer must call `observe_step()` after each physics step to capture brief violations.
 
-1. Define object-level observations and success conditions for one bounded task, such as opening
-   the refrigerator and placing the can inside. Use measured joint and object state and the
-   existing task sites; include blocked, dropped and out-of-reach outcomes.
-2. Add world-layer operation and state interfaces to NERV, with reachable-object selection and
-   reset semantics. Keep robot motor commands and scene operations separate.
-3. Train and validate the required robot manipulation skills with a suitable hand model in the
-   policy/training repositories. Validate contact, grasp release and failure recovery in apt
-   before offering the task to a brain. A saved pose or operator force is not a learned skill.
-4. Extend to additional objects only when a task requires them, measuring contact load and both
-   camera streams after each expansion.
+`SceneRuntime.reset()` cancels forces and clears task state without resetting physics. A full
+scene reset belongs to the consumer: cancel control first, reset MuJoCo data, restore the robot
+starting state, run forward dynamics and clear the runtime. A time change preserves furniture
+state. Appliance doors are passive hinges after an action ends; a drawer can physically push
+an unlocked door open, so reaching its target is assessed together with the resulting contacts.
 
-Historical training-environment failures and old performance numbers are not assumed to describe
-the current environment. There is no need to make every decorative item dynamic.
+The released G1 policy provides walking and turning. It does not provide grasping, opening,
+sitting down or stair climbing. Autonomous manipulation requires a suitable hand model and
+trained policies, followed by validation in this scene. Operator-applied forces and saved poses
+do not establish those robot skills. Water flow, temperature, cooking and fan operation remain
+outside the scene mechanics; turning a knob changes its measured angle only.
 
 ## Reproduction and checks
 
 ```bash
 python tools/check_interactions.py --robot g1 --output temp/interactions/g1.json
 python tools/check_interactions.py --robot go2 --output temp/interactions/go2.json
+python tools/check_operator.py
+python tools/check_interaction_cases.py
 python tools/check_residences.py
 python tools/render_interactions.py
 python tools/make_time_stills.py --scene apt
@@ -152,4 +167,5 @@ Rendering and the runtime benchmark need an available graphics context. Follow t
 queue policy. The runtime command requires the NERV parent repository and released G1 policy;
 it starts no network listeners and does not restart resident services.
 
-[Current validation record](../residences/migration/validation.md) · [Residence guide](../residences/README.md)
+[Interaction and Explore CPU checks](../explore/verification/README.md) ·
+[Residence rendering validation](../residences/migration/validation.md) · [Residence guide](../residences/README.md)

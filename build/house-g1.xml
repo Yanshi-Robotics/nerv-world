@@ -14,7 +14,7 @@
   </visual>
 
   <asset>
-    <texture type="skybox" fileright="../textures/house3/sky_fileright.png" fileleft="../textures/house3/sky_fileleft.png" fileup="../textures/house3/sky_fileup.png" filedown="../textures/house3/sky_filedown.png" filefront="../textures/house3/sky_filefront.png" fileback="../textures/house3/sky_fileback.png"/>
+    <texture type="skybox" fileright="../textures/residences/house/sky/sky_fileright.png" fileleft="../textures/residences/house/sky/sky_fileleft.png" fileup="../textures/residences/house/sky/sky_fileup.png" filedown="../textures/residences/house/sky/sky_filedown.png" filefront="../textures/residences/house/sky/sky_filefront.png" fileback="../textures/residences/house/sky/sky_fileback.png"/>
     <texture type="cube" name="tex_wood_floor" file="../textures/wood_floor.png"/>
     <texture type="cube" name="tex_wood_floor_light" file="../textures/wood_floor_light.png"/>
     <texture type="cube" name="tex_tile_white" file="../textures/tile_white.png"/>
