@@ -59,6 +59,25 @@ Initialize submodules and install NERV's simulation dependencies, then start the
 
 The real LeRobot ACT artifact has no simulation deployment in this update. It is not loaded or replayed into these scenes. Real-device bindings and physical acceptance are separate.
 
+### Instance configuration
+
+Each generated world descriptor publishes `configuration.schema` and a `configuration.builder` reference.
+The schema supplies the supported slots, object choices, defaults and descriptions to NERV's
+World Control panel. The catalogue includes English and Chinese labels, dimensions, mass and
+rigid/flexible descriptions; flexible material settings remain uncalibrated.
+
+Choose object slots before creating a session. NERV calls `build_configured()` with the validated
+configuration and a dedicated instance directory. The generated scene contains the selected
+physical models; it never overwrites the shared default MJCF. Its receipt records the configuration,
+scene hash, descriptor hash and source fingerprints.
+
+Reset restores this instance's selected objects and initial posture. A topology change uses
+**End and rebuild**, with a new instance identity and no inherited control authorization.
+Hanoi retains its fixed five-disk structure and does not declare snack replacement slots.
+World Control is a simulation interface, separate from robot actions and sensor observations.
+The host and UI discover these capabilities from the world descriptor; they contain no object
+or material lookup table.
+
 For a direct world-node inspection, with the node-pool ports available:
 
 ```bash

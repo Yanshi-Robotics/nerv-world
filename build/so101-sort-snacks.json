@@ -3,7 +3,7 @@
   "preset": "sort-snacks",
   "label": "Three snacks into matching baskets",
   "source_config_sha256": "66f406d56dbf142a7e63acb400525574f2a09a494b09c77112a3f94c60128687",
-  "source_catalog_sha256": "110fe7f68447adcae50bfbc151b93d01f4e1e3a3b08c84b67e983d284032d135",
+  "source_catalog_sha256": "32a8c93241a1f281b9b3626dd338472f5717b36764fecab3de9e153d108ab243",
   "surface_z": 0.7,
   "objects": [
     {

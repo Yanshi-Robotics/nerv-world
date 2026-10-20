@@ -18,6 +18,222 @@
     }
   },
   "ambient": [],
+  "configuration": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "chips": {
+          "type": "string",
+          "title": "chips",
+          "default": "soft_snack",
+          "oneOf": [
+            {
+              "const": "soft_snack",
+              "title": "Green compliant snack packet",
+              "title_locales": {
+                "zh": "\u7eff\u8272\u67d4\u6027\u96f6\u98df\u5305"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_volume \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model."
+            },
+            {
+              "const": "cloth",
+              "title": "Flexible cloth square",
+              "title_locales": {
+                "zh": "\u67d4\u6027\u5e03\u7247"
+              },
+              "description_locales": {
+                "zh": "[0.065, 0.055, 0.001] m \u00b7 0.012 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_sheet \u00b7 [0.065, 0.055, 0.001] m \u00b7 0.012 kg. Uncalibrated two-dimensional elastic sheet; not a calibrated fabric."
+            },
+            {
+              "const": "cookie_box",
+              "title": "Orange cookie carton",
+              "title_locales": {
+                "zh": "\u6a59\u8272\u997c\u5e72\u76d2"
+              },
+              "description_locales": {
+                "zh": "[0.044, 0.03, 0.024] m \u00b7 0.03 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.044, 0.03, 0.024] m \u00b7 0.03 kg. Rigid collision approximation."
+            },
+            {
+              "const": "drink_can",
+              "title": "Blue drink can",
+              "title_locales": {
+                "zh": "\u84dd\u8272\u996e\u6599\u7f50"
+              },
+              "description_locales": {
+                "zh": "[0.028, 0.028, 0.04] m \u00b7 0.035 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "cylinder \u00b7 [0.028, 0.028, 0.04] m \u00b7 0.035 kg. Rigid collision approximation."
+            },
+            {
+              "const": "snack_rigid",
+              "title": "Rigid snack baseline",
+              "title_locales": {
+                "zh": "\u521a\u4f53\u96f6\u98df\u5bf9\u7167\u5757"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Rigid collision approximation."
+            }
+          ],
+          "category": "objects",
+          "apply": "rebuild"
+        },
+        "cookies": {
+          "type": "string",
+          "title": "cookies",
+          "default": "cookie_box",
+          "oneOf": [
+            {
+              "const": "soft_snack",
+              "title": "Green compliant snack packet",
+              "title_locales": {
+                "zh": "\u7eff\u8272\u67d4\u6027\u96f6\u98df\u5305"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_volume \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model."
+            },
+            {
+              "const": "cloth",
+              "title": "Flexible cloth square",
+              "title_locales": {
+                "zh": "\u67d4\u6027\u5e03\u7247"
+              },
+              "description_locales": {
+                "zh": "[0.065, 0.055, 0.001] m \u00b7 0.012 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_sheet \u00b7 [0.065, 0.055, 0.001] m \u00b7 0.012 kg. Uncalibrated two-dimensional elastic sheet; not a calibrated fabric."
+            },
+            {
+              "const": "cookie_box",
+              "title": "Orange cookie carton",
+              "title_locales": {
+                "zh": "\u6a59\u8272\u997c\u5e72\u76d2"
+              },
+              "description_locales": {
+                "zh": "[0.044, 0.03, 0.024] m \u00b7 0.03 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.044, 0.03, 0.024] m \u00b7 0.03 kg. Rigid collision approximation."
+            },
+            {
+              "const": "drink_can",
+              "title": "Blue drink can",
+              "title_locales": {
+                "zh": "\u84dd\u8272\u996e\u6599\u7f50"
+              },
+              "description_locales": {
+                "zh": "[0.028, 0.028, 0.04] m \u00b7 0.035 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "cylinder \u00b7 [0.028, 0.028, 0.04] m \u00b7 0.035 kg. Rigid collision approximation."
+            },
+            {
+              "const": "snack_rigid",
+              "title": "Rigid snack baseline",
+              "title_locales": {
+                "zh": "\u521a\u4f53\u96f6\u98df\u5bf9\u7167\u5757"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Rigid collision approximation."
+            }
+          ],
+          "category": "objects",
+          "apply": "rebuild"
+        },
+        "drink": {
+          "type": "string",
+          "title": "drink",
+          "default": "drink_can",
+          "oneOf": [
+            {
+              "const": "soft_snack",
+              "title": "Green compliant snack packet",
+              "title_locales": {
+                "zh": "\u7eff\u8272\u67d4\u6027\u96f6\u98df\u5305"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_volume \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model."
+            },
+            {
+              "const": "cloth",
+              "title": "Flexible cloth square",
+              "title_locales": {
+                "zh": "\u67d4\u6027\u5e03\u7247"
+              },
+              "description_locales": {
+                "zh": "[0.065, 0.055, 0.001] m \u00b7 0.012 kg. \u67d4\u6027\u53c2\u6570\u672a\u7ecf\u5b9e\u7269\u6807\u5b9a\uff0c\u4e0d\u4ee3\u8868\u771f\u5b9e\u7269\u54c1\u7684\u7cbe\u786e\u6570\u5b57\u5b6a\u751f\u3002"
+              },
+              "description": "flex_sheet \u00b7 [0.065, 0.055, 0.001] m \u00b7 0.012 kg. Uncalibrated two-dimensional elastic sheet; not a calibrated fabric."
+            },
+            {
+              "const": "cookie_box",
+              "title": "Orange cookie carton",
+              "title_locales": {
+                "zh": "\u6a59\u8272\u997c\u5e72\u76d2"
+              },
+              "description_locales": {
+                "zh": "[0.044, 0.03, 0.024] m \u00b7 0.03 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.044, 0.03, 0.024] m \u00b7 0.03 kg. Rigid collision approximation."
+            },
+            {
+              "const": "drink_can",
+              "title": "Blue drink can",
+              "title_locales": {
+                "zh": "\u84dd\u8272\u996e\u6599\u7f50"
+              },
+              "description_locales": {
+                "zh": "[0.028, 0.028, 0.04] m \u00b7 0.035 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "cylinder \u00b7 [0.028, 0.028, 0.04] m \u00b7 0.035 kg. Rigid collision approximation."
+            },
+            {
+              "const": "snack_rigid",
+              "title": "Rigid snack baseline",
+              "title_locales": {
+                "zh": "\u521a\u4f53\u96f6\u98df\u5bf9\u7167\u5757"
+              },
+              "description_locales": {
+                "zh": "[0.05, 0.036, 0.018] m \u00b7 0.025 kg. \u91c7\u7528\u521a\u4f53\u78b0\u649e\u8fd1\u4f3c\u3002"
+              },
+              "description": "box \u00b7 [0.05, 0.036, 0.018] m \u00b7 0.025 kg. Rigid collision approximation."
+            }
+          ],
+          "category": "objects",
+          "apply": "rebuild"
+        }
+      },
+      "additionalProperties": false
+    },
+    "builder": {
+      "module": "scenes.so101_workbench.generate",
+      "function": "build_configured",
+      "arguments": {
+        "preset": "sort-snacks"
+      },
+      "source_files": [
+        "scenes/so101_workbench/generate.py",
+        "scenes/so101_workbench/config.json",
+        "scenes/so101_workbench/objects.json",
+        "robots/so101/scene.xml",
+        "robots/so101/scene_box.xml",
+        "robots/so101/so101.xml",
+        "robots/so101/UPSTREAM.json"
+      ]
+    }
+  },
   "physics": {
     "dt": 0.001,
     "realtime_factor": 1.0,

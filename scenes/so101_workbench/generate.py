@@ -382,6 +382,27 @@ def add_hanoi(world, asset, spec, surface):
     }
 
 
+def control_descriptor(preset, cfg, catalog):
+    choices = [{"const": key, "title": value["label"], "title_locales": value.get("label_locales", {}),
+                "description_locales": {lang: f"{value['size_m']} m · {value['mass_kg']} kg. {note}"
+                                        for lang, note in value.get("note_locales", {}).items()}, "description":
+                f"{value['kind']} · {value['size_m']} m · {value['mass_kg']} kg. " + value.get("note", "Rigid collision approximation.")}
+               for key, value in catalog.items()]
+    properties = {obj["id"]: {"type": "string", "title": obj["id"], "default": obj["type"],
+                              "oneOf": choices, "category": "objects", "apply": "rebuild"}
+                  for obj in cfg["presets"][preset]["objects"]}
+    return {"schema": {"type": "object", "properties": properties, "additionalProperties": False},
+            "builder": {"module": "scenes.so101_workbench.generate", "function": "build_configured",
+                        "arguments": {"preset": preset},
+                        "source_files": [str(path.relative_to(ROOT)) for path in
+                            [Path(__file__), CONFIG, CATALOG, *sorted((ROOT / "robots/so101").rglob("*.xml")),
+                             ROOT / "robots/so101/UPSTREAM.json"]]}}
+
+
+def build_configured(*, output, values, preset):
+    return build(preset, output, replacements=values)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--preset", choices=sorted(json.loads(CONFIG.read_text())["presets"]))
@@ -408,7 +429,7 @@ def main(argv=None):
             preset, output, replacements=overrides, config=args.config, catalog=args.catalog
         )
         if args.output is None:
-            cfg, _ = read_configuration(args.config, args.catalog)
+            cfg, catalogue = read_configuration(args.config, args.catalog)
             descriptor = {
                 "name": f"so101-{preset}",
                 "kind": "sim",
@@ -418,6 +439,7 @@ def main(argv=None):
                 "supports": {"arm-lerobot-so101": f"build/so101-{preset}.xml"},
                 "spawn": {"initial_joints": metadata["initial_joints"]},
                 "ambient": [],
+                "configuration": control_descriptor(preset, cfg, catalogue),
                 "physics": {"dt": cfg["physics"]["timestep_s"], **cfg["runtime"]},
             }
             directory = ROOT / descriptor["name"]

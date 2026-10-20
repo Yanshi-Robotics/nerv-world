@@ -24,7 +24,13 @@
     "poisson": 0.3,
     "elastic_damping_s": 0.001,
     "note": "Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model.",
-    "self_collision": "auto"
+    "self_collision": "auto",
+    "label_locales": {
+      "zh": "绿色柔性零食包"
+    },
+    "note_locales": {
+      "zh": "柔性参数未经实物标定，不代表真实物品的精确数字孪生。"
+    }
   },
   "cloth": {
     "label": "Flexible cloth square",
@@ -51,7 +57,13 @@
     "poisson": 0.3,
     "elastic_damping_s": 0.001,
     "note": "Uncalibrated two-dimensional elastic sheet; not a calibrated fabric.",
-    "self_collision": "auto"
+    "self_collision": "auto",
+    "label_locales": {
+      "zh": "柔性布片"
+    },
+    "note_locales": {
+      "zh": "柔性参数未经实物标定，不代表真实物品的精确数字孪生。"
+    }
   },
   "cookie_box": {
     "label": "Orange cookie carton",
@@ -67,7 +79,13 @@
       0.52,
       0.15,
       1
-    ]
+    ],
+    "label_locales": {
+      "zh": "橙色饼干盒"
+    },
+    "note_locales": {
+      "zh": "采用刚体碰撞近似。"
+    }
   },
   "drink_can": {
     "label": "Blue drink can",
@@ -83,7 +101,13 @@
       0.45,
       0.9,
       1
-    ]
+    ],
+    "label_locales": {
+      "zh": "蓝色饮料罐"
+    },
+    "note_locales": {
+      "zh": "采用刚体碰撞近似。"
+    }
   },
   "snack_rigid": {
     "label": "Rigid snack baseline",
@@ -99,6 +123,12 @@
       0.65,
       0.45,
       1
-    ]
+    ],
+    "label_locales": {
+      "zh": "刚体零食对照块"
+    },
+    "note_locales": {
+      "zh": "采用刚体碰撞近似。"
+    }
   }
 }

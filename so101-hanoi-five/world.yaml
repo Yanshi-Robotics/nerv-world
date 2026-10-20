@@ -18,6 +18,29 @@
     }
   },
   "ambient": [],
+  "configuration": {
+    "schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "builder": {
+      "module": "scenes.so101_workbench.generate",
+      "function": "build_configured",
+      "arguments": {
+        "preset": "hanoi-five"
+      },
+      "source_files": [
+        "scenes/so101_workbench/generate.py",
+        "scenes/so101_workbench/config.json",
+        "scenes/so101_workbench/objects.json",
+        "robots/so101/scene.xml",
+        "robots/so101/scene_box.xml",
+        "robots/so101/so101.xml",
+        "robots/so101/UPSTREAM.json"
+      ]
+    }
+  },
   "physics": {
     "dt": 0.001,
     "realtime_factor": 1.0,
