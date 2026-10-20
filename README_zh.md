@@ -4,7 +4,7 @@
 
 [English](README.md) · [简体中文](README_zh.md)
 
-面向 MuJoCo 和 [NERV](https://github.com/Yanshi-Robotics/nerv) 的住宅场景库，提供宇树 G1 和 Go2 版本。
+面向 MuJoCo 和 [NERV](https://github.com/Yanshi-Robotics/nerv) 的住宅与桌面操作场景库，提供宇树 G1、Go2 和 SO-101 本体资产。
 建筑、家具、碰撞体和机器人场景均由布局定义生成。MuJoCo 原生截图呈现仿真场景，
 World Explore 配图则来自独立的 Three.js 浏览器导览。
 
@@ -13,6 +13,14 @@ World Explore 配图则来自独立的 Three.js 浏览器导览。
 [场景](#场景) · [快速开始](#快速开始) · [三维导览](#三维导览) · [可交互家具](docs/interactions/README.md) · [住宅指南](docs/residences/README.md)
 
 **AI agent**：修改仓库前请阅读 [AGENTS.md](AGENTS.md)。
+
+## SO-101 桌面操作
+
+三套操作预设均将 SO-101 安装在桌子一侧：单物入筐、三类零食分筐，以及五层汉诺塔。物品通过目录替换，支持三维弹性柔性体和布片。筐由底板和四面侧壁构成，顶部开放；汉诺塔圆盘的碰撞体保留真实中心孔。
+
+![SO-101 三类零食分筐场景](assets/so101/sort-snacks-overview.png)
+
+[场景生成、物品替换与验证说明](scenes/so101_workbench/README.md)。当前提供物理环境、相机与关节控制接口；自主完成任务的控制器、包装材料标定和实机迁移仍需分别研发与验证。SO-101 来自固定版本的 Menagerie，保留其 [Apache 2.0 许可](robots/so101/LICENSE)。
 
 ## 场景
 

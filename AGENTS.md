@@ -10,7 +10,7 @@
 **nerv-world** 是 MuJoCo 住宅场景与机器人本体资产库，也是 NERV 的 worlds 子模块。
 布局定义生成建筑、家具和真实碰撞；本仓提供原生漫游检查工具，不运行常驻服务，也不存运动策略。
 
-当前只维护 **apt**（曼哈顿两层复式、四时段与可交互家具）和 **house**（三层山坡豪宅与封闭宅地）。
+住宅场景当前维护 **apt**（曼哈顿两层复式、四时段与可交互家具）和 **house**（三层山坡豪宅与封闭宅地）。
 旧编号地图已退役；恢复版本、迁移范围与保留功能见 [迁移说明](docs/residences/migration/README.md)。
 城市和时段环境在 `scenes/environments/`，不再依赖旧公寓布局。第三方家具字节在忽略目录中，
 裸 clone 可生成基本碰撞版本；详细外观及家具凸分解需按 README 准备本地资产。
@@ -210,3 +210,11 @@ G1 是用 `import_from_menagerie.py` 导入的——**改上游模型走那个�
 ---
 
 本地工作副本里若有同目录 `CLAUDE.md`，请一并阅读——那是作者的内部开发笔记，有意不入库。
+
+## SO-101 manipulation workbench (2026-10-20)
+
+- `scenes/so101_workbench/config.json` owns the desktop layouts, named start pose, runtime settings and qualification parameters; `objects.json` owns replaceable rigid/flex materials.
+- Run `tools/make_workbench.py --all` to regenerate MJCF, metadata, `so101-*/world.yaml` and English task guidance. Do not hand-edit those outputs. This independent manipulation generator does not use the residential manifest/layout pipeline.
+- `tools/check_workbench.py` checks asset hashes, settling and endpoint position reach, and optionally renders `assets/so101/`. Position reach is not a collision-free path, grasp or task demonstration.
+- `robots/so101/` is pinned unmodified Menagerie content, with Apache 2.0 license and `UPSTREAM.json`. Change the generated copy rather than vendored bytes.
+- `scenes/so101_workbench/evaluate.py` is offline/operator measurement. Never insert its object coordinates or scores into agent observations. No manipulation policy is shipped here.

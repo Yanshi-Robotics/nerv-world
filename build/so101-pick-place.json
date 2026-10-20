@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "preset": "pick-place",
+  "label": "Single snack into basket",
+  "source_config_sha256": "66f406d56dbf142a7e63acb400525574f2a09a494b09c77112a3f94c60128687",
+  "source_catalog_sha256": "110fe7f68447adcae50bfbc151b93d01f4e1e3a3b08c84b67e983d284032d135",
+  "surface_z": 0.7,
+  "objects": [
+    {
+      "id": "snack",
+      "type": "soft_snack",
+      "xy": [
+        0.2,
+        0.09
+      ],
+      "basket": "basket",
+      "kind": "flex_volume",
+      "label": "Green compliant snack packet",
+      "size_m": [
+        0.05,
+        0.036,
+        0.018
+      ],
+      "mass_kg": 0.025,
+      "flex": "snack",
+      "body": null,
+      "material_note": "Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model."
+    }
+  ],
+  "baskets": [
+    {
+      "id": "basket",
+      "xy": [
+        0.29,
+        -0.1
+      ],
+      "rgba": [
+        0.22,
+        0.65,
+        0.45,
+        1
+      ],
+      "inner_size_xy": [
+        0.095,
+        0.095
+      ],
+      "bottom_z": 0.706,
+      "rim_z": 0.755
+    }
+  ],
+  "validation": {
+    "settle_s": 2.0,
+    "surface_tolerance_m": 0.004,
+    "inside_margin_m": 0.001,
+    "rest_speed_m_s": 0.025,
+    "disk_tilt_deg": 15,
+    "reach_tolerance_m": 0.005,
+    "approach_clearance_m": 0.035,
+    "ik_seed": 20261020,
+    "ik_restarts": 8,
+    "ik_iterations": 200,
+    "ik_damping": 0.0001,
+    "ik_max_step_rad": 0.15
+  },
+  "initial_joints": {
+    "shoulder_pan": 0,
+    "shoulder_lift": -1.2,
+    "elbow_flex": 0.6,
+    "wrist_flex": 1.5,
+    "wrist_roll": 0,
+    "gripper": 0.5
+  },
+  "arena": "so101-pick-place.xml"
+}

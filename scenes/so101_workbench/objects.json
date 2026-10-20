@@ -1,0 +1,104 @@
+{
+  "soft_snack": {
+    "label": "Green compliant snack packet",
+    "kind": "flex_volume",
+    "size_m": [
+      0.05,
+      0.036,
+      0.018
+    ],
+    "mass_kg": 0.025,
+    "rgba": [
+      0.22,
+      0.65,
+      0.45,
+      1
+    ],
+    "grid": [
+      5,
+      4,
+      3
+    ],
+    "radius_m": 0.0015,
+    "young_pa": 1000,
+    "poisson": 0.3,
+    "elastic_damping_s": 0.001,
+    "note": "Uncalibrated compliant volume; not a sealed wrapper, granular filling or measured snack model.",
+    "self_collision": "auto"
+  },
+  "cloth": {
+    "label": "Flexible cloth square",
+    "kind": "flex_sheet",
+    "size_m": [
+      0.065,
+      0.055,
+      0.001
+    ],
+    "mass_kg": 0.012,
+    "rgba": [
+      0.8,
+      0.25,
+      0.45,
+      1
+    ],
+    "grid": [
+      7,
+      6,
+      1
+    ],
+    "radius_m": 0.001,
+    "young_pa": 1000,
+    "poisson": 0.3,
+    "elastic_damping_s": 0.001,
+    "note": "Uncalibrated two-dimensional elastic sheet; not a calibrated fabric.",
+    "self_collision": "auto"
+  },
+  "cookie_box": {
+    "label": "Orange cookie carton",
+    "kind": "box",
+    "size_m": [
+      0.044,
+      0.03,
+      0.024
+    ],
+    "mass_kg": 0.03,
+    "rgba": [
+      0.95,
+      0.52,
+      0.15,
+      1
+    ]
+  },
+  "drink_can": {
+    "label": "Blue drink can",
+    "kind": "cylinder",
+    "size_m": [
+      0.028,
+      0.028,
+      0.04
+    ],
+    "mass_kg": 0.035,
+    "rgba": [
+      0.2,
+      0.45,
+      0.9,
+      1
+    ]
+  },
+  "snack_rigid": {
+    "label": "Rigid snack baseline",
+    "kind": "box",
+    "size_m": [
+      0.05,
+      0.036,
+      0.018
+    ],
+    "mass_kg": 0.025,
+    "rgba": [
+      0.22,
+      0.65,
+      0.45,
+      1
+    ]
+  }
+}

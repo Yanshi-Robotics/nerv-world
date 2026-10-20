@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "robot": {
+    "model": "robots/so101/so101.xml",
+    "base_body": "base",
+    "position_xy": [
+      0.0,
+      0.0
+    ],
+    "yaw_rad": 0.0,
+    "wrist_camera": "wrist_cam",
+    "initial_joints": {
+      "shoulder_pan": 0,
+      "shoulder_lift": -1.2,
+      "elbow_flex": 0.6,
+      "wrist_flex": 1.5,
+      "wrist_roll": 0,
+      "gripper": 0.5
+    }
+  },
+  "table": {
+    "center_xy": [
+      0.24,
+      0.0
+    ],
+    "size_xy": [
+      0.66,
+      0.58
+    ],
+    "height_m": 0.7,
+    "thickness_m": 0.035,
+    "leg_width_m": 0.035,
+    "rgba": [
+      0.68,
+      0.54,
+      0.36,
+      1.0
+    ]
+  },
+  "physics": {
+    "timestep_s": 0.001,
+    "gravity": [
+      0,
+      0,
+      -9.81
+    ],
+    "integrator": "implicitfast",
+    "iterations": 80,
+    "contact_solref": [
+      0.01,
+      1.0
+    ],
+    "object_friction": [
+      1.0,
+      0.01,
+      0.001
+    ]
+  },
+  "cameras": {
+    "top": {
+      "position": [
+        0.22,
+        0.0,
+        1.4
+      ],
+      "target": [
+        0.22,
+        0.0,
+        0.7
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "fovy_deg": 55
+    },
+    "overview": {
+      "position": [
+        0.9,
+        -0.85,
+        1.3
+      ],
+      "target": [
+        0.2,
+        0.0,
+        0.78
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "fovy_deg": 45
+    }
+  },
+  "basket": {
+    "inner_size_xy": [
+      0.095,
+      0.095
+    ],
+    "height_m": 0.055,
+    "wall_m": 0.006
+  },
+  "hanoi": {
+    "peg_xy": [
+      [
+        0.24,
+        -0.12
+      ],
+      [
+        0.24,
+        0.0
+      ],
+      [
+        0.24,
+        0.12
+      ]
+    ],
+    "source_peg": 0,
+    "target_peg": 2,
+    "disk_radii_m": [
+      0.035,
+      0.03,
+      0.025,
+      0.02,
+      0.015
+    ],
+    "disk_height_m": 0.007,
+    "hole_radius_m": 0.007,
+    "peg_radius_m": 0.003,
+    "peg_height_m": 0.065,
+    "base_height_m": 0.008,
+    "segments": 24,
+    "mass_kg": 0.012
+  },
+  "presets": {
+    "pick-place": {
+      "label": "Single snack into basket",
+      "objects": [
+        {
+          "id": "snack",
+          "type": "soft_snack",
+          "xy": [
+            0.2,
+            0.09
+          ],
+          "basket": "basket"
+        }
+      ],
+      "baskets": [
+        {
+          "id": "basket",
+          "xy": [
+            0.29,
+            -0.1
+          ],
+          "rgba": [
+            0.22,
+            0.65,
+            0.45,
+            1
+          ]
+        }
+      ]
+    },
+    "sort-snacks": {
+      "label": "Three snacks into matching baskets",
+      "objects": [
+        {
+          "id": "chips",
+          "type": "soft_snack",
+          "xy": [
+            0.17,
+            -0.14
+          ],
+          "basket": "green"
+        },
+        {
+          "id": "cookies",
+          "type": "cookie_box",
+          "xy": [
+            0.18,
+            0.0
+          ],
+          "basket": "orange"
+        },
+        {
+          "id": "drink",
+          "type": "drink_can",
+          "xy": [
+            0.17,
+            0.14
+          ],
+          "basket": "blue"
+        }
+      ],
+      "baskets": [
+        {
+          "id": "green",
+          "xy": [
+            0.3,
+            -0.14
+          ],
+          "rgba": [
+            0.22,
+            0.65,
+            0.45,
+            1
+          ]
+        },
+        {
+          "id": "orange",
+          "xy": [
+            0.3,
+            0.0
+          ],
+          "rgba": [
+            0.95,
+            0.52,
+            0.15,
+            1
+          ]
+        },
+        {
+          "id": "blue",
+          "xy": [
+            0.3,
+            0.14
+          ],
+          "rgba": [
+            0.2,
+            0.45,
+            0.9,
+            1
+          ]
+        }
+      ]
+    },
+    "hanoi-five": {
+      "label": "Five-disk Tower of Hanoi",
+      "objects": [],
+      "baskets": []
+    }
+  },
+  "validation": {
+    "settle_s": 2.0,
+    "surface_tolerance_m": 0.004,
+    "inside_margin_m": 0.001,
+    "rest_speed_m_s": 0.025,
+    "disk_tilt_deg": 15,
+    "reach_tolerance_m": 0.005,
+    "approach_clearance_m": 0.035,
+    "ik_seed": 20261020,
+    "ik_restarts": 8,
+    "ik_iterations": 200,
+    "ik_damping": 0.0001,
+    "ik_max_step_rad": 0.15
+  },
+  "runtime": {
+    "realtime_factor": 1.0,
+    "render_width": 640,
+    "render_height": 480,
+    "stream_fps": 12,
+    "third_person": true,
+    "chase_back_m": 0.8,
+    "chase_up_m": 0.55,
+    "chase_min_m": 0.2
+  }
+}

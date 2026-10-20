@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### 2026-10-20 SO-101 workbench
+
+- Add pinned Menagerie SO-101 assets with Apache 2.0 license and per-file source hashes.
+- Add single-object basket placement, three-snack sorting and five-disk Hanoi arenas, with generated NERV descriptors, named start pose, overhead/wrist cameras and operator previews.
+- Add a replaceable object catalogue with rigid boxes/cylinders, native elastic volumes and cloth sheets. Flexible parameters are uncalibrated reference materials.
+- Build open basket collisions and annular disks from convex sectors. Add offline containment/support/release measurements and a legal symbolic Hanoi planner; no arm task policy is included.
+- Add source/hash, settling, endpoint-reach and rendering qualification tools. NERV consumers need named `spawn.initial_joints` support to reproduce the configured starting pose.
+
 ### 2026-09-07 canonical apt and house
 
 - Promote apt2 and house2 to apt and house; retire numbered scene entries, old layouts, builds and current screenshots. The four-map recovery revision is `7fb134f`.

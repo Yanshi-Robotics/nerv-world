@@ -4,7 +4,7 @@
 
 [English](README.md) · [简体中文](README_zh.md)
 
-Residential environments for MuJoCo and [NERV](https://github.com/Yanshi-Robotics/nerv),
+Residential and tabletop environments for MuJoCo and [NERV](https://github.com/Yanshi-Robotics/nerv),
 with Unitree G1 and Go2 variants. Layout definitions generate the architecture, furniture,
 collision geometry and robot scenes. Native MuJoCo screenshots show the simulated scenes;
 the World Explore images show the separate Three.js browser guide.
@@ -14,6 +14,14 @@ the World Explore images show the separate Three.js browser guide.
 [Scenes](#scenes) · [Quick Start](#quick-start) · [World Explore](#world-explore) · [Interactive furniture](docs/interactions/README.md) · [Residence guide](docs/residences/README.md)
 
 **AI agents:** read [AGENTS.md](AGENTS.md) before changing the repository.
+
+## SO-101 workbench
+
+Three manipulation presets place an SO-101 at one edge of a table: one object into an open basket, three snacks into matching baskets, and five-disk Tower of Hanoi. Objects can be replaced from a catalogue, including a native 3D elastic packet and a flexible cloth sheet. The baskets have open collision cavities; each Hanoi disk has a real central hole.
+
+![SO-101 sorting workbench](assets/so101/sort-snacks-overview.png)
+
+[Workbench generation, object replacement and qualification](scenes/so101_workbench/README.md). These are physics environments with camera and joint control support. Autonomous task controllers, calibrated packaging materials and physical transfer are separate work. The SO-101 is pinned from Menagerie and retains its [Apache 2.0 license](robots/so101/LICENSE).
 
 ## Scenes
 
